@@ -1,0 +1,22 @@
+#spring.application.name=security
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/sales_db
+    username: postgres
+    password: 1234
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format-sql:true
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+application:
+  security:
+    jwt:
+      secret-key: "491ad98b0fbdec4d20ede3d593105e8394ea959fa8a28ad7f41f227fc640bf9d"
+      expiration: 86400000 # 24 hours in milliseconds
