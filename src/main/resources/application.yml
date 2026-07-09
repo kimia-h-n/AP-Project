@@ -20,26 +20,29 @@
 #    jwt:
 #      secret-key: "491ad98b0fbdec4d20ede3d593105e8394ea959fa8a28ad7f41f227fc640bf9d"
 #      expiration: 86400000 # 24 hours in milliseconds
+#spring:
+#  application:
+#    name: security
+#  datasource:
+#    url: ${DB_URL}
+#    username: ${DB_USERNAME}
+#    password: ${DB_PASSWORD}
+#    driver-class-name: org.postgresql.Driver
+#  jpa:
+#    hibernate:
+#      ddl-auto: update
+#    show-sql: false
+#    properties:
+#      hibernate:
+#        format_sql: true
+#    database: postgresql
+#    database-platform: org.hibernate.dialect.PostgreSQLDialect
+#
+#application:
+#  security:
+#    jwt:
+#      secret-key: ${JWT_SECRET}
+#      expiration: ${JWT_EXPIRATION:86400000}
 spring:
   application:
-    name: security
-  datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: false
-    properties:
-      hibernate:
-        format_sql: true
-    database: postgresql
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-
-application:
-  security:
-    jwt:
-      secret-key: ${JWT_SECRET}
-      expiration: ${JWT_EXPIRATION:86400000}
+    name: passItOn
