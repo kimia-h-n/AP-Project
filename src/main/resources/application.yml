@@ -46,3 +46,8 @@
 spring:
   application:
     name: passItOn
+
+app:
+  admin:
+    username: admin
+    password: admin1234
