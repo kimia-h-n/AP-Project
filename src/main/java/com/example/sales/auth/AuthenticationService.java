@@ -1,16 +1,14 @@
 package com.example.sales.auth;
 
 import com.example.sales.config.JwtService;
-import com.example.sales.exception.DuplicateEmailException;
-import com.example.sales.exception.DuplicateUsernameException;
-import com.example.sales.exception.DuplicatePhoneNumberException;
-import com.example.sales.exception.UserNotFoundException;
+import com.example.sales.exception.*;
 import com.example.sales.repository.UserRepository;
 import com.example.sales.user.Role;
 import com.example.sales.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,10 +23,14 @@ public class AuthenticationService {
 
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        authManager.authenticate(new UsernamePasswordAuthenticationToken(
-                request.getUsername(),
-                request.getPassword()
-        ));
+        try {
+            authManager.authenticate(new UsernamePasswordAuthenticationToken(
+                    request.getUsername(),
+                    request.getPassword()
+            ));
+        } catch (AuthenticationException e) {
+            throw new InvalidUsernameOrPassword();
+        }
         var user = repository.findUsersByUsername(request.getUsername()).orElseThrow(UserNotFoundException::new);
         var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
