@@ -4,6 +4,7 @@ import com.example.sales.ad.model.AdRequest;
 import com.example.sales.ad.model.AdResponse;
 import com.example.sales.ad.model.moderation.AdModerationRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,6 +36,14 @@ public class AdController {
     public AdResponse getAd(@PathVariable Long id, Authentication authentication) {
         String username = extractUsernameIfLoggedIn(authentication);
         return adService.getAd(id, username);
+    }
+
+
+    @DeleteMapping("/ads/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeAd(@PathVariable Long id, Authentication authentication) {
+        String username = extractUsernameIfLoggedIn(authentication);
+        adService.removeAd(id, username);
     }
 
     //only admin can access

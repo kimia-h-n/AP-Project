@@ -4,11 +4,10 @@ package com.example.sales.ad;
 import com.example.sales.ad.fav.FavoriteRepository;
 import com.example.sales.ad.model.*;
 import com.example.sales.ad.model.moderation.AdModerationRequest;
-import com.example.sales.exception.AdNotFoundException;
-import com.example.sales.exception.AdViewNotAllowedException;
-import com.example.sales.exception.UserNotFoundException;
+import com.example.sales.exception.*;
 import com.example.sales.repository.UserRepository;
 import com.example.sales.user.User;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -71,6 +70,25 @@ public class AdService {
         adResponse.setFavorite(isFavorite);
 
         return adResponse;
+    }
+
+
+    private boolean isAlreadyRemoved(Ad ad) {
+        return ad.getStatus() == AdStatus.REMOVED;
+    }
+
+    @Transactional
+    public void removeAd(Long id, String username) {
+        Ad ad = adRepository.findById(id).orElseThrow(AdNotFoundException::new);
+
+        if (!(ad.getSeller().getUsername().equals(username)))
+            throw new OperationNotAllowedException();
+
+        if (isAlreadyRemoved(ad))
+            throw new AdNotRemovableException();
+
+        ad.setStatus(AdStatus.REMOVED);
+
     }
 
     public void moderateAd(Long id, AdModerationRequest moderationRequest) {
