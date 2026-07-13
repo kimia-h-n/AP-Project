@@ -24,6 +24,11 @@ public class HandleErrors {
                     return "این آگهی در لیست علاقه‌مندی‌های شما نیست.";
                 case "NOT_ALLOWED_AD_VIEW":
                     return "این آگهی هنوز تایید نشده و قابل مشاهده نیست.";
+                case "OPERATION_NOT_ALLOWED":
+                    return "شما اجازه‌ی حذف این آگهی را ندارید.";
+                case "AD_NOT_REMOVABLE":
+                    return "این آگهی قبلاً حذف شده است.";
+
             }
         }
 
