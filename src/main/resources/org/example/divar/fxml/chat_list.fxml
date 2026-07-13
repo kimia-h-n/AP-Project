@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+<fx:root type="javafx.scene.layout.VBox" spacing="5.0" style="-fx-padding: 8px 12px 8px 12px;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <Label fx:id="nameLabel" style="-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #333333;" />
+
+        <Label fx:id="lastMsgLabel" style="-fx-text-fill: #777777; -fx-font-size: 12px;" />
+    </children>
+</fx:root>
+
+

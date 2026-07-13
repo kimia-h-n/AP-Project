@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox prefWidth="400.0" spacing="0.0" style="-fx-background-color: #ffffff; -fx-background-radius: 8px; -fx-border-radius: 8px; -fx-border-color: #e0e0e0; -fx-border-width: 1px;"
+      nodeOrientation="RIGHT_TO_LEFT" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+
+        <HBox alignment="CENTER_LEFT" style="-fx-padding: 15px 20px; -fx-border-color: #f0f0f0; -fx-border-width: 0 0 1px 0;">
+            <children>
+                <Label text="گزارش آگهی" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333333;" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Button text="✕" onAction="#closeReportWindow" style="-fx-background-color: transparent; -fx-text-fill: #888888; -fx-font-size: 16px; -fx-cursor: hand;" />
+            </children>
+        </HBox>
+
+        <VBox spacing="14.0" style="-fx-padding: 10px 20px 20px 20px;">
+            <children>
+                <fx:define>
+                    <ToggleGroup fx:id="reportGroup" />
+                </fx:define>
+                <RadioButton text="کلاهبرداری" toggleGroup="$reportGroup" selected="true" style="-fx-font-size: 14px; -fx-text-fill: #444444; -fx-cursor: hand;" maxWidth="Infinity" alignment="CENTER_LEFT"/>
+                <RadioButton text="غیرقانونی یا غیراخلاقی" toggleGroup="$reportGroup" style="-fx-font-size: 14px; -fx-text-fill: #444444; -fx-cursor: hand;" maxWidth="Infinity" alignment="CENTER_LEFT"/>
+                <RadioButton text="دسته‌بندی اشتباه" toggleGroup="$reportGroup" style="-fx-font-size: 14px; -fx-text-fill: #444444; -fx-cursor: hand;" maxWidth="Infinity" alignment="CENTER_LEFT"/>
+                <RadioButton text="قیمت اشتباه" toggleGroup="$reportGroup" style="-fx-font-size: 14px; -fx-text-fill: #444444; -fx-cursor: hand;" maxWidth="Infinity" alignment="CENTER_LEFT"/>
+                <RadioButton text="اطلاعات اشتباه" toggleGroup="$reportGroup" style="-fx-font-size: 14px; -fx-text-fill: #444444; -fx-cursor: hand;" maxWidth="Infinity" alignment="CENTER_LEFT"/>
+                <RadioButton text="تکراری یا اسپم" toggleGroup="$reportGroup" style="-fx-font-size: 14px; -fx-text-fill: #444444; -fx-cursor: hand;" maxWidth="Infinity" alignment="CENTER_LEFT"/>
+                <RadioButton text="ناموجود یا پاسخگو نبودن" toggleGroup="$reportGroup" style="-fx-font-size: 14px; -fx-text-fill: #444444; -fx-cursor: hand;" maxWidth="Infinity" alignment="CENTER_LEFT"/>
+                <RadioButton text="سایر" toggleGroup="$reportGroup" style="-fx-font-size: 14px; -fx-text-fill: #444444; -fx-cursor: hand;" maxWidth="Infinity" alignment="CENTER_LEFT"/>
+            </children>
+        </VBox>
+
+        <HBox spacing="12.0" alignment="CENTER_LEFT" style="-fx-padding: 15px 20px; -fx-border-color: #f0f0f0; -fx-border-width: 1px 0 0 0; -fx-background-color: #fafafa;">
+            <children>
+                <Button text="تأیید و ادامه" onAction="#sendReport" style="-fx-background-color: #a62626; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 8px 22px; -fx-background-radius: 4px; -fx-cursor: hand;" />
+                <Button text="بازگشت" onAction="#closeReportWindow" style="-fx-background-color: white; -fx-text-fill: #555555; -fx-border-color: #cccccc; -fx-border-radius: 4px; -fx-font-size: 14px; -fx-padding: 8px 22px; -fx-cursor: hand;" />
+            </children>
+        </HBox>
+
+    </children>
+</VBox>
+
+

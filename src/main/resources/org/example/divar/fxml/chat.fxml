@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.divar.controller.ChatController"
+            prefWidth="1150.0" prefHeight="750.0" style="-fx-background-color: #f5f5f5;" nodeOrientation="RIGHT_TO_LEFT">
+
+    <top>
+        <HBox spacing="15.0" alignment="CENTER_LEFT" style="-fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0; -fx-background-color: #ffffff;" prefHeight="65.0">
+            <padding>
+                <Insets top="10.0" bottom="10.0" left="20.0" right="20.0"/>
+            </padding>
+            <children>
+                <Label text="دیوار" style="-fx-text-fill: #a62626; -fx-font-size: 24px; -fx-font-weight: bold; -fx-cursor: hand"/>
+                <Label text="چت آگهی‌ها" style="-fx-font-size: 16px; -fx-text-fill: #666666; -fx-padding: 0 0 0 10;"/>
+                <Region HBox.hgrow="ALWAYS" />
+                <Button text="پروفایل من" onAction="#goToProfile"
+                        style="-fx-background-color: transparent; -fx-text-fill: #666666; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 15 8 15; -fx-border-color: #cccccc; -fx-border-radius: 4px;"/>
+                <Button text="بازگشت" onAction="#goBack"
+                        style="-fx-background-color: transparent; -fx-text-fill: #666666; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 15 8 15; -fx-border-color: #cccccc; -fx-border-radius: 4px;"/>
+            </children>
+        </HBox>
+    </top>
+
+    <center>
+        <HBox style="-fx-background-color: #ffffff;">
+            <children>
+
+                <VBox prefWidth="350.0" minWidth="350.0" style="-fx-border-color: #e0e0e0; -fx-border-width: 0 1 0 0;">
+                    <children>
+                        <Label text="گفتگوها" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-padding: 15; -fx-text-fill: #333333;"/>
+                        <Separator/>
+                        <ListView fx:id="chatsList" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;"/>
+                    </children>
+                </VBox>
+
+                <VBox HBox.hgrow="ALWAYS" style="-fx-background-color: #fafafa;">
+                    <children>
+                        <HBox alignment="CENTER_LEFT" prefHeight="50.0" style="-fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0; -fx-padding: 0 20 0 20;">
+                            <children>
+                                <Label fx:id="chatHeaderLabel" text="لطفاً یک گفتگو را انتخاب کنید" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #333333;"/>
+                            </children>
+                        </HBox>
+
+                        <ScrollPane fx:id="chatScrollPane" fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-padding: 15;">
+                            <content>
+                                <VBox fx:id="messagesContainer" spacing="10.0"/>
+                            </content>
+                        </ScrollPane>
+
+                        <HBox spacing="10.0" alignment="CENTER" prefHeight="65.0" style="-fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-width: 1 0 0 0; -fx-padding: 10 20 10 20;">
+                            <children>
+                                <TextField fx:id="messageField" onAction="#sendMessage" promptText="پیام خود را بنویسید..." HBox.hgrow="ALWAYS" prefHeight="40.0" style="-fx-background-radius: 20; -fx-padding: 0 15 0 15;"/>
+
+                                <Button text="ارسال" onAction="#sendMessage" prefHeight="40.0" prefWidth="80.0" style="-fx-background-color: #a62626; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-cursor: hand;"/>
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+
+            </children>
+        </HBox>
+    </center>
+</BorderPane>
+

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.divar.controller.AdvertisementDetailsController"
+            prefWidth="1100.0" prefHeight="750.0" style="-fx-background-color: #ffffff;" nodeOrientation="RIGHT_TO_LEFT">
+
+    <top>
+        <HBox spacing="15.0" alignment="CENTER_LEFT" style="-fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0; -fx-background-color: #ffffff;" prefHeight="65.0">
+            <padding>
+                <Insets top="10.0" bottom="10.0" left="20.0" right="20.0"/>
+            </padding>
+            <children>
+                <Label text="دیوار" style="-fx-text-fill: #a62626; -fx-font-size: 24px; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                <Region HBox.hgrow="ALWAYS" />
+                <Button text="چت" onAction="#goToChat"
+                        style="-fx-background-color: transparent; -fx-text-fill: #666666; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 15 8 15; -fx-border-color: #cccccc; -fx-border-radius: 4px;"/>
+                <Button text="پروفایل من" onAction="#goToProfile"
+                        style="-fx-background-color: transparent; -fx-text-fill: #666666; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 15 8 15; -fx-border-color: #cccccc; -fx-border-radius: 4px;"/>
+                <Button text="بازگشت" onAction="#goBack"
+                        style="-fx-background-color: transparent; -fx-text-fill: #666666; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 15 8 15; -fx-border-color: #cccccc; -fx-border-radius: 4px;"/>
+            </children>
+        </HBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background-insets: 0;">
+            <content>
+                <VBox spacing="30.0">
+                    <padding>
+                        <Insets top="30.0" bottom="50.0" left="50.0" right="50.0"/>
+                    </padding>
+
+                    <HBox spacing="50.0" alignment="TOP_CENTER">
+                        <children>
+
+                            <VBox spacing="15.0" prefWidth="500.0" HBox.hgrow="ALWAYS">
+                                <children>
+                                    <Label fx:id="titleLabel" text="عنوان آگهی" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #222222;"/>
+                                    <Label fx:id="addressLabel" text="محل آگهی (مثلاً کرج، فاز ۴ مهرشهر)" style="-fx-text-fill: #777777; -fx-font-size: 14px;"/>
+
+                                    <Separator style="-fx-padding: 10 0;"/>
+
+                                    <HBox spacing="15.0" alignment="CENTER_RIGHT">
+                                        <children>
+                                            <Button text="اطلاعات تماس" style="-fx-background-color: #a62626; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 15px; -fx-padding: 10 25; -fx-background-radius: 4; -fx-cursor: hand;"/>
+                                            <Button text="چت" onAction="#chatWithSeller" style="-fx-background-color: #ffffff; -fx-border-color: #555555; -fx-text-fill: #222222; -fx-font-weight: bold; -fx-font-size: 15px; -fx-padding: 10 30; -fx-border-radius: 4; -fx-cursor: hand;"/>
+                                            <Button fx:id="favoriteBtn" text="★ نشان کردن" onAction="#manageFavoriteAdvertisement" style="-fx-background-color: transparent; -fx-text-fill: #555555; -fx-font-size: 14px; -fx-cursor: hand;"/>
+                                        </children>
+                                    </HBox>
+
+                                    <Label fx:id="messageLabel" text="" wrapText="true" maxWidth="Infinity" visible="false" style="-fx-font-size: 13px; -fx-font-weight: bold;"/>
+
+                                    <Separator style="-fx-padding: 10 0;"/>
+
+                                    <GridPane vgap="12.0" hgap="10.0">
+                                        <columnConstraints>
+                                            <ColumnConstraints prefWidth="120.0" />
+                                            <ColumnConstraints hgrow="ALWAYS" />
+                                        </columnConstraints>
+                                        <children>
+                                            <Label text="وضعیت کالا:" style="-fx-text-fill: #777777; -fx-font-size: 14px;" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                                            <Label fx:id="statusLabel" text="در حد نو" style="-fx-font-weight: bold; -fx-font-size: 14px;" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                                            <Label text="قیمت:" style="-fx-text-fill: #777777; -fx-font-size: 14px;" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                                            <Label fx:id="priceLabel" text="۰ تومان" style="-fx-font-weight: bold; -fx-font-size: 14px;" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                                            <Label text="دسته‌بندی:" style="-fx-text-fill: #777777; -fx-font-size: 14px;" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                                            <Label fx:id="categoryLabel" text="وسایل نقلیه" style="-fx-font-weight: bold; -fx-font-size: 14px;" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                                        </children>
+                                    </GridPane>
+
+                                    <Separator style="-fx-padding: 10 0;"/>
+
+                                    <Label text="توضیحات" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+                                    <Label fx:id="descriptionLabel" text="توضیحات آگهی در این قسمت قرار می‌گیرد..." wrapText="true" style="-fx-text-fill: #444444; -fx-font-size: 14px; -fx-line-spacing: 5;"/>
+
+                                    <Separator style="-fx-padding: 15 0 5 0;"/>
+                                    <HBox alignment="CENTER_LEFT" spacing="20"> <children>
+                                        <HBox fx:id="ratingContainer" alignment="CENTER_LEFT" spacing="5" />
+
+                                        <Button fx:id="reportButton" text="گزارش این آگهی" onAction="#reportAdvertisement"
+                                                style="-fx-background-color: transparent; -fx-text-fill: #a62626; -fx-border-color: #a62626; -fx-border-radius: 4px; -fx-padding: 8px 15px; -fx-cursor: hand; -fx-font-size: 14px;"/>
+                                    </children>
+                                    </HBox>
+                                </children>
+                            </VBox>
+
+                            <VBox spacing="15.0" alignment="TOP_CENTER">
+                                <children>
+                                    <StackPane style="-fx-border-color: #e0e0e0; -fx-border-width: 1px; -fx-border-radius: 4px; -fx-background-color: #fafafa;" prefWidth="360.0" prefHeight="360.0">
+                                        <children>
+                                            <ImageView fx:id="mainImage" fitWidth="350.0" fitHeight="350.0" preserveRatio="true"/>
+                                        </children>
+                                    </StackPane>
+
+                                    <HBox fx:id="imageContainer" spacing="10.0" alignment="CENTER" prefHeight="70.0"/>
+                                </children>
+                            </VBox>
+
+                        </children>
+                    </HBox>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+</BorderPane>
+
