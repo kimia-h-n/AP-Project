@@ -17,5 +17,6 @@ public interface AdvertisementService {
     ArrayList<Advertisement> getAdvertisementsByUser(String userId);
     boolean isFavorite(long adId);
     List<Advertisement> getFavoriteAdvertisements(String username);
+    void deleteAdvertisement(long adId) throws RuntimeException;
 }
 

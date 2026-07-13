@@ -85,4 +85,9 @@ public class AdvertisementServiceHttp implements AdvertisementService {
         }
         return favorites;
     }
+
+    @Override
+    public void deleteAdvertisement(long adId) throws RuntimeException {
+        ApiClient.delete("/api/v1/ads/" + adId);
+    }
 }
