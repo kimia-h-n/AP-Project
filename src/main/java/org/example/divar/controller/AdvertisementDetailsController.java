@@ -56,7 +56,7 @@ public class AdvertisementDetailsController {
 
         titleLabel.setText(freshAd.getTitle());
         addressLabel.setText(freshAd.getAddress());
-        statusLabel.setText(freshAd.getStatus().toString());
+        statusLabel.setText(freshAd.getCondition().toString());
         categoryLabel.setText(freshAd.getCategory().toString());
         if (freshAd.getDescription() != null) {
             descriptionLabel.setText(freshAd.getDescription());
