@@ -1,5 +1,6 @@
 package org.example.divar.controller;
 
+import javafx.application.Platform;
 import org.example.divar.SwitchStage;
 import org.example.divar.model.*;
 import org.example.divar.service.AdvertisementService;
@@ -35,6 +36,7 @@ public class AdvertisementDetailsController {
     @FXML private ImageView mainImage;
     @FXML private HBox imageContainer;
     @FXML private Button favoriteBtn;
+    @FXML private Button deleteBtn;
 
     private javafx.stage.Stage reportWindow;
     private javafx.stage.Stage successWindow;
@@ -77,6 +79,15 @@ public class AdvertisementDetailsController {
         } else {
             favoriteBtn.setText("★ نشان کردن");
             favoriteBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #555555; -fx-font-size: 14px;");
+        }
+
+
+        if (currentUsername != null && advertisement.getSeller() != null && currentUsername.equals(advertisement.getSeller().getUsername())) {
+            deleteBtn.setVisible(true);
+            deleteBtn.setManaged(true);
+        } else {
+            deleteBtn.setVisible(false);
+            deleteBtn.setManaged(false);
         }
 
         imageContainer.getChildren().clear();
@@ -199,10 +210,20 @@ public class AdvertisementDetailsController {
     private void showError(String message) {
         if (messageLabel != null) {
             messageLabel.setText(message);
-            messageLabel.setStyle("-fx-text-fill: #a62626; -fx-font-weight: bold; -fx-font-size: 14px;");
+            messageLabel.getStyleClass().remove("success-message");
+            if (!messageLabel.getStyleClass().contains("error-message")) {
+                messageLabel.getStyleClass().add("error-message");
+            }
             messageLabel.setVisible(true);
         } else {
-            System.out.println(message);
+            System.err.println("Error: " + message);
+        }
+    }
+
+    private void showSuccess(String message) {
+        if (messageLabel != null) {
+            messageLabel.setText(message);
+            messageLabel.setVisible(true);
         }
     }
 
@@ -306,6 +327,30 @@ public class AdvertisementDetailsController {
         }
     }
 
+    @FXML
+    private void deleteAdvertisement() {
+        deleteBtn.setDisable(true);
+        try {
+            AppContext.getAdvertisementService().deleteAdvertisement(currentAdvertisement.getId());
+
+            showSuccess("آگهی شما با موفقیت حذف شد.");
+
+            new Thread(() -> {
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                Platform.runLater(() -> {
+                    goBack();
+                });
+            }).start();
+
+        } catch (RuntimeException e) {
+            showError(e.getMessage());
+            deleteBtn.setDisable(false);
+        }
+    }
 
     @FXML private void goToProfile() {
         SwitchStage.switchToProfile(); }

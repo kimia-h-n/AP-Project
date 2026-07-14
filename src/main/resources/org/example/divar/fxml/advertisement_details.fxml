@@ -50,10 +50,10 @@
                                             <Button text="اطلاعات تماس" style="-fx-background-color: #a62626; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 15px; -fx-padding: 10 25; -fx-background-radius: 4; -fx-cursor: hand;"/>
                                             <Button text="چت" onAction="#chatWithSeller" style="-fx-background-color: #ffffff; -fx-border-color: #555555; -fx-text-fill: #222222; -fx-font-weight: bold; -fx-font-size: 15px; -fx-padding: 10 30; -fx-border-radius: 4; -fx-cursor: hand;"/>
                                             <Button fx:id="favoriteBtn" text="★ نشان کردن" onAction="#manageFavoriteAdvertisement" style="-fx-background-color: transparent; -fx-text-fill: #555555; -fx-font-size: 14px; -fx-cursor: hand;"/>
+                                            <Button fx:id="deleteBtn" text=" حذف آگهی" visible="false" managed="false" onAction="#deleteAdvertisement"
+                                                    style="-fx-background-color: transparent; -fx-border-color: #a62626; -fx-text-fill: #a62626; -fx-border-radius: 4px; -fx-padding: 6px 14px; -fx-cursor: hand;"/>
                                         </children>
                                     </HBox>
-
-                                    <Label fx:id="messageLabel" text="" wrapText="true" maxWidth="Infinity" visible="false" style="-fx-font-size: 13px; -fx-font-weight: bold;"/>
 
                                     <Separator style="-fx-padding: 10 0;"/>
 
@@ -85,6 +85,9 @@
 
                                         <Button fx:id="reportButton" text="گزارش این آگهی" onAction="#reportAdvertisement"
                                                 style="-fx-background-color: transparent; -fx-text-fill: #a62626; -fx-border-color: #a62626; -fx-border-radius: 4px; -fx-padding: 8px 15px; -fx-cursor: hand; -fx-font-size: 14px;"/>
+
+                                        <Label fx:id="messageLabel" wrapText="true" maxWidth="Infinity"
+                                               style="-fx-font-size: 13px; -fx-text-fill: green; -fx-font-weight: bold;" visible="false"/>
                                     </children>
                                     </HBox>
                                 </children>
