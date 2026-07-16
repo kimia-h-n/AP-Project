@@ -1,5 +1,6 @@
 package com.example.sales.ad.model;
 
+import com.example.sales.ad.fav.FavoriteAd;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -20,5 +21,13 @@ public interface AdMapper {
     AdResponse toResponse(Ad ad);
 
     List<AdResponse> toResponseList(List<Ad> ads);
+
+    List<AdResponse> toResponseListFromFavorites(List<FavoriteAd> ads);
+
+    List<AdCartSummery> toCartSummeryFromFavorites(List<FavoriteAd> ads);
+
+    List<AdCartSummery> toCartSummeryList(List<Ad> ads);
+
+    List<PendingAd> toPendingAdList(List<Ad> ads);
 }
 

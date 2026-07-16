@@ -6,6 +6,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.Instant;
 import java.util.List;
 
 @Data
@@ -44,5 +48,11 @@ public class Ad {
     @JoinColumn(name = "buyer_id")
     private User buyer; //can be null
 
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt;
 
+    @UpdateTimestamp
+    @Column(nullable = false)
+    private Instant updatedAt;
 }

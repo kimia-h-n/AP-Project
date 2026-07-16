@@ -1,4 +1,4 @@
-package com.example.sales.config;
+package com.example.sales.admin;
 
 
 import com.example.sales.repository.UserRepository;
@@ -38,6 +38,7 @@ public class AdminInitializer {
                     .firstname(null)
                     .lastname(null)
                     .role(Role.ADMIN)
+                    .enable(true)
                     .build();
             userRepository.save(admin);
         };
