@@ -55,6 +55,7 @@ public class AuthenticationService {
                 .email(email)
                 .phoneNumber(phoneNumber)
                 .role(Role.USER)
+                .enable(true)
                 .build();
         repository.save(user);
         var jwtToken = jwtService.generateToken(user);

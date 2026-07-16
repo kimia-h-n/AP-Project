@@ -33,7 +33,7 @@ public class User implements UserDetails {
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
-
+    private boolean enable;
 
     /*
       Spring:
@@ -69,7 +69,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return this.enable;
     }
 
     @Override

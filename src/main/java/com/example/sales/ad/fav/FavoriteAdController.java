@@ -1,10 +1,14 @@
 package com.example.sales.ad.fav;
 
 
+import com.example.sales.ad.model.AdCartSummery;
+import com.example.sales.ad.model.AdResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @AllArgsConstructor
@@ -18,6 +22,12 @@ public class FavoriteAdController {
     public void addToFavorites(@PathVariable Long adId, Authentication authentication) {
         String username = authentication.getName();
         favAdService.addToFavorites(adId, username);
+    }
+
+    @GetMapping
+    public List<AdCartSummery> getAllUserFavoriteAds(Authentication authentication) {
+        String username = authentication.getName();
+        return favAdService.getAllUserFavoriteAds(username);
     }
 
     @DeleteMapping("/{adId}")
