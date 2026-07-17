@@ -1,5 +1,6 @@
 package com.example.sales.auth;
 
+import com.example.sales.user.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,4 +12,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AuthenticationResponse {
     private String token;
+    private Role role;
 }
