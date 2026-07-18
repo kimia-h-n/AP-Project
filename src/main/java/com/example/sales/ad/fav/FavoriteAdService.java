@@ -1,12 +1,10 @@
 package com.example.sales.ad.fav;
 
 
-import com.example.sales.ad.AdController;
 import com.example.sales.ad.AdRepository;
 import com.example.sales.ad.model.Ad;
 import com.example.sales.ad.model.AdCartSummery;
 import com.example.sales.ad.model.AdMapper;
-import com.example.sales.ad.model.AdResponse;
 import com.example.sales.exception.AdNotFavoriteException;
 import com.example.sales.exception.AdNotFoundException;
 import com.example.sales.exception.AlreadyFavoriteAdException;
@@ -54,7 +52,7 @@ public class FavoriteAdService {
     }
 
     private RequestInfo getRequestInfo(Long adId, String username) {
-        User user = userRepository.findUsersByUsername(username).orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findByUsername(username).orElseThrow(UserNotFoundException::new);
         Ad ad = adRepository.findById(adId).orElseThrow(AdNotFoundException::new);
         return new RequestInfo(user, ad);
     }
