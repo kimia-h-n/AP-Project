@@ -31,7 +31,7 @@ public class AuthenticationService {
         } catch (AuthenticationException e) {
             throw new InvalidUsernameOrPassword();
         }
-        var user = repository.findUsersByUsername(request.getUsername()).orElseThrow(UserNotFoundException::new);
+        var user = repository.findByUsername(request.getUsername()).orElseThrow(UserNotFoundException::new);
         var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
@@ -62,7 +62,7 @@ public class AuthenticationService {
         var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
-                .role(Role.USER)
+                .role(user.getRole())
                 .build();
     }
 }

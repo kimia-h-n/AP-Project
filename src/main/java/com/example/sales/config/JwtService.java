@@ -70,6 +70,14 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
+    public boolean validateJwtToken(String token) {
+        try {
+            extractAllClaims(token);
+            return true;
+        } catch (IllegalArgumentException ex) {
+            return false;
+        }
+    }
 
     public <T> T extractClaims(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);

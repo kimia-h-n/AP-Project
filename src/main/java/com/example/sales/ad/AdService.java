@@ -1,7 +1,6 @@
 package com.example.sales.ad;
 
 
-import com.example.sales.ad.ad.AdSpecification;
 import com.example.sales.ad.fav.FavoriteRepository;
 import com.example.sales.ad.model.*;
 import com.example.sales.exception.*;
@@ -23,7 +22,7 @@ public class AdService {
     private final AdMapper adMapper;
 
     public void addAd(AdRequest request, String username) {
-        User user = userRepository.findUsersByUsername(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(UserNotFoundException::new);
         Ad ad = adMapper.toEntity(request);
         ad.setSeller(user);
@@ -46,7 +45,7 @@ public class AdService {
             }
             return;
         }
-        User user = userRepository.findUsersByUsername(username).orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findByUsername(username).orElseThrow(UserNotFoundException::new);
         Set<Long> favAdIds = favoriteRepository.findFavoriteAdIdsByUser(user);
         responseList.forEach(ad -> {
             ad.setFavorite(favAdIds.contains(ad.getId()));
@@ -68,7 +67,7 @@ public class AdService {
 //        if (ad.getStatus() != AdStatus.APPROVED)
 //            throw new AdViewNotAllowedException();
 
-        User user = userRepository.findUsersByUsername(username).orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findByUsername(username).orElseThrow(UserNotFoundException::new);
 
         boolean isFavorite = favoriteRepository.existsFavoriteAdByUserAndAd(user, ad);
 
@@ -105,7 +104,7 @@ public class AdService {
 
     public List<AdResponse> getAllMyAds(String username) {
         List<AdResponse> ads = adMapper.toResponseList(adRepository.findAllBySeller
-                (userRepository.findUsersByUsername(username).
+                (userRepository.findByUsername(username).
                         orElseThrow(UserNotFoundException::new)));
         ads.forEach(ad -> ad.setMine(true));
         return ads;
