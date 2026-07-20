@@ -51,3 +51,9 @@ app:
   admin:
     username: admin
     password: admin1234
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.web.cors: DEBUG
+    com.example.sales: DEBUG
