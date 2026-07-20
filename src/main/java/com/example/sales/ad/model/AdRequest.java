@@ -20,6 +20,5 @@ public class AdRequest {
     private long price;
     private AdCategory category;
     private ProductCondition condition;
-    private City city;
-    private List<String> imagePaths;
+    private Long cityId;
 }

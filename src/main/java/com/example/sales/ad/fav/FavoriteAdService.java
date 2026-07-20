@@ -2,6 +2,7 @@ package com.example.sales.ad.fav;
 
 
 import com.example.sales.ad.AdRepository;
+import com.example.sales.ad.AdService;
 import com.example.sales.ad.model.Ad;
 import com.example.sales.ad.model.AdCartSummery;
 import com.example.sales.ad.model.AdMapper;
@@ -23,6 +24,7 @@ public class FavoriteAdService {
     private final UserRepository userRepository;
     private final AdRepository adRepository;
     private final AdMapper adMapper;
+    private final AdService adService;
 
     public void addToFavorites(Long adId, String username) {
         RequestInfo requestInfo = getRequestInfo(adId, username);
@@ -61,7 +63,9 @@ public class FavoriteAdService {
     public List<AdCartSummery> getAllUserFavoriteAds(String username) {
         if (!userRepository.existsByUsername(username))
             throw new UserNotFoundException();
-        return adMapper.toCartSummeryFromFavorites(favRepository.getAllByUser_Username(username));
+        List<AdCartSummery> ads = adMapper.toCartSummeryFromFavorites(favRepository.getAllByUser_Username(username));
+        adService.addPrimaryImage(ads); //todo: better way of avoiding duplication
+        return ads;
     }
 
     private record RequestInfo(User user, Ad ad) {

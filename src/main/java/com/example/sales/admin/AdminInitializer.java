@@ -38,7 +38,7 @@ public class AdminInitializer {
                     .firstname(null)
                     .lastname(null)
                     .role(Role.ADMIN)
-                    .enable(true)
+                    .enabled(true)
                     .build();
             userRepository.save(admin);
         };
