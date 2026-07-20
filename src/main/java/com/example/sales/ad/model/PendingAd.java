@@ -1,6 +1,7 @@
 package com.example.sales.ad.model;
 
 
+import com.example.sales.province.City;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,7 +17,8 @@ public class PendingAd {
     private AdCategory category;
     private String sellerFirstName;
     private String sellerLastName;
-    private City city;
+    private String cityName;
     private Instant createdAt;
     private Instant updatedAt;
+    private Long sellerId;
 }

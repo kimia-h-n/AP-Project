@@ -19,10 +19,13 @@ public class AdResponse {
     private long price;
     private AdCategory category;
     private ProductCondition condition;
-    private City city;
-    private List<String> imagePaths;
+    private String cityName;
+    private List<ImageResponse> images;
     private AdStatus status;
     private String sellerUsername;
+    private String sellerFirstname;
+    private String sellerLastname;
+    private Long sellerId;
     private boolean isFavorite;
     private boolean isMine;
     private Instant createdAt;

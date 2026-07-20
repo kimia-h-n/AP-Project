@@ -1,17 +1,23 @@
 package com.example.sales.ad;
 
 
+import com.example.sales.ad.ad.AdSpecifications;
 import com.example.sales.ad.fav.FavoriteRepository;
 import com.example.sales.ad.model.*;
 import com.example.sales.exception.*;
+import com.example.sales.picture.ImageMetaView;
+import com.example.sales.picture.StorageRepository;
+import com.example.sales.province.ProvinceRepository;
 import com.example.sales.repository.UserRepository;
+import com.example.sales.user.Role;
 import com.example.sales.user.User;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -19,12 +25,15 @@ public class AdService {
     private final AdRepository adRepository;
     private final UserRepository userRepository;
     private final FavoriteRepository favoriteRepository;
+    private final StorageRepository storageRepository;
+    private final ProvinceRepository provinceRepository;
     private final AdMapper adMapper;
 
     public void addAd(AdRequest request, String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(UserNotFoundException::new);
         Ad ad = adMapper.toEntity(request);
+        ad.setCity(provinceRepository.findById(request.getCityId()).orElseThrow(CityNotFoundException::new));
         ad.setSeller(user);
         ad.setStatus(AdStatus.PENDING);
         adRepository.save(ad);
@@ -32,9 +41,33 @@ public class AdService {
 
 
     public List<AdCartSummery> getAllActiveAds(String username) {
-//        List<AdCartSummery> activeAds = adMapper.toResponseList(adRepository.findAllByStatus(AdStatus.APPROVED));
 //        applyFavorite(username, activeAds);
-        return adMapper.toCartSummeryList(adRepository.findAllByStatus(AdStatus.APPROVED));
+//        return adMapper.toCartSummeryList(adRepository.findAllByStatus(AdStatus.APPROVED));
+        List<AdCartSummery> ads = adMapper.toCartSummeryList
+                (adRepository.findAllByStatus(AdStatus.APPROVED));
+        addPrimaryImage(ads);
+        return ads;
+    }
+
+    public void addPrimaryImage(List<AdCartSummery> ads) {
+        List<Long> adIds = ads.stream()
+                .map(AdCartSummery::getId)
+                .toList();
+
+        Map<Long, UUID> primaryByAdId = storageRepository
+                .findPrimaryMetaByAdIdIn(adIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        ImageMetaView::getAdId,
+                        ImageMetaView::getId,
+                        (existing, ignored) -> existing
+                ));
+        for (AdCartSummery ad : ads) {
+            UUID primaryImageId = primaryByAdId.get(ad.getId());
+            ad.setPrimaryImageId(primaryImageId);
+            ad.setPrimaryImageUrl(primaryImageId != null ? "/api/v1/images/" + primaryImageId : null);
+
+        }
     }
 
     private void applyFavorite(String username, List<AdResponse> responseList) {
@@ -59,8 +92,10 @@ public class AdService {
 
     public AdResponse getAd(Long id, String username) {
         Ad ad = adRepository.findById(id).orElseThrow(AdNotFoundException::new);
+        AdResponse adResponse = adMapper.toResponse(ad);
+        adResponse.setImages(buildImageResponses(id));
         if (isNotLoggedIn(username))
-            return adMapper.toResponse(ad);
+            return adResponse;
 
         //todo: if in future, viewing rejected ads is desired, change here
         //todo: is it neccessary to check this here?
@@ -70,24 +105,36 @@ public class AdService {
         User user = userRepository.findByUsername(username).orElseThrow(UserNotFoundException::new);
 
         boolean isFavorite = favoriteRepository.existsFavoriteAdByUserAndAd(user, ad);
-
-        AdResponse adResponse = adMapper.toResponse(ad);
         adResponse.setFavorite(isFavorite);
         adResponse.setMine(username.equals(adResponse.getSellerUsername()));
 
         return adResponse;
     }
 
+    private List<ImageResponse> buildImageResponses(Long adId) {
+        return storageRepository.findMetaByAdId(adId).stream()
+                .map(m -> new ImageResponse(
+                        m.getId(),
+                        "/api/v1/images/" + m.getId(),
+                        m.getSortOrder(),
+                        m.isPrimaryImage()))
+                .toList();
+    }
 
     private boolean isAlreadyRemoved(Ad ad) {
         return ad.getStatus() == AdStatus.REMOVED;
+    }
+
+    private boolean isAdmin(String username) {
+        return userRepository.findByUsername(username).orElseThrow(UserNotFoundException::new)
+                .getRole() == Role.ADMIN;
     }
 
     @Transactional
     public void removeAd(Long id, String username) {
         Ad ad = adRepository.findById(id).orElseThrow(AdNotFoundException::new);
 
-        if (!isAdOwner(username, ad))
+        if (!(isAdOwner(username, ad) || isAdmin(username)))
             throw new OperationNotAllowedException();
 
         if (isAlreadyRemoved(ad))
@@ -103,10 +150,13 @@ public class AdService {
 
 
     public List<AdResponse> getAllMyAds(String username) {
-        List<AdResponse> ads = adMapper.toResponseList(adRepository.findAllBySeller
-                (userRepository.findByUsername(username).
-                        orElseThrow(UserNotFoundException::new)));
-        ads.forEach(ad -> ad.setMine(true));
+        List<Ad> myAds = adRepository.findAllBySeller(
+                userRepository.findByUsername(username).orElseThrow(UserNotFoundException::new));
+        List<AdResponse> ads = adMapper.toResponseList(myAds);
+        for (int i = 0; i < ads.size(); i++) {
+            ads.get(i).setMine(true);
+            ads.get(i).setImages(buildImageResponses(myAds.get(i).getId()));
+        }
         return ads;
     }
 
@@ -152,13 +202,9 @@ public class AdService {
             contentChanged = true;
         }
 
-        if (request.getCity() != null && request.getCity() != ad.getCity()) {
-            ad.setCity(request.getCity());
-            contentChanged = true;
-        }
-
-        if (request.getImagePaths() != null && !request.getImagePaths().equals(ad.getImagePaths())) {
-            ad.setImagePaths(request.getImagePaths());
+        if (!Objects.equals(request.getCityId(), ad.getCity().getId())) {
+            ad.setCity(provinceRepository.findById(request.getCityId())
+                    .orElseThrow(CityNotFoundException::new));
             contentChanged = true;
         }
 
@@ -175,6 +221,26 @@ public class AdService {
 //        applyFavorite(username, matchedAds);
         //todo: for later search improvements such as matching with description
 //         return adMapper.toCartSummeryList(adRepository.findAll(AdSpecification.titleContains(title)));
-        return adMapper.toCartSummeryList(adRepository.findByTitleContainingIgnoreCaseAndStatus(title, AdStatus.APPROVED));
+        List<AdCartSummery> ads = adMapper.toCartSummeryList(adRepository.findByTitleContainingIgnoreCaseAndStatus(title, AdStatus.APPROVED));
+        addPrimaryImage(ads);
+        return ads;
+    }
+
+    public List<AdCartSummery> searchAds(Long minPrice, Long maxPrice, AdCategory category, Long cityId) {
+        Specification<Ad> spec = Specification.where(AdSpecifications.hasStatus(AdStatus.APPROVED));
+
+        if (minPrice != null || maxPrice != null) {
+            spec = spec.and(AdSpecifications.priceBetween(minPrice, maxPrice));
+        }
+        if (category != null) {
+            spec = spec.and(AdSpecifications.hasCategory(category));
+        }
+        if (cityId != null) {
+            spec = spec.and(AdSpecifications.hasCityId(cityId));
+        }
+
+        List<AdCartSummery> ads = adMapper.toCartSummeryList(adRepository.findAll(spec));
+        addPrimaryImage(ads);
+        return ads;
     }
 }

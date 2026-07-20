@@ -1,8 +1,10 @@
 package com.example.sales.admin;
 
 
+import com.example.sales.ad.model.AdResponse;
 import com.example.sales.ad.model.PendingAd;
 import com.example.sales.ad.model.moderation.AdModerationRequest;
+import com.example.sales.ad.report.AdReportResponse;
 import com.example.sales.user.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +36,11 @@ public class AdminController {
     @PostMapping("/ads/{id}/moderation")
     public void moderateAd(@PathVariable Long id, @RequestBody AdModerationRequest moderationRequest) {
         adminService.moderateAd(id, moderationRequest);
+    }
+
+    @GetMapping("/reported-ads")
+    public List<AdReportResponse> getReportedAds() {
+        return adminService.getReportedAds();
     }
 
 
