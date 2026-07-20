@@ -36,8 +36,8 @@ public class AdService {
         ad.setCity(provinceRepository.findById(request.getCityId()).orElseThrow(CityNotFoundException::new));
         ad.setSeller(user);
         ad.setStatus(AdStatus.PENDING);
-        adRepository.save(ad);
-        return new AdInsertResponse(ad.getId());
+        Ad savedAd = adRepository.save(ad);
+        return new AdInsertResponse(savedAd.getId());
     }
 
 
