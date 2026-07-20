@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.awt.datatransfer.DataFlavor;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,9 +27,9 @@ public class AdController {
     private final StorageService storageService;
 
     @PostMapping("/ads")
-    public void addAdvertisement(@RequestBody AdRequest request, Authentication authentication) {
+    public AdInsertResponse addAdvertisement(@RequestBody AdRequest request, Authentication authentication) {
         String username = authentication.getName();
-        adService.addAd(request, username);
+        return adService.addAd(request, username);
     }
 
     //sample use case: GET /api/v1/ads?status=APPROVED
@@ -90,9 +91,10 @@ public class AdController {
             @RequestParam(required = false) Long minPrice,
             @RequestParam(required = false) Long maxPrice,
             @RequestParam(required = false) AdCategory category,
+            @RequestParam(required = false) DateFilter dataFilter,
             @RequestParam(required = false) Long cityId
     ) {
-        return adService.searchAds(minPrice, maxPrice, category, cityId);
+        return adService.searchAds(minPrice, maxPrice, category, dataFilter, cityId);
     }
 
     @PostMapping(value = "/ads/{adId}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -115,4 +117,24 @@ public class AdController {
                 .contentType(MediaType.parseMediaType(result.contentType()))
                 .body(result.data());
     }
+
+    @DeleteMapping("/images/{imageId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeImage(@PathVariable UUID imageId, Authentication authentication) {
+        String username = authentication.getName();
+        storageService.removeImage(imageId, username);
+    }
+
+    @PutMapping(value = "/images/{imageId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> replaceImage(
+            @PathVariable UUID imageId,
+            @RequestPart("file") MultipartFile file,
+            Authentication authentication
+    ) throws IOException {
+        String username = authentication.getName();
+        storageService.replaceImage(imageId, file, username);
+        return ResponseEntity.ok(imageId);
+    }
+
+
 }

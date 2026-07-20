@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -48,7 +49,7 @@ public class StorageService {
     }
 
     private int nextOrder(Long adId) {
-        return imageRepository.findByAdIdOrderBySortOrderAsc(adId).size();
+        return imageRepository.findMaxSortOrderByAdId(adId) + 1;
     }
 
 
@@ -59,18 +60,56 @@ public class StorageService {
         return new ImageDownload(data, image.getType());
     }
 
-//    public void uploadImage(MultipartFile file) throws IOException {
-//        ImageData imageData = imageRepository.save(
-//                ImageData.builder()
-//                        .name(file.getOriginalFilename())
-//                        .type(file.getContentType())
-//                        .imageData(ImageUtils.compressImage(file.getBytes())).build() // we don't want to save the hard coded file here, we first need to decompress it.
-//        );
-//        if (imageData == null)
-//            throw new UploadException();
-//    }
-//    public byte[] downloadImage(String name) {
-//        ImageData imageData = imageRepository.findByName(name).orElseThrow(ImageNotFoundException::new);
-//        return ImageUtils.decompressImage(imageData.getImageData());
-//    }
+    @Transactional
+    public void removeImage(UUID imageId, String username) {
+        ImageData image = imageRepository.findById(imageId)
+                .orElseThrow(ImageNotFoundException::new);
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(UserNotFoundException::new);
+
+        if (!image.getAd().getSeller().getId().equals(user.getId()))
+            throw new OperationNotAllowedException();
+
+        Long adId = image.getAd().getId();
+        int removedOrder = image.getSortOrder();
+        boolean wasPrimary = image.isPrimaryImage();
+
+        imageRepository.delete(image);
+
+        List<ImageData> images = imageRepository.findByAdIdOrderBySortOrderAsc(adId);
+
+        for (ImageData img : images) {
+            if (img.getSortOrder() > removedOrder) {
+                img.setSortOrder(img.getSortOrder() - 1);
+            }
+            img.setPrimaryImage(false);
+        }
+
+        if (wasPrimary && !images.isEmpty()) {
+            images.getFirst().setPrimaryImage(true);
+        }
+    }
+
+    @Transactional
+    public void replaceImage(UUID imageId, MultipartFile file, String username) throws IOException {
+        ImageData oldImage = imageRepository.findById(imageId)
+                .orElseThrow(ImageNotFoundException::new);
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(UserNotFoundException::new);
+
+        if (!oldImage.getAd().getSeller().getId().equals(user.getId()))
+            throw new OperationNotAllowedException();
+
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/"))
+            throw new InvalidDataFormat();
+
+        oldImage.setName(file.getOriginalFilename());
+        oldImage.setType(contentType);
+        oldImage.setImageData(ImageUtils.compressImage(file.getBytes()));
+
+        imageRepository.save(oldImage);
+    }
 }

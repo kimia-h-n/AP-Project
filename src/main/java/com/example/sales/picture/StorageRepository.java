@@ -42,4 +42,7 @@ public interface StorageRepository extends JpaRepository<ImageData, UUID> {
             order by i.sortOrder asc
             """)
     List<ImageMetaView> findMetaByAdId(@Param("adId") Long adId);
+
+    @Query("select coalesce(max(i.sortOrder), -1) from ImageData i where i.ad.id = :adId")
+    int findMaxSortOrderByAdId(Long adId);
 }
