@@ -1,15 +1,50 @@
 package com.example.sales.ad.ad;
 
+import com.example.sales.ad.DateFilter;
 import com.example.sales.ad.model.Ad;
 import com.example.sales.ad.model.AdCategory;
 import com.example.sales.ad.model.AdStatus;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+
 public class AdSpecifications {
     public static Specification<Ad> hasStatus(AdStatus status) {
         return (root, query, cb) ->
                 status == null ? cb.conjunction() : cb.equal(root.get("status"), status);
+    }
+
+    private static final ZoneId APP_ZONE = ZoneId.of("Asia/Tehran");
+
+    public static Specification<Ad> hasDateFilter(DateFilter dateFilter) {
+        return (root, query, cb) -> {
+            if (dateFilter == null) {
+                return cb.conjunction();
+            }
+
+            LocalDate today = LocalDate.now(APP_ZONE);
+
+            Instant startOfToday = today.atStartOfDay(APP_ZONE).toInstant();
+            Instant startOfYesterday = today.minusDays(1).atStartOfDay(APP_ZONE).toInstant();
+            Instant startOfSevenDaysAgo = today.minusDays(7).atStartOfDay(APP_ZONE).toInstant();
+
+            return switch (dateFilter) {
+                case YESTERDAY -> cb.and(
+                        cb.greaterThanOrEqualTo(root.get("createdAt"), startOfYesterday),
+                        cb.lessThan(root.get("createdAt"), startOfToday)
+                );
+
+                case PAST_WEEK -> cb.and(
+                        cb.greaterThanOrEqualTo(root.get("createdAt"), startOfSevenDaysAgo),
+                        cb.lessThan(root.get("createdAt"), startOfToday)
+                );
+
+                case OLDER -> cb.lessThan(root.get("createdAt"), startOfSevenDaysAgo);
+            };
+        };
     }
 
     public static Specification<Ad> hasCategory(AdCategory category) {

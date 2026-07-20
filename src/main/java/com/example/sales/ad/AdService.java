@@ -29,7 +29,7 @@ public class AdService {
     private final ProvinceRepository provinceRepository;
     private final AdMapper adMapper;
 
-    public void addAd(AdRequest request, String username) {
+    public AdInsertResponse addAd(AdRequest request, String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(UserNotFoundException::new);
         Ad ad = adMapper.toEntity(request);
@@ -37,6 +37,7 @@ public class AdService {
         ad.setSeller(user);
         ad.setStatus(AdStatus.PENDING);
         adRepository.save(ad);
+        return new AdInsertResponse(ad.getId());
     }
 
 
@@ -202,7 +203,7 @@ public class AdService {
             contentChanged = true;
         }
 
-        if (!Objects.equals(request.getCityId(), ad.getCity().getId())) {
+        if (request.getCityId() != null && !Objects.equals(request.getCityId(), ad.getCity().getId())) {
             ad.setCity(provinceRepository.findById(request.getCityId())
                     .orElseThrow(CityNotFoundException::new));
             contentChanged = true;
@@ -226,7 +227,8 @@ public class AdService {
         return ads;
     }
 
-    public List<AdCartSummery> searchAds(Long minPrice, Long maxPrice, AdCategory category, Long cityId) {
+    public List<AdCartSummery> searchAds(Long minPrice, Long maxPrice, AdCategory category,
+                                         DateFilter dateFilter, Long cityId) {
         Specification<Ad> spec = Specification.where(AdSpecifications.hasStatus(AdStatus.APPROVED));
 
         if (minPrice != null || maxPrice != null) {
@@ -237,6 +239,9 @@ public class AdService {
         }
         if (cityId != null) {
             spec = spec.and(AdSpecifications.hasCityId(cityId));
+        }
+        if (dateFilter != null) {
+            spec = spec.and(AdSpecifications.hasDateFilter(dateFilter));
         }
 
         List<AdCartSummery> ads = adMapper.toCartSummeryList(adRepository.findAll(spec));
