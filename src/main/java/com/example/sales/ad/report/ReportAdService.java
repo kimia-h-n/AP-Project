@@ -7,9 +7,12 @@ import com.example.sales.exception.SpamNotAllowedException;
 import com.example.sales.exception.UserNotFoundException;
 import com.example.sales.repository.UserRepository;
 import com.example.sales.user.User;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class ReportAdService {
@@ -18,6 +21,7 @@ public class ReportAdService {
     private final AdReportRepository adReportRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public void reportAd(Long adId, ReportReason reportReason, String username) {
         Ad ad = adRepository.findById(adId).orElseThrow(AdNotFoundException::new);
         User user = userRepository.findByUsername(username).orElseThrow(UserNotFoundException::new);
@@ -25,12 +29,13 @@ public class ReportAdService {
             throw new SpamNotAllowedException();
         ad.spam();
 
-        //todo: move to adReportService?
         AdReport adReport = AdReport.builder()
+                .ad(ad)
                 .reporter(user)
                 .reason(reportReason)
                 .build();
 
+        log.info("error happened while saving data");
         adReportRepository.save(adReport);
 
     }

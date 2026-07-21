@@ -1,7 +1,5 @@
 package com.example.sales.ad.report;
 
-
-import com.example.sales.user.UserName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
