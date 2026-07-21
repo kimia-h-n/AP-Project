@@ -45,16 +45,17 @@ public interface AdMapper {
     // AdReport -> AdReportResponse
     // =========================
 
-    @Mapping(target = "sellerFirstName", source = "ad.seller.firstname")
-    @Mapping(target = "sellerLastName", source = "ad.seller.lastname")
-    @Mapping(target = "adTitle", source = "ad.title")
     @Mapping(target = "adReportId", source = "id")
     @Mapping(target = "adId", source = "ad.id")
+    @Mapping(target = "adTitle", source = "ad.title")
+    @Mapping(target = "sellerFirstName", source = "ad.seller.firstname")
+    @Mapping(target = "sellerLastName", source = "ad.seller.lastname")
+    @Mapping(target = "reportReason", source = "reason")
+    @Mapping(target = "primaryImageId", ignore = true)
+    @Mapping(target = "primaryImageUrl", ignore = true)
     AdReportResponse toAdReportResponse(AdReport adReport);
 
-    List<AdReportResponse> toAdReportResponseList(
-            List<AdReport> adReports
-    );
+    List<AdReportResponse> toAdReportResponseList(List<AdReport> adReports);
 
 
     // =========================

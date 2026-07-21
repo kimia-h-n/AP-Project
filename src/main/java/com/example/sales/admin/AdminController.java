@@ -2,11 +2,11 @@ package com.example.sales.admin;
 
 
 import com.example.sales.ad.model.AdCardSummary;
-import com.example.sales.ad.model.AdResponse;
 import com.example.sales.ad.model.PendingAd;
 import com.example.sales.ad.model.moderation.AdModerationRequest;
 import com.example.sales.ad.report.AdReportResponse;
-import com.example.sales.user.UserResponse;
+import com.example.sales.user.UserInfoResponse;
+import com.example.sales.user.UserSummary;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,8 +19,18 @@ public class AdminController {
     private final AdminService adminService;
 
     @GetMapping("/users")
-    public List<UserResponse> getAllUsers() {
+    public List<UserSummary> getAllUsers() {
         return adminService.getAllUsers();
+    }
+
+    @GetMapping("/users/{id}")
+    public UserInfoResponse getUserInfo(@PathVariable Long id) {
+        return adminService.getUserInfo(id);
+    }
+
+    @GetMapping("/users/{id}/ads")
+    public List<AdCardSummary> getUserAds(@PathVariable Long id) {
+        return adminService.getUserAds(id);
     }
 
     @PostMapping("/users/block/{id}")

@@ -25,6 +25,7 @@ public class AdResponse {
     private String sellerFirstname;
     private String sellerLastname;
     private Long sellerId;
+    private Double sellerRatingAvg;
     private boolean isFavorite;
     private boolean isMine;
     private Instant createdAt;
