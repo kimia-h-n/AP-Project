@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -21,4 +22,6 @@ public class PendingAd {
     private Instant createdAt;
     private Instant updatedAt;
     private Long sellerId;
+    private UUID primaryImageId;
+    private String primaryImageUrl;
 }

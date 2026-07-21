@@ -5,6 +5,7 @@ import com.example.sales.ad.ad.AdSpecifications;
 import com.example.sales.ad.fav.FavoriteRepository;
 import com.example.sales.ad.model.*;
 import com.example.sales.exception.*;
+import com.example.sales.picture.AdPrimaryImageEnricher;
 import com.example.sales.picture.ImageMetaView;
 import com.example.sales.picture.StorageRepository;
 import com.example.sales.province.ProvinceRepository;
@@ -28,6 +29,7 @@ public class AdService {
     private final StorageRepository storageRepository;
     private final ProvinceRepository provinceRepository;
     private final AdMapper adMapper;
+    private final AdPrimaryImageEnricher primaryImageEnricher;
 
     public AdInsertResponse addAd(AdRequest request, String username) {
         User user = userRepository.findByUsername(username)
@@ -41,18 +43,24 @@ public class AdService {
     }
 
 
-    public List<AdCartSummery> getAllActiveAds(String username) {
+    public List<AdCardSummary> getAllActiveAds(String username) {
 //        applyFavorite(username, activeAds);
 //        return adMapper.toCartSummeryList(adRepository.findAllByStatus(AdStatus.APPROVED));
-        List<AdCartSummery> ads = adMapper.toCartSummeryList
+        List<AdCardSummary> ads = adMapper.toCartSummeryList
                 (adRepository.findAllByStatus(AdStatus.APPROVED));
-        addPrimaryImage(ads);
+//        addPrimaryImage(ads);
+        primaryImageEnricher.enrich(
+                ads,
+                AdCardSummary::getId,
+                AdCardSummary::setPrimaryImageId,
+                AdCardSummary::setPrimaryImageUrl
+        );
         return ads;
     }
 
-    public void addPrimaryImage(List<AdCartSummery> ads) {
+    public void addPrimaryImage(List<AdCardSummary> ads) {
         List<Long> adIds = ads.stream()
-                .map(AdCartSummery::getId)
+                .map(AdCardSummary::getId)
                 .toList();
 
         Map<Long, UUID> primaryByAdId = storageRepository
@@ -63,7 +71,7 @@ public class AdService {
                         ImageMetaView::getId,
                         (existing, ignored) -> existing
                 ));
-        for (AdCartSummery ad : ads) {
+        for (AdCardSummary ad : ads) {
             UUID primaryImageId = primaryByAdId.get(ad.getId());
             ad.setPrimaryImageId(primaryImageId);
             ad.setPrimaryImageUrl(primaryImageId != null ? "/api/v1/images/" + primaryImageId : null);
@@ -151,8 +159,11 @@ public class AdService {
 
 
     public List<AdResponse> getAllMyAds(String username) {
-        List<Ad> myAds = adRepository.findAllBySeller(
-                userRepository.findByUsername(username).orElseThrow(UserNotFoundException::new));
+
+        List<Ad> myAds = adRepository.findAllBySellerAndStatus(
+                userRepository.findByUsername(username).orElseThrow(UserNotFoundException::new),
+                AdStatus.APPROVED);
+
         List<AdResponse> ads = adMapper.toResponseList(myAds);
         for (int i = 0; i < ads.size(); i++) {
             ads.get(i).setMine(true);
@@ -188,7 +199,7 @@ public class AdService {
             contentChanged = true;
         }
 
-        if (request.getPrice() != null && request.getPrice() != ad.getPrice()) {
+        if (request.getPrice() != null && !(request.getPrice().equals(ad.getPrice()))) {
             ad.setPrice(request.getPrice());
             contentChanged = true;
         }
@@ -216,18 +227,18 @@ public class AdService {
         return contentChanged;
     }
 
-    public List<AdCartSummery> searchByTitle(String username, String title) {
+    public List<AdCardSummary> searchByTitle(String username, String title) {
 //        List<AdResponse> matchedAds = adMapper.toResponseList(
 //                adRepository.findAll(AdSpecification.titleContains(title)));
 //        applyFavorite(username, matchedAds);
         //todo: for later search improvements such as matching with description
 //         return adMapper.toCartSummeryList(adRepository.findAll(AdSpecification.titleContains(title)));
-        List<AdCartSummery> ads = adMapper.toCartSummeryList(adRepository.findByTitleContainingIgnoreCaseAndStatus(title, AdStatus.APPROVED));
+        List<AdCardSummary> ads = adMapper.toCartSummeryList(adRepository.findByTitleContainingIgnoreCaseAndStatus(title, AdStatus.APPROVED));
         addPrimaryImage(ads);
         return ads;
     }
 
-    public List<AdCartSummery> searchAds(Long minPrice, Long maxPrice, AdCategory category,
+    public List<AdCardSummary> searchAds(Long minPrice, Long maxPrice, AdCategory category,
                                          DateFilter dateFilter, Long cityId) {
         Specification<Ad> spec = Specification.where(AdSpecifications.hasStatus(AdStatus.APPROVED));
 
@@ -244,8 +255,14 @@ public class AdService {
             spec = spec.and(AdSpecifications.hasDateFilter(dateFilter));
         }
 
-        List<AdCartSummery> ads = adMapper.toCartSummeryList(adRepository.findAll(spec));
-        addPrimaryImage(ads);
+        List<AdCardSummary> ads = adMapper.toCartSummeryList(adRepository.findAll(spec));
+//        addPrimaryImage(ads);
+        primaryImageEnricher.enrich(
+                ads,
+                AdCardSummary::getId,
+                AdCardSummary::setPrimaryImageId,
+                AdCardSummary::setPrimaryImageUrl
+        );
         return ads;
     }
 }

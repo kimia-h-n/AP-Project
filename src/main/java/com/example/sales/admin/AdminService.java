@@ -2,6 +2,7 @@ package com.example.sales.admin;
 
 
 import com.example.sales.ad.AdRepository;
+import com.example.sales.ad.AdService;
 import com.example.sales.ad.model.*;
 import com.example.sales.ad.model.moderation.AdModerationRequest;
 import com.example.sales.ad.report.AdReport;
@@ -11,6 +12,7 @@ import com.example.sales.exception.AdNotFoundException;
 import com.example.sales.exception.AlreadyBlockedException;
 import com.example.sales.exception.UserAlreadyEnabled;
 import com.example.sales.exception.UserNotFoundException;
+import com.example.sales.picture.AdPrimaryImageEnricher;
 import com.example.sales.repository.UserRepository;
 import com.example.sales.user.User;
 import com.example.sales.user.UserMapper;
@@ -31,6 +33,7 @@ public class AdminService {
     private final AdRepository adRepository;
     private final AdReportRepository adReportRepository;
     private final AdMapper adMapper;
+    private final AdPrimaryImageEnricher adPrimaryImageEnricher;
 
     public List<UserResponse> getAllUsers() {
         return userMapper.toUserResponse(userRepository.findAll());
@@ -75,12 +78,24 @@ public class AdminService {
     }
 
     public List<PendingAd> getAllPendingAds() {
-        return adMapper.toPendingAdList(adRepository.findAllByStatus(AdStatus.PENDING));
+        List<PendingAd> ads = adMapper.toPendingAdList(adRepository.findAllByStatus(AdStatus.PENDING));
+        adPrimaryImageEnricher.enrich(
+                ads,
+                PendingAd::getId,
+                PendingAd::setPrimaryImageId,
+                PendingAd::setPrimaryImageUrl
+        );
+        return ads;
     }
 
     public List<AdReportResponse> getReportedAds() {
-        List<AdReport> adReportResponses = adReportRepository.findAll();
-        return adMapper.toAdReportResponse(adReportResponses);
-
+        List<AdReportResponse> ads = adMapper.toAdReportResponseList(adReportRepository.findAll());
+        adPrimaryImageEnricher.enrich(
+                ads,
+                AdReportResponse::getAdId,
+                AdReportResponse::setPrimaryImageId,
+                AdReportResponse::setPrimaryImageUrl
+        );
+        return ads;
     }
 }

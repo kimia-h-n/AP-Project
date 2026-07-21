@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -13,9 +15,9 @@ public class AdReportResponse {
     private Long adReportId;
     private Long adId;
     private String adTitle;
-    //todo: later change to UserName
-//     private UserName userName;
     private String sellerFirstName;
-    private String sellerLastname;
+    private String sellerLastName;
+    private UUID primaryImageId;
+    private String primaryImageUrl;
     private ReportReason reportReason;
 }

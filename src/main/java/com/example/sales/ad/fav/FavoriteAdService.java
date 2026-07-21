@@ -4,14 +4,16 @@ package com.example.sales.ad.fav;
 import com.example.sales.ad.AdRepository;
 import com.example.sales.ad.AdService;
 import com.example.sales.ad.model.Ad;
-import com.example.sales.ad.model.AdCartSummery;
+import com.example.sales.ad.model.AdCardSummary;
 import com.example.sales.ad.model.AdMapper;
 import com.example.sales.exception.AdNotFavoriteException;
 import com.example.sales.exception.AdNotFoundException;
 import com.example.sales.exception.AlreadyFavoriteAdException;
 import com.example.sales.exception.UserNotFoundException;
+import com.example.sales.picture.AdPrimaryImageEnricher;
 import com.example.sales.repository.UserRepository;
 import com.example.sales.user.User;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,8 +26,9 @@ public class FavoriteAdService {
     private final UserRepository userRepository;
     private final AdRepository adRepository;
     private final AdMapper adMapper;
-    private final AdService adService;
+    private final AdPrimaryImageEnricher primaryImageEnricher;
 
+    @Transactional
     public void addToFavorites(Long adId, String username) {
         RequestInfo requestInfo = getRequestInfo(adId, username);
 
@@ -39,13 +42,18 @@ public class FavoriteAdService {
         favRepository.save(favoriteAd);
     }
 
+    @Transactional
     public void removeFromFavorites(Long adId, String username) {
         RequestInfo requestInfo = getRequestInfo(adId, username);
 
-        if (!isAdFavorite(requestInfo))
-            throw new AdNotFavoriteException();
+        long deletedCount = favRepository.deleteByUserAndAd(
+                requestInfo.user(),
+                requestInfo.ad()
+        );
 
-        favRepository.deleteByUserAndAd(requestInfo.user(), requestInfo.ad());
+        if (deletedCount == 0) {
+            throw new AdNotFavoriteException();
+        }
 
     }
 
@@ -60,11 +68,16 @@ public class FavoriteAdService {
     }
 
     //todo: consider using Pageable if the list of favorites are too long
-    public List<AdCartSummery> getAllUserFavoriteAds(String username) {
+    public List<AdCardSummary> getAllUserFavoriteAds(String username) {
         if (!userRepository.existsByUsername(username))
             throw new UserNotFoundException();
-        List<AdCartSummery> ads = adMapper.toCartSummeryFromFavorites(favRepository.getAllByUser_Username(username));
-        adService.addPrimaryImage(ads); //todo: better way of avoiding duplication
+        List<AdCardSummary> ads = adMapper.toCartSummeryFromFavorites(favRepository.getAllByUser_Username(username));
+        primaryImageEnricher.enrich(
+                ads,
+                AdCardSummary::getId,
+                AdCardSummary::setPrimaryImageId,
+                AdCardSummary::setPrimaryImageUrl
+        );
         return ads;
     }
 

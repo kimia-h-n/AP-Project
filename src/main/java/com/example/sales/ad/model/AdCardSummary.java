@@ -1,7 +1,6 @@
 package com.example.sales.ad.model;
 
 
-import com.example.sales.province.City;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +11,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AdCartSummery {
+public class AdCardSummary {
     private Long id;
     private String title;
     private long price;
@@ -22,5 +21,4 @@ public class AdCartSummery {
     private AdCategory category;
     private UUID primaryImageId;
     private String primaryImageUrl;
-
 }

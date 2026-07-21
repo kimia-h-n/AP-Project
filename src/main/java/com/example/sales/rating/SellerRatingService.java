@@ -19,7 +19,6 @@ import java.util.Objects;
 @AllArgsConstructor
 public class SellerRatingService {
 
-    private final ReportAdService reportAdService;
     SellerRatingRepository ratingRepository;
     UserRepository userRepository;
 

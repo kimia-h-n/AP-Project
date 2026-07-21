@@ -9,6 +9,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
+import java.awt.datatransfer.DataFlavor;
 import java.beans.Transient;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -16,7 +17,9 @@ import java.io.InputStream;
 import java.security.Key;
 import java.security.Principal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,6 +42,36 @@ class AdSpecifications {
     public static Specification<Ad> hasStatus(AdStatus status) {
         return (root, query, cb) ->
                 status == null ? cb.conjunction() : cb.equal(root.get("status"), status);
+    }
+
+    private static final ZoneId APP_ZONE = ZoneId.of("Asia/Tehran");
+
+    public static Specification<Ad> hasDateFilter(DateFilter dateFilter) {
+        return (root, query, cb) -> {
+            if (dateFilter == null) {
+                return cb.conjunction();
+            }
+
+            LocalDate today = LocalDate.now(APP_ZONE);
+
+            Instant startOfToday = today.atStartOfDay(APP_ZONE).toInstant();
+            Instant startOfYesterday = today.minusDays(1).atStartOfDay(APP_ZONE).toInstant();
+            Instant startOfSevenDaysAgo = today.minusDays(7).atStartOfDay(APP_ZONE).toInstant();
+
+            return switch (dateFilter) {
+                case YESTERDAY -> cb.and(
+                        cb.greaterThanOrEqualTo(root.get("createdAt"), startOfYesterday),
+                        cb.lessThan(root.get("createdAt"), startOfToday)
+                );
+
+                case PAST_WEEK -> cb.and(
+                        cb.greaterThanOrEqualTo(root.get("createdAt"), startOfSevenDaysAgo),
+                        cb.lessThan(root.get("createdAt"), startOfToday)
+                );
+
+                case OLDER -> cb.lessThan(root.get("createdAt"), startOfSevenDaysAgo);
+            };
+        };
     }
 
     public static Specification<Ad> hasCategory(AdCategory category) {
@@ -77,6 +110,7 @@ class AdSpecifications {
     }
 }
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1")
@@ -85,9 +119,9 @@ class AdController {
     private final StorageService storageService;
 
     @PostMapping("/ads")
-    public void addAdvertisement(@RequestBody AdRequest request, Authentication authentication) {
+    public AdInsertResponse addAdvertisement(@RequestBody AdRequest request, Authentication authentication) {
         String username = authentication.getName();
-        adService.addAd(request, username);
+        return adService.addAd(request, username);
     }
 
     //sample use case: GET /api/v1/ads?status=APPROVED
@@ -149,15 +183,25 @@ class AdController {
             @RequestParam(required = false) Long minPrice,
             @RequestParam(required = false) Long maxPrice,
             @RequestParam(required = false) AdCategory category,
+            @RequestParam(required = false) DateFilter dataFilter,
             @RequestParam(required = false) Long cityId
     ) {
-        return adService.searchAds(minPrice, maxPrice, category, cityId);
+        return adService.searchAds(minPrice, maxPrice, category, dataFilter, cityId);
     }
 
     @PostMapping(value = "/ads/{adId}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> upload(
             @PathVariable Long adId,
             @RequestPart("files") List<MultipartFile> files, Authentication authentication) throws IOException {
+        log.info("UPLOAD IMAGE -> adId={}, fileCount={}, authPresent={}",
+                adId,
+                files != null ? files.size() : 0,
+                authentication != null);
+
+        if (authentication != null) {
+            log.info("UPLOAD IMAGE -> username={}", authentication.getName());
+        }
+
         List<UUID> ids = new ArrayList<>();
         String username = authentication.getName();
         for (MultipartFile file : files) {
@@ -174,6 +218,26 @@ class AdController {
                 .contentType(MediaType.parseMediaType(result.contentType()))
                 .body(result.data());
     }
+
+    @DeleteMapping("/images/{imageId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeImage(@PathVariable UUID imageId, Authentication authentication) {
+        String username = authentication.getName();
+        storageService.removeImage(imageId, username);
+    }
+
+    @PutMapping(value = "/images/{imageId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> replaceImage(
+            @PathVariable UUID imageId,
+            @RequestPart("files") MultipartFile file,
+            Authentication authentication
+    ) throws IOException {
+        String username = authentication.getName();
+        storageService.replaceImage(imageId, file, username);
+        return ResponseEntity.ok(imageId);
+    }
+
+
 }
 
 @Repository
@@ -198,14 +262,15 @@ class AdService {
     private final ProvinceRepository provinceRepository;
     private final AdMapper adMapper;
 
-    public void addAd(AdRequest request, String username) {
+    public AdInsertResponse addAd(AdRequest request, String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(UserNotFoundException::new);
         Ad ad = adMapper.toEntity(request);
         ad.setCity(provinceRepository.findById(request.getCityId()).orElseThrow(CityNotFoundException::new));
         ad.setSeller(user);
         ad.setStatus(AdStatus.PENDING);
-        adRepository.save(ad);
+        Ad savedAd = adRepository.save(ad);
+        return new AdInsertResponse(savedAd.getId());
     }
 
 
@@ -371,7 +436,7 @@ class AdService {
             contentChanged = true;
         }
 
-        if (!Objects.equals(request.getCityId(), ad.getCity().getId())) {
+        if (request.getCityId() != null && !Objects.equals(request.getCityId(), ad.getCity().getId())) {
             ad.setCity(provinceRepository.findById(request.getCityId())
                     .orElseThrow(CityNotFoundException::new));
             contentChanged = true;
@@ -395,7 +460,8 @@ class AdService {
         return ads;
     }
 
-    public List<AdCartSummery> searchAds(Long minPrice, Long maxPrice, AdCategory category, Long cityId) {
+    public List<AdCartSummery> searchAds(Long minPrice, Long maxPrice, AdCategory category,
+                                         DateFilter dateFilter, Long cityId) {
         Specification<Ad> spec = Specification.where(AdSpecifications.hasStatus(AdStatus.APPROVED));
 
         if (minPrice != null || maxPrice != null) {
@@ -407,11 +473,20 @@ class AdService {
         if (cityId != null) {
             spec = spec.and(AdSpecifications.hasCityId(cityId));
         }
+        if (dateFilter != null) {
+            spec = spec.and(AdSpecifications.hasDateFilter(dateFilter));
+        }
 
         List<AdCartSummery> ads = adMapper.toCartSummeryList(adRepository.findAll(spec));
         addPrimaryImage(ads);
         return ads;
     }
+}
+
+enum DateFilter {
+    YESTERDAY,
+    PAST_WEEK,
+    OLDER
 }
 
 @Data
@@ -609,6 +684,13 @@ class AdCartSummery {
 enum AdCategory {
     PROPERTY, VEHICLE, ELECTRONIC, HOME, SERVICE,
     PERSONAL, HOBBIT, SOCIAL, INDUSTRIAL, JOB,
+}
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+class AdInsertResponse {
+    Long id;
 }
 
 @Mapper(componentModel = "spring")
@@ -1416,6 +1498,7 @@ class ApplicationConfig {
 
 }
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -1427,6 +1510,11 @@ class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
+
+        log.info("JWT FILTER -> {} {}", request.getMethod(), request.getRequestURI());
+        log.info("Origin: {}", request.getHeader("Origin"));
+        log.info("Authorization: {}", request.getHeader("Authorization"));
+
         final String authHeader = request.getHeader("Authorization");
         final String jwtToken;
         final String username;
@@ -1532,28 +1620,45 @@ class JwtService {
 @EnableWebSecurity
 @RequiredArgsConstructor
 class SecurityConfiguration {
-    private final JwtAuthenticationFilter jwtAuthFilter;
 
+    private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         return http
+                .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/api/v1/ads/**", "/api/v1/filter").permitAll()
+                        // ───────────────────── Public Endpoints ─────────────────────
+                        .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/province").permitAll()
                         .requestMatchers("/chat/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/rating/avg/**").permitAll().requestMatchers("/api/v1/image", "/api/v1/image/**").permitAll()
-                        .requestMatchers("/api/v1/auth/**").permitAll()
+
+                        // ───────────────────── Public GET Endpoints ─────────────────
                         .requestMatchers(HttpMethod.GET, "/api/v1/ads/**").permitAll()
-                        .requestMatchers("/api/v1/favorites/**").authenticated()
-                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/swagger-ui/**").permitAll()
-                        .requestMatchers("/v3/api-docs/**").permitAll()
-                        .requestMatchers("/swagger-ui.html").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/filter").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/search").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/rating/avg/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/images/**").permitAll()
+
+                        // ───────────────────── Swagger / Docs ───────────────────────
+                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/v3/api-docs/**").permitAll()
+
+                        // ───────────────────── Authenticated Endpoints ──────────────
+                        .requestMatchers("/api/v1/favorites/**").authenticated()
+
+                        // ───────────────────── Image Mutations (need token) ─────────
+                        .requestMatchers(HttpMethod.POST, "/api/v1/ads/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/images/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/images/**").authenticated()
+
+                        // ───────────────────── Admin ───────────────────────────────
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+
+                        // ───────────────────── Everything else ─────────────────────
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session ->
@@ -1564,6 +1669,19 @@ class SecurityConfiguration {
                 .build();
     }
 
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOriginPatterns(List.of("*"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setExposedHeaders(List.of("Authorization"));
+        config.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
 }
 
 @RestController
@@ -1949,6 +2067,9 @@ interface StorageRepository extends JpaRepository<ImageData, UUID> {
             order by i.sortOrder asc
             """)
     List<ImageMetaView> findMetaByAdId(@Param("adId") Long adId);
+
+    @Query("select coalesce(max(i.sortOrder), -1) from ImageData i where i.ad.id = :adId")
+    int findMaxSortOrderByAdId(Long adId);
 }
 
 @Service
@@ -1984,7 +2105,7 @@ class StorageService {
     }
 
     private int nextOrder(Long adId) {
-        return imageRepository.findByAdIdOrderBySortOrderAsc(adId).size();
+        return imageRepository.findMaxSortOrderByAdId(adId) + 1;
     }
 
 
@@ -1995,20 +2116,58 @@ class StorageService {
         return new ImageDownload(data, image.getType());
     }
 
-//    public void uploadImage(MultipartFile file) throws IOException {
-//        ImageData imageData = imageRepository.save(
-//                ImageData.builder()
-//                        .name(file.getOriginalFilename())
-//                        .type(file.getContentType())
-//                        .imageData(ImageUtils.compressImage(file.getBytes())).build() // we don't want to save the hard coded file here, we first need to decompress it.
-//        );
-//        if (imageData == null)
-//            throw new UploadException();
-//    }
-//    public byte[] downloadImage(String name) {
-//        ImageData imageData = imageRepository.findByName(name).orElseThrow(ImageNotFoundException::new);
-//        return ImageUtils.decompressImage(imageData.getImageData());
-//    }
+    @Transactional
+    public void removeImage(UUID imageId, String username) {
+        ImageData image = imageRepository.findById(imageId)
+                .orElseThrow(ImageNotFoundException::new);
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(UserNotFoundException::new);
+
+        if (!image.getAd().getSeller().getId().equals(user.getId()))
+            throw new OperationNotAllowedException();
+
+        Long adId = image.getAd().getId();
+        int removedOrder = image.getSortOrder();
+        boolean wasPrimary = image.isPrimaryImage();
+
+        imageRepository.delete(image);
+
+        List<ImageData> images = imageRepository.findByAdIdOrderBySortOrderAsc(adId);
+
+        for (ImageData img : images) {
+            if (img.getSortOrder() > removedOrder) {
+                img.setSortOrder(img.getSortOrder() - 1);
+            }
+            img.setPrimaryImage(false);
+        }
+
+        if (wasPrimary && !images.isEmpty()) {
+            images.getFirst().setPrimaryImage(true);
+        }
+    }
+
+    @Transactional
+    public void replaceImage(UUID imageId, MultipartFile file, String username) throws IOException {
+        ImageData oldImage = imageRepository.findById(imageId)
+                .orElseThrow(ImageNotFoundException::new);
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(UserNotFoundException::new);
+
+        if (!oldImage.getAd().getSeller().getId().equals(user.getId()))
+            throw new OperationNotAllowedException();
+
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/"))
+            throw new InvalidDataFormat();
+
+        oldImage.setName(file.getOriginalFilename());
+        oldImage.setType(contentType);
+        oldImage.setImageData(ImageUtils.compressImage(file.getBytes()));
+
+        imageRepository.save(oldImage);
+    }
 }
 
 @Data
