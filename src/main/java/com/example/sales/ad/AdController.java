@@ -47,7 +47,7 @@ public class AdController {
     }
 
     @GetMapping("/me/ads/")
-    public List<AdResponse> getAllMyAds(Authentication authentication) {
+    public List<AdCardSummary> getAllMyAds(Authentication authentication) {
         String username = authentication.getName();
         return adService.getAllMyAds(username);
     }
@@ -94,7 +94,7 @@ public class AdController {
             @RequestParam(required = false) DateFilter dataFilter,
             @RequestParam(required = false) Long cityId
     ) {
-        return adService.searchAds(minPrice, maxPrice, category, dataFilter, cityId);
+        return adService.filterAds(minPrice, maxPrice, category, dataFilter, cityId);
     }
 
     @PostMapping(value = "/ads/{adId}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

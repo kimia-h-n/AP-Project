@@ -158,17 +158,23 @@ public class AdService {
     }
 
 
-    public List<AdResponse> getAllMyAds(String username) {
+    public List<AdCardSummary> getAllMyAds(String username) {
 
-        List<Ad> myAds = adRepository.findAllBySellerAndStatus(
+        List<Ad> myAdsList = adRepository.findAllBySellerAndStatus(
                 userRepository.findByUsername(username).orElseThrow(UserNotFoundException::new),
                 AdStatus.APPROVED);
-
-        List<AdResponse> ads = adMapper.toResponseList(myAds);
-        for (int i = 0; i < ads.size(); i++) {
-            ads.get(i).setMine(true);
-            ads.get(i).setImages(buildImageResponses(myAds.get(i).getId()));
-        }
+        List<AdCardSummary> ads = adMapper.toCartSummeryList(myAdsList);
+        primaryImageEnricher.enrich(
+                ads,
+                AdCardSummary::getId,
+                AdCardSummary::setPrimaryImageId,
+                AdCardSummary::setPrimaryImageUrl
+        );
+//        List<AdResponse> ads = adMapper.toResponseList(myAds);
+//        for (int i = 0; i < ads.size(); i++) {
+//            ads.get(i).setMine(true);
+//            ads.get(i).setImages(buildImageResponses(myAds.get(i).getId()));
+//        }
         return ads;
     }
 
@@ -234,11 +240,16 @@ public class AdService {
         //todo: for later search improvements such as matching with description
 //         return adMapper.toCartSummeryList(adRepository.findAll(AdSpecification.titleContains(title)));
         List<AdCardSummary> ads = adMapper.toCartSummeryList(adRepository.findByTitleContainingIgnoreCaseAndStatus(title, AdStatus.APPROVED));
-        addPrimaryImage(ads);
+        primaryImageEnricher.enrich(
+                ads,
+                AdCardSummary::getId,
+                AdCardSummary::setPrimaryImageId,
+                AdCardSummary::setPrimaryImageUrl
+        );
         return ads;
     }
 
-    public List<AdCardSummary> searchAds(Long minPrice, Long maxPrice, AdCategory category,
+    public List<AdCardSummary> filterAds(Long minPrice, Long maxPrice, AdCategory category,
                                          DateFilter dateFilter, Long cityId) {
         Specification<Ad> spec = Specification.where(AdSpecifications.hasStatus(AdStatus.APPROVED));
 
