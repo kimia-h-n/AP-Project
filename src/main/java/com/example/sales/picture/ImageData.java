@@ -1,6 +1,6 @@
 package com.example.sales.picture;
 
-import com.example.sales.ad.model.Ad;
+import com.example.sales.ad.Ad;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

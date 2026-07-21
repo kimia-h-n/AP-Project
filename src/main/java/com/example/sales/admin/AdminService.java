@@ -1,16 +1,20 @@
 package com.example.sales.admin;
 
 
+import com.example.sales.ad.Ad;
 import com.example.sales.ad.AdRepository;
+import com.example.sales.ad.dto.AdCardSummary;
+import com.example.sales.ad.dto.PendingAdResponse;
+import com.example.sales.ad.mapper.AdMapper;
 import com.example.sales.rating.SellerRatingService;
 import com.example.sales.user.UserInfoResponse;
 import com.example.sales.user.UserSummary;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.sales.ad.model.*;
-import com.example.sales.ad.model.moderation.AdModerationRequest;
-import com.example.sales.ad.report.AdReport;
-import com.example.sales.ad.report.AdReportRepository;
-import com.example.sales.ad.report.AdReportResponse;
+import com.example.sales.ad.moderation.AdModerationRequest;
+import com.example.sales.ad.reported.model.AdReport;
+import com.example.sales.ad.reported.AdReportRepository;
+import com.example.sales.ad.reported.dto.AdReportResponse;
 import com.example.sales.exception.AdNotFoundException;
 import com.example.sales.exception.AlreadyBlockedException;
 import com.example.sales.exception.UserAlreadyEnabled;
@@ -78,13 +82,13 @@ public class AdminService {
         adRepository.save(ad);
     }
 
-    public List<PendingAd> getAllPendingAds() {
-        List<PendingAd> ads = adMapper.toPendingAdList(adRepository.findAllByStatus(AdStatus.PENDING));
+    public List<PendingAdResponse> getAllPendingAds() {
+        List<PendingAdResponse> ads = adMapper.toPendingAdList(adRepository.findAllByStatus(AdStatus.PENDING));
         primaryImageEnricher.enrich(
                 ads,
-                PendingAd::getId,
-                PendingAd::setPrimaryImageId,
-                PendingAd::setPrimaryImageUrl
+                PendingAdResponse::getId,
+                PendingAdResponse::setPrimaryImageId,
+                PendingAdResponse::setPrimaryImageUrl
         );
         return ads;
     }

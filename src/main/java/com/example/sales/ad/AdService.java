@@ -1,8 +1,11 @@
 package com.example.sales.ad;
 
 
-import com.example.sales.ad.ad.AdSpecifications;
-import com.example.sales.ad.fav.FavoriteRepository;
+import com.example.sales.ad.filter.AdSpecifications;
+import com.example.sales.ad.dto.*;
+import com.example.sales.ad.favorite.FavoriteRepository;
+import com.example.sales.ad.filter.DateFilter;
+import com.example.sales.ad.mapper.AdMapper;
 import com.example.sales.ad.model.*;
 import com.example.sales.exception.*;
 import com.example.sales.picture.AdPrimaryImageEnricher;

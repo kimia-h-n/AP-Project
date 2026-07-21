@@ -1,10 +1,10 @@
 package com.example.sales.admin;
 
 
-import com.example.sales.ad.model.AdCardSummary;
-import com.example.sales.ad.model.PendingAd;
-import com.example.sales.ad.model.moderation.AdModerationRequest;
-import com.example.sales.ad.report.AdReportResponse;
+import com.example.sales.ad.dto.AdCardSummary;
+import com.example.sales.ad.dto.PendingAdResponse;
+import com.example.sales.ad.moderation.AdModerationRequest;
+import com.example.sales.ad.reported.dto.AdReportResponse;
 import com.example.sales.user.UserInfoResponse;
 import com.example.sales.user.UserSummary;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +45,8 @@ public class AdminController {
 
     //only admin can access
     @PostMapping("/ads/{id}/moderation")
-    public void moderateAd(@PathVariable Long id, @RequestBody AdModerationRequest moderationRequest) {
+    public void moderateAd(@PathVariable Long id,
+                           @RequestBody AdModerationRequest moderationRequest) {
         adminService.moderateAd(id, moderationRequest);
     }
 
@@ -56,7 +57,7 @@ public class AdminController {
 
 
     @GetMapping("/ads/moderation")
-    public List<PendingAd> getPendingAds() {
+    public List<PendingAdResponse> getPendingAds() {
         return adminService.getAllPendingAds();
     }
 }

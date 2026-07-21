@@ -1,6 +1,5 @@
 package com.example.sales.ad;
 
-import com.example.sales.ad.model.Ad;
 import com.example.sales.ad.model.AdStatus;
 import com.example.sales.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
