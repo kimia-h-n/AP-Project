@@ -9,6 +9,7 @@ import com.example.sales.picture.AdPrimaryImageEnricher;
 import com.example.sales.picture.ImageMetaView;
 import com.example.sales.picture.StorageRepository;
 import com.example.sales.province.ProvinceRepository;
+import com.example.sales.rating.SellerRatingService;
 import com.example.sales.repository.UserRepository;
 import com.example.sales.user.Role;
 import com.example.sales.user.User;
@@ -30,6 +31,7 @@ public class AdService {
     private final ProvinceRepository provinceRepository;
     private final AdMapper adMapper;
     private final AdPrimaryImageEnricher primaryImageEnricher;
+    private final SellerRatingService sellerRatingService;
 
     public AdInsertResponse addAd(AdRequest request, String username) {
         User user = userRepository.findByUsername(username)
@@ -103,6 +105,8 @@ public class AdService {
         Ad ad = adRepository.findById(id).orElseThrow(AdNotFoundException::new);
         AdResponse adResponse = adMapper.toResponse(ad);
         adResponse.setImages(buildImageResponses(id));
+        Double averageRating = sellerRatingService.calculateSellerRatingAvg(ad.getSeller().getId());
+        adResponse.setSellerRatingAvg(averageRating);
         if (isNotLoggedIn(username))
             return adResponse;
 

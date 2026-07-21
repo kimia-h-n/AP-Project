@@ -9,8 +9,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
-import java.awt.datatransfer.DataFlavor;
-import java.beans.Transient;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,6 +30,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.zip.Deflater;
@@ -127,7 +126,7 @@ class AdController {
     //sample use case: GET /api/v1/ads?status=APPROVED
     //for now only gets active ads
     @GetMapping("/ads")
-    public List<AdCartSummery> getAllAds(Authentication authentication) {
+    public List<AdCardSummary> getAllAds(Authentication authentication) {
         String username = extractUsernameIfLoggedIn(authentication);
         return adService.getAllActiveAds(username);
     }
@@ -139,7 +138,7 @@ class AdController {
     }
 
     @GetMapping("/me/ads/")
-    public List<AdResponse> getAllMyAds(Authentication authentication) {
+    public List<AdCardSummary> getAllMyAds(Authentication authentication) {
         String username = authentication.getName();
         return adService.getAllMyAds(username);
     }
@@ -173,20 +172,20 @@ class AdController {
     }
 
     @GetMapping("/search")
-    public List<AdCartSummery> searchByTitle(@RequestParam String title, Authentication authentication) {
+    public List<AdCardSummary> searchByTitle(@RequestParam String title, Authentication authentication) {
         String username = extractUsernameIfLoggedIn(authentication);
         return adService.searchByTitle(username, title);
     }
 
     @GetMapping("/filter")
-    public List<AdCartSummery> searchAds(
+    public List<AdCardSummary> searchAds(
             @RequestParam(required = false) Long minPrice,
             @RequestParam(required = false) Long maxPrice,
             @RequestParam(required = false) AdCategory category,
             @RequestParam(required = false) DateFilter dataFilter,
             @RequestParam(required = false) Long cityId
     ) {
-        return adService.searchAds(minPrice, maxPrice, category, dataFilter, cityId);
+        return adService.filterAds(minPrice, maxPrice, category, dataFilter, cityId);
     }
 
     @PostMapping(value = "/ads/{adId}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -247,7 +246,12 @@ interface AdRepository extends JpaRepository<Ad, Long>, JpaSpecificationExecutor
 
     List<Ad> findAllBySeller(User seller);
 
+    List<Ad> findAllBySellerAndStatus(User seller, AdStatus status);
+
     List<Ad> findByTitleContainingIgnoreCaseAndStatus(String title, AdStatus status);
+
+    long countByStatus(AdStatus status);
+
 
     boolean existsById(Long id);
 }
@@ -261,6 +265,8 @@ class AdService {
     private final StorageRepository storageRepository;
     private final ProvinceRepository provinceRepository;
     private final AdMapper adMapper;
+    private final AdPrimaryImageEnricher primaryImageEnricher;
+    private final SellerRatingService sellerRatingService;
 
     public AdInsertResponse addAd(AdRequest request, String username) {
         User user = userRepository.findByUsername(username)
@@ -274,18 +280,24 @@ class AdService {
     }
 
 
-    public List<AdCartSummery> getAllActiveAds(String username) {
+    public List<AdCardSummary> getAllActiveAds(String username) {
 //        applyFavorite(username, activeAds);
 //        return adMapper.toCartSummeryList(adRepository.findAllByStatus(AdStatus.APPROVED));
-        List<AdCartSummery> ads = adMapper.toCartSummeryList
+        List<AdCardSummary> ads = adMapper.toCartSummeryList
                 (adRepository.findAllByStatus(AdStatus.APPROVED));
-        addPrimaryImage(ads);
+//        addPrimaryImage(ads);
+        primaryImageEnricher.enrich(
+                ads,
+                AdCardSummary::getId,
+                AdCardSummary::setPrimaryImageId,
+                AdCardSummary::setPrimaryImageUrl
+        );
         return ads;
     }
 
-    public void addPrimaryImage(List<AdCartSummery> ads) {
+    public void addPrimaryImage(List<AdCardSummary> ads) {
         List<Long> adIds = ads.stream()
-                .map(AdCartSummery::getId)
+                .map(AdCardSummary::getId)
                 .toList();
 
         Map<Long, UUID> primaryByAdId = storageRepository
@@ -296,7 +308,7 @@ class AdService {
                         ImageMetaView::getId,
                         (existing, ignored) -> existing
                 ));
-        for (AdCartSummery ad : ads) {
+        for (AdCardSummary ad : ads) {
             UUID primaryImageId = primaryByAdId.get(ad.getId());
             ad.setPrimaryImageId(primaryImageId);
             ad.setPrimaryImageUrl(primaryImageId != null ? "/api/v1/images/" + primaryImageId : null);
@@ -328,6 +340,8 @@ class AdService {
         Ad ad = adRepository.findById(id).orElseThrow(AdNotFoundException::new);
         AdResponse adResponse = adMapper.toResponse(ad);
         adResponse.setImages(buildImageResponses(id));
+        Double averageRating = sellerRatingService.calculateSellerRatingAvg(ad.getSeller().getId());
+        adResponse.setSellerRatingAvg(averageRating);
         if (isNotLoggedIn(username))
             return adResponse;
 
@@ -383,14 +397,23 @@ class AdService {
     }
 
 
-    public List<AdResponse> getAllMyAds(String username) {
-        List<Ad> myAds = adRepository.findAllBySeller(
-                userRepository.findByUsername(username).orElseThrow(UserNotFoundException::new));
-        List<AdResponse> ads = adMapper.toResponseList(myAds);
-        for (int i = 0; i < ads.size(); i++) {
-            ads.get(i).setMine(true);
-            ads.get(i).setImages(buildImageResponses(myAds.get(i).getId()));
-        }
+    public List<AdCardSummary> getAllMyAds(String username) {
+
+        List<Ad> myAdsList = adRepository.findAllBySellerAndStatus(
+                userRepository.findByUsername(username).orElseThrow(UserNotFoundException::new),
+                AdStatus.APPROVED);
+        List<AdCardSummary> ads = adMapper.toCartSummeryList(myAdsList);
+        primaryImageEnricher.enrich(
+                ads,
+                AdCardSummary::getId,
+                AdCardSummary::setPrimaryImageId,
+                AdCardSummary::setPrimaryImageUrl
+        );
+//        List<AdResponse> ads = adMapper.toResponseList(myAds);
+//        for (int i = 0; i < ads.size(); i++) {
+//            ads.get(i).setMine(true);
+//            ads.get(i).setImages(buildImageResponses(myAds.get(i).getId()));
+//        }
         return ads;
     }
 
@@ -421,7 +444,7 @@ class AdService {
             contentChanged = true;
         }
 
-        if (request.getPrice() != null && request.getPrice() != ad.getPrice()) {
+        if (request.getPrice() != null && !(request.getPrice().equals(ad.getPrice()))) {
             ad.setPrice(request.getPrice());
             contentChanged = true;
         }
@@ -449,18 +472,23 @@ class AdService {
         return contentChanged;
     }
 
-    public List<AdCartSummery> searchByTitle(String username, String title) {
+    public List<AdCardSummary> searchByTitle(String username, String title) {
 //        List<AdResponse> matchedAds = adMapper.toResponseList(
 //                adRepository.findAll(AdSpecification.titleContains(title)));
 //        applyFavorite(username, matchedAds);
         //todo: for later search improvements such as matching with description
 //         return adMapper.toCartSummeryList(adRepository.findAll(AdSpecification.titleContains(title)));
-        List<AdCartSummery> ads = adMapper.toCartSummeryList(adRepository.findByTitleContainingIgnoreCaseAndStatus(title, AdStatus.APPROVED));
-        addPrimaryImage(ads);
+        List<AdCardSummary> ads = adMapper.toCartSummeryList(adRepository.findByTitleContainingIgnoreCaseAndStatus(title, AdStatus.APPROVED));
+        primaryImageEnricher.enrich(
+                ads,
+                AdCardSummary::getId,
+                AdCardSummary::setPrimaryImageId,
+                AdCardSummary::setPrimaryImageUrl
+        );
         return ads;
     }
 
-    public List<AdCartSummery> searchAds(Long minPrice, Long maxPrice, AdCategory category,
+    public List<AdCardSummary> filterAds(Long minPrice, Long maxPrice, AdCategory category,
                                          DateFilter dateFilter, Long cityId) {
         Specification<Ad> spec = Specification.where(AdSpecifications.hasStatus(AdStatus.APPROVED));
 
@@ -477,8 +505,14 @@ class AdService {
             spec = spec.and(AdSpecifications.hasDateFilter(dateFilter));
         }
 
-        List<AdCartSummery> ads = adMapper.toCartSummeryList(adRepository.findAll(spec));
-        addPrimaryImage(ads);
+        List<AdCardSummary> ads = adMapper.toCartSummeryList(adRepository.findAll(spec));
+//        addPrimaryImage(ads);
+        primaryImageEnricher.enrich(
+                ads,
+                AdCardSummary::getId,
+                AdCardSummary::setPrimaryImageId,
+                AdCardSummary::setPrimaryImageUrl
+        );
         return ads;
     }
 }
@@ -495,6 +529,7 @@ enum DateFilter {
 @NoArgsConstructor
 @Entity
 @Table(name = "favorites")
+//todo: later add unique for this.
 class FavoriteAd {
     @Id
     @GeneratedValue
@@ -522,7 +557,7 @@ class FavoriteAdController {
     }
 
     @GetMapping
-    public List<AdCartSummery> getAllUserFavoriteAds(Authentication authentication) {
+    public List<AdCardSummary> getAllUserFavoriteAds(Authentication authentication) {
         String username = authentication.getName();
         return favAdService.getAllUserFavoriteAds(username);
     }
@@ -543,8 +578,9 @@ class FavoriteAdService {
     private final UserRepository userRepository;
     private final AdRepository adRepository;
     private final AdMapper adMapper;
-    private final AdService adService;
+    private final AdPrimaryImageEnricher primaryImageEnricher;
 
+    @Transactional
     public void addToFavorites(Long adId, String username) {
         RequestInfo requestInfo = getRequestInfo(adId, username);
 
@@ -558,13 +594,18 @@ class FavoriteAdService {
         favRepository.save(favoriteAd);
     }
 
+    @Transactional
     public void removeFromFavorites(Long adId, String username) {
         RequestInfo requestInfo = getRequestInfo(adId, username);
 
-        if (!isAdFavorite(requestInfo))
-            throw new AdNotFavoriteException();
+        long deletedCount = favRepository.deleteByUserAndAd(
+                requestInfo.user(),
+                requestInfo.ad()
+        );
 
-        favRepository.deleteByUserAndAd(requestInfo.user(), requestInfo.ad());
+        if (deletedCount == 0) {
+            throw new AdNotFavoriteException();
+        }
 
     }
 
@@ -579,11 +620,16 @@ class FavoriteAdService {
     }
 
     //todo: consider using Pageable if the list of favorites are too long
-    public List<AdCartSummery> getAllUserFavoriteAds(String username) {
+    public List<AdCardSummary> getAllUserFavoriteAds(String username) {
         if (!userRepository.existsByUsername(username))
             throw new UserNotFoundException();
-        List<AdCartSummery> ads = adMapper.toCartSummeryFromFavorites(favRepository.getAllByUser_Username(username));
-        adService.addPrimaryImage(ads); //todo: better way of avoiding duplication
+        List<AdCardSummary> ads = adMapper.toCartSummeryFromFavorites(favRepository.getAllByUser_Username(username));
+        primaryImageEnricher.enrich(
+                ads,
+                AdCardSummary::getId,
+                AdCardSummary::setPrimaryImageId,
+                AdCardSummary::setPrimaryImageUrl
+        );
         return ads;
     }
 
@@ -596,11 +642,13 @@ class FavoriteAdService {
 @Repository
 interface FavoriteRepository extends JpaRepository<FavoriteAd, Long> {
 
-    void deleteByUserAndAd(User user, Ad ad);
+//    void deleteByUserAndAd(User user, Ad ad);
 
     boolean existsFavoriteAdByUserAndAd(User user, Ad ad);
 
     List<FavoriteAd> getAllByUser_Username(String userUsername);
+
+    long deleteByUserAndAd(User user, Ad ad);
 
     @Query("select f.ad.id from FavoriteAd f where f.user = :user")
     Set<Long> findFavoriteAdIdsByUser(@Param("user") User user);
@@ -668,7 +716,7 @@ class Ad {
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-class AdCartSummery {
+class AdCardSummary {
     private Long id;
     private String title;
     private long price;
@@ -678,7 +726,6 @@ class AdCartSummery {
     private AdCategory category;
     private UUID primaryImageId;
     private String primaryImageUrl;
-
 }
 
 enum AdCategory {
@@ -696,12 +743,24 @@ class AdInsertResponse {
 @Mapper(componentModel = "spring")
 interface AdMapper {
 
+    // =========================
+    // AdRequest -> Ad
+    // =========================
+
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "seller", ignore = true)
     @Mapping(target = "buyer", ignore = true)
     @Mapping(target = "rejectionReason", ignore = true)
+    @Mapping(target = "images", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     Ad toEntity(AdRequest request);
+
+
+    // =========================
+    // Ad -> AdResponse
+    // =========================
 
     @Mapping(target = "sellerFirstname", source = "seller.firstname")
     @Mapping(target = "sellerLastname", source = "seller.lastname")
@@ -711,16 +770,29 @@ interface AdMapper {
     @Mapping(target = "cityName", source = "city.name")
     AdResponse toResponse(Ad ad);
 
+    List<AdResponse> toResponseList(List<Ad> ads);
 
-    @Mapping(target = "sellerFirstname", source = ("seller.firstname"))
-    @Mapping(target = "sellerLastname", source = "seller.lastname")
-    @Mapping(target = "adTitle", source = "ad.title")
+
+    // =========================
+    // AdReport -> AdReportResponse
+    // =========================
+
     @Mapping(target = "adReportId", source = "id")
     @Mapping(target = "adId", source = "ad.id")
-    List<AdReportResponse> toAdReportResponse(List<AdReport> ads);
+    @Mapping(target = "adTitle", source = "ad.title")
+    @Mapping(target = "sellerFirstName", source = "ad.seller.firstname")
+    @Mapping(target = "sellerLastName", source = "ad.seller.lastname")
+    @Mapping(target = "reportReason", source = "reason")
+    @Mapping(target = "primaryImageId", ignore = true)
+    @Mapping(target = "primaryImageUrl", ignore = true)
+    AdReportResponse toAdReportResponse(AdReport adReport);
 
-    @Mapping(target = "cityName", source = "city.name")
-    List<AdResponse> toResponseList(List<Ad> ads);
+    List<AdReportResponse> toAdReportResponseList(List<AdReport> adReports);
+
+
+    // =========================
+    // FavoriteAd -> AdCartSummery
+    // =========================
 
     @Mapping(target = "id", source = "ad.id")
     @Mapping(target = "title", source = "ad.title")
@@ -729,16 +801,37 @@ interface AdMapper {
     @Mapping(target = "category", source = "ad.category")
     @Mapping(target = "createdAt", source = "ad.createdAt")
     @Mapping(target = "updatedAt", source = "ad.updatedAt")
-    List<AdCartSummery> toCartSummeryFromFavorites(List<FavoriteAd> ads);
+    @Mapping(target = "primaryImageId", ignore = true)
+    @Mapping(target = "primaryImageUrl", ignore = true)
+    AdCardSummary toCartSummeryFromFavorite(FavoriteAd favoriteAd);
+
+    List<AdCardSummary> toCartSummeryFromFavorites(
+            List<FavoriteAd> favoriteAds
+    );
+
+
+    // =========================
+    // Ad -> AdCartSummery
+    // =========================
 
     @Mapping(target = "cityName", source = "city.name")
-    @Mapping(target = "id", source = "id")
-    List<AdCartSummery> toCartSummeryList(List<Ad> ads);
+    @Mapping(target = "primaryImageId", ignore = true)
+    @Mapping(target = "primaryImageUrl", ignore = true)
+    AdCardSummary toCartSummery(Ad ad);
+
+    List<AdCardSummary> toCartSummeryList(List<Ad> ads);
+
+
+    // =========================
+    // Ad -> PendingAd
+    // =========================
 
     @Mapping(target = "cityName", source = "city.name")
-    @Mapping(target = "sellerFirstname", source = "seller.firstname")
-    @Mapping(target = "sellerLastname", source = "seller.lastname")
+    @Mapping(target = "sellerFirstName", source = "seller.firstname")
+    @Mapping(target = "sellerLastName", source = "seller.lastname")
     @Mapping(target = "sellerId", source = "seller.id")
+    PendingAd toPendingAd(Ad ad);
+
     List<PendingAd> toPendingAdList(List<Ad> ads);
 }
 
@@ -775,6 +868,7 @@ class AdResponse {
     private String sellerFirstname;
     private String sellerLastname;
     private Long sellerId;
+    private Double sellerRatingAvg;
     private boolean isFavorite;
     private boolean isMine;
     private Instant createdAt;
@@ -841,15 +935,18 @@ class PendingAd {
     private Instant createdAt;
     private Instant updatedAt;
     private Long sellerId;
+    private UUID primaryImageId;
+    private String primaryImageUrl;
 }
 
 enum ProductCondition {
     NEW, ALMOST_NEW, USED
 }
 
-@Data
-@AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @Entity
 @Table(name = "ad_reports")
@@ -878,7 +975,14 @@ class AdReport {
 
 @Repository
 interface AdReportRepository extends JpaRepository<AdReport, Long> {
-
+    @Query("""
+            select ar
+            from AdReport ar
+            join fetch ar.ad ad
+            join fetch ad.seller seller
+            order by ar.id desc
+            """)
+    List<AdReport> findAllWithAdAndSeller();
 
 
 }
@@ -890,24 +994,26 @@ class AdReportResponse {
     private Long adReportId;
     private Long adId;
     private String adTitle;
-    //todo: later change to UserName
-//     private UserName userName;
     private String sellerFirstName;
-    private String sellerLastname;
+    private String sellerLastName;
+    private UUID primaryImageId;
+    private String primaryImageUrl;
     private ReportReason reportReason;
 }
 
-@Controller
-@RequestMapping("/api/v1/")
+@Slf4j
+@RestController
+@RequestMapping("/api/v1")
 @AllArgsConstructor
 class ReportAdController {
 
     private final ReportAdService reportAdService;
 
-    @PostMapping("report-ad")
+    @PostMapping("/report-ad")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void reportAd(@RequestParam Long adId,
                          @RequestBody ReportReason reportReason, Authentication authentication) {
+        log.info("inside report ad");
         String username = authentication.getName();
         reportAdService.reportAd(adId, reportReason, username);
     }
@@ -921,6 +1027,7 @@ class ReportAdRequest {
     private ReportReason reportReason;
 }
 
+@Slf4j
 @Service
 @AllArgsConstructor
 class ReportAdService {
@@ -929,6 +1036,7 @@ class ReportAdService {
     private final AdReportRepository adReportRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public void reportAd(Long adId, ReportReason reportReason, String username) {
         Ad ad = adRepository.findById(adId).orElseThrow(AdNotFoundException::new);
         User user = userRepository.findByUsername(username).orElseThrow(UserNotFoundException::new);
@@ -936,8 +1044,8 @@ class ReportAdService {
             throw new SpamNotAllowedException();
         ad.spam();
 
-        //todo: move to adReportService?
         AdReport adReport = AdReport.builder()
+                .ad(ad)
                 .reporter(user)
                 .reason(reportReason)
                 .build();
@@ -960,8 +1068,18 @@ class AdminController {
     private final AdminService adminService;
 
     @GetMapping("/users")
-    public List<UserResponse> getAllUsers() {
+    public List<UserSummary> getAllUsers() {
         return adminService.getAllUsers();
+    }
+
+    @GetMapping("/users/{id}")
+    public UserInfoResponse getUserInfo(@PathVariable Long id) {
+        return adminService.getUserInfo(id);
+    }
+
+    @GetMapping("/users/{id}/ads")
+    public List<AdCardSummary> getUserAds(@PathVariable Long id) {
+        return adminService.getUserAds(id);
     }
 
     @PostMapping("/users/block/{id}")
@@ -1035,9 +1153,11 @@ class AdminService {
     private final AdRepository adRepository;
     private final AdReportRepository adReportRepository;
     private final AdMapper adMapper;
+    private final AdPrimaryImageEnricher primaryImageEnricher;
+    private final SellerRatingService sellerRatingService;
 
-    public List<UserResponse> getAllUsers() {
-        return userMapper.toUserResponse(userRepository.findAll());
+    public List<UserSummary> getAllUsers() {
+        return userMapper.toUserSummary(userRepository.findAll());
     }
 
 
@@ -1079,13 +1199,53 @@ class AdminService {
     }
 
     public List<PendingAd> getAllPendingAds() {
-        return adMapper.toPendingAdList(adRepository.findAllByStatus(AdStatus.PENDING));
+        List<PendingAd> ads = adMapper.toPendingAdList(adRepository.findAllByStatus(AdStatus.PENDING));
+        primaryImageEnricher.enrich(
+                ads,
+                PendingAd::getId,
+                PendingAd::setPrimaryImageId,
+                PendingAd::setPrimaryImageUrl
+        );
+        return ads;
     }
 
+    @Transactional(readOnly = true)
     public List<AdReportResponse> getReportedAds() {
-        List<AdReport> adReportResponses = adReportRepository.findAll();
-        return adMapper.toAdReportResponse(adReportResponses);
+        List<AdReport> reports =
+                adReportRepository.findAllWithAdAndSeller();
 
+        List<AdReportResponse> responses =
+                adMapper.toAdReportResponseList(reports);
+
+        primaryImageEnricher.enrich(
+                responses,
+                AdReportResponse::getAdId,
+                AdReportResponse::setPrimaryImageId,
+                AdReportResponse::setPrimaryImageUrl
+        );
+
+        return responses;
+    }
+
+    public UserInfoResponse getUserInfo(Long id) {
+        Double averageRating = sellerRatingService.calculateSellerRatingAvg(id);
+        UserInfoResponse response = userMapper.toUserResponse(userRepository.findById(id).orElseThrow(UserNotFoundException::new));
+        response.setAvgRating(averageRating);
+        return response;
+    }
+
+    public List<AdCardSummary> getUserAds(Long id) {
+        List<Ad> myAdsList = adRepository.findAllBySellerAndStatus(
+                userRepository.findById(id).orElseThrow(UserNotFoundException::new),
+                AdStatus.APPROVED);
+        List<AdCardSummary> ads = adMapper.toCartSummeryList(myAdsList);
+        primaryImageEnricher.enrich(
+                ads,
+                AdCardSummary::getId,
+                AdCardSummary::setPrimaryImageId,
+                AdCardSummary::setPrimaryImageUrl
+        );
+        return ads;
     }
 }
 
@@ -1432,7 +1592,7 @@ class SearchService {
     private UserRepository userRepository;
     private UserMapper userMapper;
 
-    public List<UserResponse> searchUser(String keyword) {
+    public List<UserInfoResponse> searchUser(String keyword) {
         List<User> userList = userRepository.searchUsers(keyword);
         return userMapper.toUserResponse(userList);
     }
@@ -1657,6 +1817,7 @@ class SecurityConfiguration {
 
                         // ───────────────────── Admin ───────────────────────────────
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/admin/dashboard/stats").hasRole("ADMIN")
 
                         // ───────────────────── Everything else ─────────────────────
                         .anyRequest().authenticated()
@@ -1909,6 +2070,59 @@ class UserAlreadyEnabled extends BaseException {
 class UserNotFoundException extends BaseException {
     public UserNotFoundException() {
         super("User is not found!", ErrorCode.USER_NOT_FOUND);
+    }
+}
+
+@Component
+@RequiredArgsConstructor
+class AdPrimaryImageEnricher {
+
+    private static final String IMAGE_ENDPOINT = "/api/v1/images/";
+
+    private final StorageRepository storageRepository;
+
+    public <T> void enrich(
+            List<T> items,
+            Function<T, Long> adIdExtractor,
+            BiConsumer<T, UUID> imageIdSetter,
+            BiConsumer<T, String> imageUrlSetter
+    ) {
+        if (items == null || items.isEmpty()) {
+            return;
+        }
+
+        List<Long> adIds = items.stream()
+                .map(adIdExtractor)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+
+        if (adIds.isEmpty()) {
+            return;
+        }
+
+        Map<Long, UUID> primaryByAdId =
+                storageRepository.findPrimaryMetaByAdIdIn(adIds)
+                        .stream()
+                        .collect(Collectors.toMap(
+                                ImageMetaView::getAdId,
+                                ImageMetaView::getId,
+                                (existing, ignored) -> existing
+                        ));
+
+        for (T item : items) {
+            Long adId = adIdExtractor.apply(item);
+            UUID imageId = primaryByAdId.get(adId);
+
+            imageIdSetter.accept(item, imageId);
+
+            imageUrlSetter.accept(
+                    item,
+                    imageId == null
+                            ? null
+                            : IMAGE_ENDPOINT + imageId
+            );
+        }
     }
 }
 
@@ -2287,10 +2501,11 @@ class SellerRating {
     private Long id;
 
     private Integer rating; //1->5
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-    @ManyToOne
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "seller_id", nullable = false)
     private User seller;
 }
@@ -2320,11 +2535,16 @@ class SellerRatingController {
 
 @Repository
 interface SellerRatingRepository extends JpaRepository<SellerRating, Long> {
+//
 
     boolean existsBySellerAndUser(User seller, User user);
 
-    List<SellerRating> findAllBySeller(User seller);
-
+    @Query("""
+            select avg(sr.rating)
+            from SellerRating sr
+            where sr.seller.id = :sellerId
+            """)
+    Double calculateAverageBySellerId(@Param("sellerId") Long sellerId);
 }
 
 @Data
@@ -2333,28 +2553,78 @@ class SellerRatingRequest {
     private Integer rating;
 }
 
+//@Service
+//@AllArgsConstructor
+//class SellerRatingService {
+//
+//    SellerRatingRepository ratingRepository;
+//    UserRepository userRepository;
+//
+//    //todo: later for editing rating
+//    public void submitRating(SellerRatingRequest request, String username) {
+//        //if user has already voted to this person!
+//        //if user == seller
+//
+//        User user = userRepository.findByUsername(username).orElseThrow(UserNotFoundException::new);
+//        User seller = userRepository.findById(request.getSellerId()).orElseThrow(UserNotFoundException::new);
+//
+//        if (user.getId().equals(seller.getId()))
+//            throw new OperationNotAllowedException();
+//
+//        if (ratingRepository.existsBySellerAndUser(seller, user))
+//            throw new AlreadyVotedException();
+//
+//
+//        SellerRating sellerRating = SellerRating.builder()
+//                .seller(seller)
+//                .user(user)
+//                .rating(request.getRating())
+//                .build();
+//
+//        ratingRepository.save(sellerRating);
+//    }
+//
+//    /**
+//     *
+//     * @param sellerId
+//     * @return avgRatingScore for seller, 0.0 if no rating
+//     */
+//    public Double calculateSellerRatingAvg(Long sellerId) {
+//        User seller = userRepository.findById(sellerId).orElseThrow(UserNotFoundException::new);
+//
+//        List<SellerRating> ratings = ratingRepository.findAllBySeller(seller);
+//
+//        return ratings.stream()
+//                .map(SellerRating::getRating)
+//                .filter(Objects::nonNull)
+//                .mapToInt(Integer::intValue)
+//                .average()
+//                .orElse(0.0);
+//    }
+//
+//}
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 class SellerRatingService {
 
-    private final ReportAdService reportAdService;
-    SellerRatingRepository ratingRepository;
-    UserRepository userRepository;
+    private final SellerRatingRepository ratingRepository;
+    private final UserRepository userRepository;
 
-    //todo: later for editing rating
+    @Transactional
     public void submitRating(SellerRatingRequest request, String username) {
-        //if user has already voted to this person!
-        //if user == seller
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(UserNotFoundException::new);
 
-        User user = userRepository.findByUsername(username).orElseThrow(UserNotFoundException::new);
-        User seller = userRepository.findById(request.getSellerId()).orElseThrow(UserNotFoundException::new);
+        User seller = userRepository.findById(request.getSellerId())
+                .orElseThrow(UserNotFoundException::new);
 
-        if (user.getId().equals(seller.getId()))
+        if (user.getId().equals(seller.getId())) {
             throw new OperationNotAllowedException();
+        }
 
-        if (ratingRepository.existsBySellerAndUser(seller, user))
+        if (ratingRepository.existsBySellerAndUser(seller, user)) {
             throw new AlreadyVotedException();
-
+        }
 
         SellerRating sellerRating = SellerRating.builder()
                 .seller(seller)
@@ -2365,22 +2635,16 @@ class SellerRatingService {
         ratingRepository.save(sellerRating);
     }
 
-    /**
-     *
-     * @param sellerId
-     * @return avgRatingScore for seller, 0.0 if no rating
-     */
+    @Transactional(readOnly = true)
     public Double calculateSellerRatingAvg(Long sellerId) {
-        User seller = userRepository.findById(sellerId).orElseThrow(UserNotFoundException::new);
+        if (!userRepository.existsById(sellerId)) {
+            throw new UserNotFoundException();
+        }
 
-        List<SellerRating> ratings = ratingRepository.findAllBySeller(seller);
+        Double average =
+                ratingRepository.calculateAverageBySellerId(sellerId);
 
-        return ratings.stream()
-                .map(SellerRating::getRating)
-                .filter(Objects::nonNull)
-                .mapToInt(Integer::intValue)
-                .average()
-                .orElse(0.0);
+        return average != null ? Math.round(average * 10.0) / 10.0 : 0.0;
     }
 
 }
@@ -2388,6 +2652,9 @@ class SellerRatingService {
 interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByUsername(String username);
+
+    long countByEnabledTrue();
+    long countByEnabledFalse();
 
     boolean existsByUsername(String username);
 
@@ -2404,12 +2671,62 @@ interface UserRepository extends JpaRepository<User, Long> {
     List<User> searchUsers(@Param("keyword") String keyword);
 }
 
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+class DashboardStatistics {
+    private Integer numActiveUsers;
+    private Integer numBlockedUsers;
+    private Integer numAds;
+    private Integer numPendingAds;
+    private Integer numReports;
+}
+
+@RestController
+@AllArgsConstructor
+@RequestMapping("/api/v1/admin/dashboard/stats")
+class DashboardStatsController {
+    private final DashboardStatsService service;
+
+    @GetMapping
+    public DashboardStatistics getStats() {
+        return service.getStats();
+    }
+}
+
+@Service
+@AllArgsConstructor
+class DashboardStatsService {
+
+    private final AdRepository adRepository;
+    private final UserRepository userRepository;
+    private final AdReportRepository reportRepository;
+
+    public DashboardStatistics getStats() {
+        long numActiveUsers = userRepository.countByEnabledTrue();
+        long numBlockedUsers = userRepository.countByEnabledFalse();
+        long numAds = adRepository.count();
+        long numPendingAds = adRepository.countByStatus(AdStatus.PENDING);
+        long numReports = reportRepository.count();
+
+        return DashboardStatistics.builder()
+                .numActiveUsers((int) numActiveUsers)
+                .numBlockedUsers((int) numBlockedUsers)
+                .numAds((int) numAds)
+                .numPendingAds((int) numPendingAds)
+                .numReports((int) numReports)
+                .build();
+    }
+}
+
 enum Role {
     USER,
     ADMIN
 }
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -2477,25 +2794,45 @@ class User implements UserDetails {
     }
 }
 
-@Mapper(componentModel = "spring")
-interface UserMapper {
-    List<UserResponse> toUserResponse(List<User> users);
-}
-
-record UserName (String firstname, String lastname){
-}
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-class UserResponse {
+class UserInfoResponse {
     private Long id;
     private String username;
     private String firstname;
     private String lastname;
     private String email;
     private String phoneNumber;
-    private boolean enable;
+    private Double avgRating;
+    private boolean enabled;
+}
+
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.ERROR)
+interface UserMapper {
+
+    UserInfoResponse toUserResponse(User user);
+
+    List<UserInfoResponse> toUserResponse(List<User> users);
+
+    UserSummary toUserSummary(User user);
+
+    List<UserSummary> toUserSummary(List<User> users);
+}
+
+record UserName (String firstname, String lastname){
+}
+
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+class UserSummary {
+    private Long id;
+    private String firstname;
+    private String lastname;
+    private String phoneNumber;
+    private boolean enabled;
 }
 
 @SpringBootTest
@@ -2507,9 +2844,941 @@ class ApplicationTests {
 
 }
 
+class AdMapperTest {
+
+    private AdMapper adMapper;
+
+    @BeforeEach
+    void setUp() {
+        adMapper = Mappers.getMapper(AdMapper.class);
+    }
+
+    @Test
+    void shouldMapAdToCartSummaryIncludingPersianCityName() {
+        // Arrange
+        City city = new City();
+        city.setLabel("TEHRAN");
+        city.setName("تهران");
+
+        Instant createdAt =
+                Instant.parse("2026-07-01T10:00:00Z");
+
+        Instant updatedAt =
+                Instant.parse("2026-07-02T12:00:00Z");
+
+        Ad ad = new Ad();
+        ad.setId(10L);
+        ad.setTitle("Test advertisement");
+        ad.setPrice(2_000_000L);
+        ad.setCreatedAt(createdAt);
+        ad.setUpdatedAt(updatedAt);
+        ad.setCity(city);
+
+        // Act
+        AdCardSummary result =
+                adMapper.toCartSummery(ad);
+
+        // Assert
+        assertNotNull(result);
+
+        assertAll(
+                () -> assertEquals(
+                        10L,
+                        result.getId()
+                ),
+                () -> assertEquals(
+                        "Test advertisement",
+                        result.getTitle()
+                ),
+                () -> assertEquals(
+                        2_000_000L,
+                        result.getPrice()
+                ),
+                () -> assertEquals(
+                        createdAt,
+                        result.getCreatedAt()
+                ),
+                () -> assertEquals(
+                        updatedAt,
+                        result.getUpdatedAt()
+                ),
+                () -> assertEquals(
+                        "تهران",
+                        result.getCityName(),
+                        "city.name must be mapped to cityName"
+                ),
+                () -> assertNotEquals(
+                        "TEHRAN",
+                        result.getCityName(),
+                        "city.label must not be mapped to cityName"
+                )
+        );
+    }
+
+    @Test
+    void shouldMapListOfAdsToCartSummaries() {
+        // Arrange
+        City tehran = new City();
+        tehran.setLabel("TEHRAN");
+        tehran.setName("تهران");
+
+        City shiraz = new City();
+        shiraz.setLabel("SHIRAZ");
+        shiraz.setName("شیراز");
+
+        Ad firstAd = new Ad();
+        firstAd.setId(1L);
+        firstAd.setTitle("First ad");
+        firstAd.setPrice(1000L);
+        firstAd.setCity(tehran);
+
+        Ad secondAd = new Ad();
+        secondAd.setId(2L);
+        secondAd.setTitle("Second ad");
+        secondAd.setPrice(2000L);
+        secondAd.setCity(shiraz);
+
+        List<Ad> ads = List.of(firstAd, secondAd);
+
+        // Act
+        List<AdCardSummary> result =
+                adMapper.toCartSummeryList(ads);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(2, result.size());
+
+        assertAll(
+                () -> assertEquals(
+                        1L,
+                        result.get(0).getId()
+                ),
+                () -> assertEquals(
+                        "تهران",
+                        result.get(0).getCityName()
+                ),
+                () -> assertNotEquals(
+                        "TEHRAN",
+                        result.get(0).getCityName()
+                ),
+                () -> assertEquals(
+                        2L,
+                        result.get(1).getId()
+                ),
+                () -> assertEquals(
+                        "شیراز",
+                        result.get(1).getCityName()
+                ),
+                () -> assertNotEquals(
+                        "SHIRAZ",
+                        result.get(1).getCityName()
+                )
+        );
+    }
+
+    @Test
+    void shouldMapFavoriteAdUsingAdIdNotFavoriteId() {
+        // Arrange
+        City city = new City();
+        city.setLabel("TABRIZ");
+        city.setName("تبریز");
+
+        Ad ad = new Ad();
+        ad.setId(100L);
+        ad.setTitle("Favorite advertisement");
+        ad.setPrice(5_000_000L);
+        ad.setCity(city);
+
+        FavoriteAd favorite = new FavoriteAd();
+
+        // شناسه Favorite عمداً با شناسه Ad متفاوت است
+        favorite.setId(999L);
+        favorite.setAd(ad);
+
+        // Act
+        AdCardSummary result =
+                adMapper.toCartSummeryFromFavorite(favorite);
+
+        // Assert
+        assertNotNull(result);
+
+        assertAll(
+                () -> assertEquals(
+                        100L,
+                        result.getId(),
+                        "Summary ID must be taken from ad.id, not favorite.id"
+                ),
+                () -> assertNotEquals(
+                        999L,
+                        result.getId(),
+                        "Favorite ID must not be used as the advertisement ID"
+                ),
+                () -> assertEquals(
+                        "Favorite advertisement",
+                        result.getTitle()
+                ),
+                () -> assertEquals(
+                        5_000_000L,
+                        result.getPrice()
+                ),
+                () -> assertEquals(
+                        "تبریز",
+                        result.getCityName(),
+                        "ad.city.name must be mapped to cityName"
+                ),
+                () -> assertNotEquals(
+                        "TABRIZ",
+                        result.getCityName(),
+                        "ad.city.label must not be mapped to cityName"
+                )
+        );
+    }
+
+    @Test
+    void shouldMapListOfFavoritesUsingNestedAdProperties() {
+        // Arrange
+        City mashhad = new City();
+        mashhad.setLabel("MASHHAD");
+        mashhad.setName("مشهد");
+
+        City isfahan = new City();
+        isfahan.setLabel("ISFAHAN");
+        isfahan.setName("اصفهان");
+
+        Ad firstAd = new Ad();
+        firstAd.setId(10L);
+        firstAd.setTitle("First favorite");
+        firstAd.setPrice(100_000L);
+        firstAd.setCity(mashhad);
+
+        Ad secondAd = new Ad();
+        secondAd.setId(20L);
+        secondAd.setTitle("Second favorite");
+        secondAd.setPrice(200_000L);
+        secondAd.setCity(isfahan);
+
+        FavoriteAd firstFavorite = new FavoriteAd();
+        firstFavorite.setId(1000L);
+        firstFavorite.setAd(firstAd);
+
+        FavoriteAd secondFavorite = new FavoriteAd();
+        secondFavorite.setId(2000L);
+        secondFavorite.setAd(secondAd);
+
+        List<FavoriteAd> favorites =
+                List.of(firstFavorite, secondFavorite);
+
+        // Act
+        List<AdCardSummary> result =
+                adMapper.toCartSummeryFromFavorites(favorites);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(2, result.size());
+
+        AdCardSummary firstSummary = result.get(0);
+        AdCardSummary secondSummary = result.get(1);
+
+        assertAll(
+                () -> assertEquals(
+                        10L,
+                        firstSummary.getId()
+                ),
+                () -> assertEquals(
+                        "مشهد",
+                        firstSummary.getCityName()
+                ),
+                () -> assertNotEquals(
+                        "MASHHAD",
+                        firstSummary.getCityName()
+                ),
+                () -> assertEquals(
+                        20L,
+                        secondSummary.getId()
+                ),
+                () -> assertEquals(
+                        "اصفهان",
+                        secondSummary.getCityName()
+                ),
+                () -> assertNotEquals(
+                        "ISFAHAN",
+                        secondSummary.getCityName()
+                )
+        );
+    }
+
+    @Test
+    void shouldIgnoreImageFieldsDuringAdMapping() {
+        // Arrange
+        City city = new City();
+        city.setLabel("KARAJ");
+        city.setName("کرج");
+
+        Ad ad = new Ad();
+        ad.setId(40L);
+        ad.setTitle("Advertisement without mapped image");
+        ad.setPrice(10_000L);
+        ad.setCity(city);
+
+        // Act
+        AdCardSummary result =
+                adMapper.toCartSummery(ad);
+
+        // Assert
+        assertNotNull(result);
+
+        assertAll(
+                () -> assertEquals(
+                        "کرج",
+                        result.getCityName()
+                ),
+                () -> assertNotEquals(
+                        "KARAJ",
+                        result.getCityName()
+                ),
+                () -> assertNull(
+                        result.getPrimaryImageId(),
+                        "Mapper must ignore primaryImageId"
+                ),
+                () -> assertNull(
+                        result.getPrimaryImageUrl(),
+                        "Mapper must ignore primaryImageUrl"
+                )
+        );
+    }
+
+    @Test
+    void shouldIgnoreImageFieldsDuringFavoriteMapping() {
+        // Arrange
+        City city = new City();
+        city.setLabel("QOM");
+        city.setName("قم");
+
+        Ad ad = new Ad();
+        ad.setId(50L);
+        ad.setTitle("Favorite without mapped image");
+        ad.setPrice(20_000L);
+        ad.setCity(city);
+
+        FavoriteAd favorite = new FavoriteAd();
+        favorite.setId(500L);
+        favorite.setAd(ad);
+
+        // Act
+        AdCardSummary result =
+                adMapper.toCartSummeryFromFavorite(favorite);
+
+        // Assert
+        assertNotNull(result);
+
+        assertAll(
+                () -> assertEquals(
+                        50L,
+                        result.getId()
+                ),
+                () -> assertEquals(
+                        "قم",
+                        result.getCityName()
+                ),
+                () -> assertNotEquals(
+                        "QOM",
+                        result.getCityName()
+                ),
+                () -> assertNull(
+                        result.getPrimaryImageId(),
+                        "Mapper must ignore primaryImageId"
+                ),
+                () -> assertNull(
+                        result.getPrimaryImageUrl(),
+                        "Mapper must ignore primaryImageUrl"
+                )
+        );
+    }
+
+    @Test
+    void shouldReturnNullWhenAdIsNull() {
+        // Act
+        AdCardSummary result =
+                adMapper.toCartSummery(null);
+
+        // Assert
+        assertNull(result);
+    }
+
+    @Test
+    void shouldKeepCityNameNullWhenAdCityIsNull() {
+        // Arrange
+        Ad ad = new Ad();
+        ad.setId(70L);
+        ad.setTitle("Advertisement without city");
+        ad.setPrice(3000L);
+        ad.setCity(null);
+
+        // Act
+        AdCardSummary result =
+                adMapper.toCartSummery(ad);
+
+        // Assert
+        assertNotNull(result);
+        assertNull(result.getCityName());
+    }
+}
+
+@ExtendWith(MockitoExtension.class)
+class AdServiceTest {
+
+    @Mock
+    private AdRepository adRepository;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private FavoriteRepository favoriteRepository;
+    @Mock
+    private StorageRepository storageRepository;
+    @Mock
+    private ProvinceRepository provinceRepository;
+    @Mock
+    private AdMapper adMapper;
+
+    @InjectMocks
+    private AdService adService;
+
+    private User seller;
+    private Ad ad;
+
+    @BeforeEach
+    void setUp() {
+        seller = User.builder()
+                .id(1L)
+                .username("seller1")
+                .role(Role.USER)
+                .build();
+
+        ad = Ad.builder()
+                .id(10L)
+                .title("Old title")
+                .description("Old description")
+                .price(1000L)
+                .status(AdStatus.APPROVED)
+                .seller(seller)
+                .city(City.builder().id(2L).name("Tehran").build())
+                .build();
+    }
+
+    // ---------- addAd ----------
+
+    @Test
+    void addAd_userNotFound_throwsUserNotFoundException() {
+        AdRequest request = AdRequest.builder().cityId(2L).build();
+        when(userRepository.findByUsername("seller1")).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> adService.addAd(request, "seller1"));
+        verifyNoInteractions(adRepository);
+    }
+
+    @Test
+    void addAd_cityNotFound_throwsCityNotFoundException() {
+        AdRequest request = AdRequest.builder().cityId(99L).build();
+        when(userRepository.findByUsername("seller1")).thenReturn(Optional.of(seller));
+        when(adMapper.toEntity(request)).thenReturn(new Ad());
+        when(provinceRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(CityNotFoundException.class, () -> adService.addAd(request, "seller1"));
+        verify(adRepository, never()).save(any());
+    }
+
+    @Test
+    void addAd_success_savesAdWithPendingStatusAndReturnsId() {
+        AdRequest request = AdRequest.builder().title("New ad").cityId(2L).build();
+        City city = City.builder().id(2L).name("Tehran").build();
+        Ad mappedAd = new Ad();
+
+        when(userRepository.findByUsername("seller1")).thenReturn(Optional.of(seller));
+        when(adMapper.toEntity(request)).thenReturn(mappedAd);
+        when(provinceRepository.findById(2L)).thenReturn(Optional.of(city));
+        when(adRepository.save(mappedAd)).thenAnswer(invocation -> {
+            Ad savedAd = invocation.getArgument(0);
+            savedAd.setId(55L);
+            return savedAd;
+        });
+
+        AdInsertResponse response = adService.addAd(request, "seller1");
+
+        assertEquals(55L, response.getId());
+        assertEquals(AdStatus.PENDING, mappedAd.getStatus());
+        assertEquals(seller, mappedAd.getSeller());
+        assertEquals(city, mappedAd.getCity());
+    }
+
+    // ---------- getAd ----------
+
+    @Test
+    void getAd_notFound_throwsAdNotFoundException() {
+        when(adRepository.findById(10L)).thenReturn(Optional.empty());
+
+        assertThrows(AdNotFoundException.class, () -> adService.getAd(10L, "someone"));
+    }
+
+    @Test
+    void getAd_anonymousUser_doesNotTouchUserOrFavoriteRepositories() {
+        AdResponse mapped = new AdResponse();
+        mapped.setSellerUsername("seller1");
+        when(adRepository.findById(10L)).thenReturn(Optional.of(ad));
+        when(adMapper.toResponse(ad)).thenReturn(mapped);
+        when(storageRepository.findMetaByAdId(10L)).thenReturn(List.of());
+
+        AdResponse result = adService.getAd(10L, null);
+
+        assertNotNull(result);
+        verifyNoInteractions(userRepository, favoriteRepository);
+    }
+
+    @Test
+    void getAd_loggedInOwner_marksAdAsMine() {
+        AdResponse mapped = new AdResponse();
+        mapped.setSellerUsername("seller1");
+        when(adRepository.findById(10L)).thenReturn(Optional.of(ad));
+        when(adMapper.toResponse(ad)).thenReturn(mapped);
+        when(storageRepository.findMetaByAdId(10L)).thenReturn(List.of());
+        when(userRepository.findByUsername("seller1")).thenReturn(Optional.of(seller));
+        when(favoriteRepository.existsFavoriteAdByUserAndAd(seller, ad)).thenReturn(false);
+
+        AdResponse result = adService.getAd(10L, "seller1");
+
+        assertTrue(result.isMine());
+        assertFalse(result.isFavorite());
+    }
+
+    // ---------- removeAd ----------
+
+    @Test
+    void removeAd_notOwnerAndNotAdmin_throwsOperationNotAllowedException() {
+        User otherUser = User.builder().username("intruder").role(Role.USER).build();
+        when(adRepository.findById(10L)).thenReturn(Optional.of(ad));
+        when(userRepository.findByUsername("intruder")).thenReturn(Optional.of(otherUser));
+
+        assertThrows(OperationNotAllowedException.class, () -> adService.removeAd(10L, "intruder"));
+        assertNotEquals(AdStatus.REMOVED, ad.getStatus());
+    }
+
+    @Test
+    void removeAd_alreadyRemoved_throwsAdNotRemovableException() {
+        ad.setStatus(AdStatus.REMOVED);
+        when(adRepository.findById(10L)).thenReturn(Optional.of(ad));
+
+        assertThrows(AdNotRemovableException.class, () -> adService.removeAd(10L, "seller1"));
+    }
+
+    @Test
+    void removeAd_byOwner_setsStatusToRemoved() {
+        when(adRepository.findById(10L)).thenReturn(Optional.of(ad));
+
+        adService.removeAd(10L, "seller1");
+
+        assertEquals(AdStatus.REMOVED, ad.getStatus());
+    }
+
+    @Test
+    void removeAd_byAdmin_setsStatusToRemoved() {
+        User admin = User.builder().username("admin1").role(Role.ADMIN).build();
+        when(adRepository.findById(10L)).thenReturn(Optional.of(ad));
+        when(userRepository.findByUsername("admin1")).thenReturn(Optional.of(admin));
+
+        adService.removeAd(10L, "admin1");
+
+        assertEquals(AdStatus.REMOVED, ad.getStatus());
+    }
+
+    // ---------- updateAd ----------
+
+    @Test
+    void updateAd_notOwner_throwsOperationNotAllowedException() {
+        when(adRepository.findById(10L)).thenReturn(Optional.of(ad));
+        AdUpdateRequest request = AdUpdateRequest.builder().title("Hacked title").build();
+
+        assertThrows(OperationNotAllowedException.class, () -> adService.updateAd(10L, "intruder", request));
+        verify(adRepository, never()).save(any());
+    }
+
+    @Test
+    void updateAd_noFieldsChanged_doesNotSave() {
+        when(adRepository.findById(10L)).thenReturn(Optional.of(ad));
+        AdUpdateRequest request = AdUpdateRequest.builder().title(ad.getTitle()).build();
+
+        adService.updateAd(10L, "seller1", request);
+
+        verify(adRepository, never()).save(any());
+    }
+
+    @Test
+    void updateAd_approvedAdWithContentChange_revertsStatusToPending() {
+        when(adRepository.findById(10L)).thenReturn(Optional.of(ad));
+        AdUpdateRequest request = AdUpdateRequest.builder().title("Updated title").build();
+
+        adService.updateAd(10L, "seller1", request);
+
+        assertEquals("Updated title", ad.getTitle());
+        assertEquals(AdStatus.PENDING, ad.getStatus());
+        verify(adRepository).save(ad);
+    }
+}
+
+@ExtendWith(MockitoExtension.class)
+class AuthenticationServiceTest {
+
+    @Mock
+    private UserRepository repository;
+    @Mock
+    private PasswordEncoder passwordEncoder;
+    @Mock
+    private JwtService jwtService;
+    @Mock
+    private AuthenticationManager authManager;
+
+    @InjectMocks
+    private AuthenticationService authenticationService;
+
+    // ---------- authenticate ----------
+
+    @Test
+    void authenticate_badCredentials_throwsInvalidUsernameOrPassword() {
+        AuthenticationRequest request = AuthenticationRequest.builder()
+                .username("john")
+                .password("wrongpass")
+                .build();
+        when(authManager.authenticate(any())).thenThrow(new BadCredentialsException("bad creds"));
+
+        assertThrows(InvalidUsernameOrPassword.class, () -> authenticationService.authenticate(request));
+        verifyNoInteractions(jwtService);
+    }
+
+    @Test
+    void authenticate_validCredentialsButUserMissing_throwsUserNotFoundException() {
+        AuthenticationRequest request = AuthenticationRequest.builder()
+                .username("john")
+                .password("secret")
+                .build();
+        when(authManager.authenticate(any())).thenReturn(null);
+        when(repository.findByUsername("john")).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> authenticationService.authenticate(request));
+    }
+
+    @Test
+    void authenticate_success_returnsTokenAndRole() {
+        AuthenticationRequest request = AuthenticationRequest.builder()
+                .username("john")
+                .password("secret")
+                .build();
+        User user = User.builder().username("john").role(Role.USER).build();
+
+        when(authManager.authenticate(any())).thenReturn(null);
+        when(repository.findByUsername("john")).thenReturn(Optional.of(user));
+        when(jwtService.generateToken(user)).thenReturn("signed-jwt-token");
+
+        AuthenticationResponse response = authenticationService.authenticate(request);
+
+        assertEquals("signed-jwt-token", response.getToken());
+        assertEquals(Role.USER, response.getRole());
+    }
+
+    // ---------- register ----------
+
+    @Test
+    void register_duplicateUsername_throwsDuplicateUsernameException() {
+        RegisterRequest request = RegisterRequest.builder()
+                .username("john")
+                .email("john@example.com")
+                .phoneNumber("0912")
+                .build();
+        when(repository.existsByUsername("john")).thenReturn(true);
+
+        assertThrows(DuplicateUsernameException.class, () -> authenticationService.register(request));
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void register_duplicatePhoneNumber_throwsDuplicatePhoneNumberException() {
+        RegisterRequest request = RegisterRequest.builder()
+                .username("john")
+                .email("john@example.com")
+                .phoneNumber("0912")
+                .build();
+        when(repository.existsByUsername("john")).thenReturn(false);
+        when(repository.existsByPhoneNumber("0912")).thenReturn(true);
+
+        assertThrows(DuplicatePhoneNumberException.class, () -> authenticationService.register(request));
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void register_duplicateEmail_throwsDuplicateEmailException() {
+        RegisterRequest request = RegisterRequest.builder()
+                .username("john")
+                .email("john@example.com")
+                .phoneNumber("0912")
+                .build();
+        when(repository.existsByUsername("john")).thenReturn(false);
+        when(repository.existsByPhoneNumber("0912")).thenReturn(false);
+        when(repository.existsByEmail("john@example.com")).thenReturn(true);
+
+        assertThrows(DuplicateEmailException.class, () -> authenticationService.register(request));
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void register_success_encodesPasswordAndReturnsToken() {
+        RegisterRequest request = RegisterRequest.builder()
+                .username("john")
+                .email("john@example.com")
+                .phoneNumber("0912")
+                .password("plainpass")
+                .firstname("John")
+                .lastname("Doe")
+                .build();
+
+        when(repository.existsByUsername("john")).thenReturn(false);
+        when(repository.existsByPhoneNumber("0912")).thenReturn(false);
+        when(repository.existsByEmail("john@example.com")).thenReturn(false);
+        when(passwordEncoder.encode("plainpass")).thenReturn("encoded-pass");
+        when(jwtService.generateToken(any(User.class))).thenReturn("signed-jwt-token");
+
+        AuthenticationResponse response = authenticationService.register(request);
+
+        assertEquals("signed-jwt-token", response.getToken());
+        assertEquals(Role.USER, response.getRole());
+
+        verify(repository).save(argThat(savedUser ->
+                savedUser.getPassword().equals("encoded-pass")
+                        && savedUser.getRole() == Role.USER
+                        && savedUser.isEnabled()
+        ));
+    }
+}
+
+@ExtendWith(MockitoExtension.class)
+class FavoriteAdServiceTest {
+
+    @Mock
+    private FavoriteRepository favRepository;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private AdRepository adRepository;
+    @Mock
+    private AdMapper adMapper;
+    @Mock
+    private AdService adService;
+
+    @InjectMocks
+    private FavoriteAdService favoriteAdService;
+
+    private User user;
+    private Ad ad;
+
+    private void stubUserAndAd() {
+        user = User.builder().id(1L).username("john").build();
+        ad = Ad.builder().id(10L).build();
+        when(userRepository.findByUsername("john")).thenReturn(Optional.of(user));
+        when(adRepository.findById(10L)).thenReturn(Optional.of(ad));
+    }
+
+    // ---------- addToFavorites ----------
+
+    @Test
+    void addToFavorites_alreadyFavorite_throwsAlreadyFavoriteAdException() {
+        stubUserAndAd();
+        when(favRepository.existsFavoriteAdByUserAndAd(user, ad)).thenReturn(true);
+
+        assertThrows(AlreadyFavoriteAdException.class, () -> favoriteAdService.addToFavorites(10L, "john"));
+        verify(favRepository, never()).save(any());
+    }
+
+    @Test
+    void addToFavorites_adNotFound_throwsAdNotFoundException() {
+        user = User.builder().id(1L).username("john").build();
+        when(userRepository.findByUsername("john")).thenReturn(Optional.of(user));
+        when(adRepository.findById(10L)).thenReturn(Optional.empty());
+
+        assertThrows(AdNotFoundException.class, () -> favoriteAdService.addToFavorites(10L, "john"));
+    }
+
+    @Test
+    void addToFavorites_notYetFavorite_savesFavorite() {
+        stubUserAndAd();
+        when(favRepository.existsFavoriteAdByUserAndAd(user, ad)).thenReturn(false);
+
+        favoriteAdService.addToFavorites(10L, "john");
+
+        verify(favRepository).save(argThat(fav ->
+                fav.getUser().equals(user) && fav.getAd().equals(ad)
+        ));
+    }
+
+    // ---------- removeFromFavorites ----------
+
+    @Test
+    void removeFromFavorites_notFavorite_throwsAdNotFavoriteException() {
+        stubUserAndAd();
+        when(favRepository.existsFavoriteAdByUserAndAd(user, ad)).thenReturn(false);
+
+        assertThrows(AdNotFavoriteException.class, () -> favoriteAdService.removeFromFavorites(10L, "john"));
+        verify(favRepository, never()).deleteByUserAndAd(any(), any());
+    }
+
+    @Test
+    void removeFromFavorites_isFavorite_deletesFavorite() {
+        stubUserAndAd();
+        when(favRepository.existsFavoriteAdByUserAndAd(user, ad)).thenReturn(true);
+
+        favoriteAdService.removeFromFavorites(10L, "john");
+
+        verify(favRepository).deleteByUserAndAd(user, ad);
+    }
+
+    // ---------- getAllUserFavoriteAds ----------
+
+    @Test
+    void getAllUserFavoriteAds_userNotFound_throwsUserNotFoundException() {
+        when(userRepository.existsByUsername("ghost")).thenReturn(false);
+
+        assertThrows(UserNotFoundException.class, () -> favoriteAdService.getAllUserFavoriteAds("ghost"));
+        verifyNoInteractions(favRepository, adMapper);
+    }
+
+    @Test
+    void getAllUserFavoriteAds_userExists_returnsMappedListWithPrimaryImages() {
+        List<FavoriteAd> favorites = List.of(FavoriteAd.builder().id(1L).build());
+        List<AdCardSummary> summaries = List.of(new AdCardSummary());
+
+        when(userRepository.existsByUsername("john")).thenReturn(true);
+        when(favRepository.getAllByUser_Username("john")).thenReturn(favorites);
+        when(adMapper.toCartSummeryFromFavorites(favorites)).thenReturn(summaries);
+
+        List<AdCardSummary> result = favoriteAdService.getAllUserFavoriteAds("john");
+
+        assertEquals(summaries, result);
+        verify(adService).addPrimaryImage(summaries);
+    }
+}
+
+@ExtendWith(MockitoExtension.class)
+class SellerRatingServiceTest {
+
+    @Mock
+    private ReportAdService reportAdService;
+    @Mock
+    private SellerRatingRepository ratingRepository;
+    @Mock
+    private UserRepository userRepository;
+
+    @InjectMocks
+    private SellerRatingService sellerRatingService;
+
+    // ---------- submitRating ----------
+
+    @Test
+    void submitRating_userRatesSelf_throwsOperationNotAllowedException() {
+        User user = User.builder().id(1L).username("john").build();
+        SellerRatingRequest request = new SellerRatingRequest();
+        request.setSellerId(1L);
+        request.setRating(5);
+
+        when(userRepository.findByUsername("john")).thenReturn(Optional.of(user));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        assertThrows(OperationNotAllowedException.class, () -> sellerRatingService.submitRating(request, "john"));
+        verify(ratingRepository, never()).save(any());
+    }
+
+    @Test
+    void submitRating_alreadyVoted_throwsAlreadyVotedException() {
+        User user = User.builder().id(1L).username("john").build();
+        User seller = User.builder().id(2L).username("seller1").build();
+        SellerRatingRequest request = new SellerRatingRequest();
+        request.setSellerId(2L);
+        request.setRating(4);
+
+        when(userRepository.findByUsername("john")).thenReturn(Optional.of(user));
+        when(userRepository.findById(2L)).thenReturn(Optional.of(seller));
+        when(ratingRepository.existsBySellerAndUser(seller, user)).thenReturn(true);
+
+        assertThrows(AlreadyVotedException.class, () -> sellerRatingService.submitRating(request, "john"));
+        verify(ratingRepository, never()).save(any());
+    }
+
+    @Test
+    void submitRating_validRating_savesRating() {
+        User user = User.builder().id(1L).username("john").build();
+        User seller = User.builder().id(2L).username("seller1").build();
+        SellerRatingRequest request = new SellerRatingRequest();
+        request.setSellerId(2L);
+        request.setRating(4);
+
+        when(userRepository.findByUsername("john")).thenReturn(Optional.of(user));
+        when(userRepository.findById(2L)).thenReturn(Optional.of(seller));
+        when(ratingRepository.existsBySellerAndUser(seller, user)).thenReturn(false);
+
+        sellerRatingService.submitRating(request, "john");
+
+        verify(ratingRepository).save(argThat(sellerRating ->
+                sellerRating.getUser().equals(user)
+                        && sellerRating.getSeller().equals(seller)
+                        && sellerRating.getRating().equals(4)
+        ));
+    }
+
+    @Test
+    void submitRating_sellerNotFound_throwsUserNotFoundException() {
+        User user = User.builder().id(1L).username("john").build();
+        SellerRatingRequest request = new SellerRatingRequest();
+        request.setSellerId(99L);
+        request.setRating(3);
+
+        when(userRepository.findByUsername("john")).thenReturn(Optional.of(user));
+        when(userRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> sellerRatingService.submitRating(request, "john"));
+    }
+
+    // ---------- calculateSellerRatingAvg ----------
+
+    @Test
+    void calculateSellerRatingAvg_noRatings_returnsZero() {
+        User seller = User.builder().id(2L).build();
+        when(userRepository.findById(2L)).thenReturn(Optional.of(seller));
+        when(ratingRepository.findAllBySeller(seller)).thenReturn(List.of());
+
+        Double avg = sellerRatingService.calculateSellerRatingAvg(2L);
+
+        assertEquals(0.0, avg);
+    }
+
+    @Test
+    void calculateSellerRatingAvg_withRatings_returnsCorrectAverage() {
+        User seller = User.builder().id(2L).build();
+        SellerRating r1 = SellerRating.builder().rating(5).build();
+        SellerRating r2 = SellerRating.builder().rating(3).build();
+
+        when(userRepository.findById(2L)).thenReturn(Optional.of(seller));
+        when(ratingRepository.findAllBySeller(seller)).thenReturn(List.of(r1, r2));
+
+        Double avg = sellerRatingService.calculateSellerRatingAvg(2L);
+
+        assertEquals(4.0, avg);
+    }
+
+    @Test
+    void calculateSellerRatingAvg_sellerNotFound_throwsUserNotFoundException() {
+        when(userRepository.findById(2L)).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> sellerRatingService.calculateSellerRatingAvg(2L));
+    }
+}
+
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-07-20T14:59:49+0330",
+    date = "2026-07-21T10:31:36+0330",
     comments = "version: 1.6.3, compiler: javac, environment: Java 21 (Oracle Corporation)"
 )
 @Component
@@ -2562,20 +3831,6 @@ class AdMapperImpl implements AdMapper {
     }
 
     @Override
-    public List<AdReportResponse> toAdReportResponse(List<AdReport> ads) {
-        if ( ads == null ) {
-            return null;
-        }
-
-        List<AdReportResponse> list = new ArrayList<AdReportResponse>( ads.size() );
-        for ( AdReport adReport : ads ) {
-            list.add( adReportToAdReportResponse( adReport ) );
-        }
-
-        return list;
-    }
-
-    @Override
     public List<AdResponse> toResponseList(List<Ad> ads) {
         if ( ads == null ) {
             return null;
@@ -2590,31 +3845,121 @@ class AdMapperImpl implements AdMapper {
     }
 
     @Override
-    public List<AdCartSummery> toCartSummeryFromFavorites(List<FavoriteAd> ads) {
-        if ( ads == null ) {
+    public AdReportResponse toAdReportResponse(AdReport adReport) {
+        if ( adReport == null ) {
             return null;
         }
 
-        List<AdCartSummery> list = new ArrayList<AdCartSummery>( ads.size() );
-        for ( FavoriteAd favoriteAd : ads ) {
-            list.add( favoriteAdToAdCartSummery( favoriteAd ) );
+        AdReportResponse adReportResponse = new AdReportResponse();
+
+        adReportResponse.setSellerFirstName( adReportAdSellerFirstname( adReport ) );
+        adReportResponse.setSellerLastName( adReportAdSellerLastname( adReport ) );
+        adReportResponse.setAdTitle( adReportAdTitle( adReport ) );
+        adReportResponse.setAdReportId( adReport.getId() );
+        adReportResponse.setAdId( adReportAdId( adReport ) );
+
+        return adReportResponse;
+    }
+
+    @Override
+    public List<AdReportResponse> toAdReportResponseList(List<AdReport> adReports) {
+        if ( adReports == null ) {
+            return null;
+        }
+
+        List<AdReportResponse> list = new ArrayList<AdReportResponse>( adReports.size() );
+        for ( AdReport adReport : adReports ) {
+            list.add( toAdReportResponse( adReport ) );
         }
 
         return list;
     }
 
     @Override
-    public List<AdCartSummery> toCartSummeryList(List<Ad> ads) {
+    public AdCardSummary toCartSummeryFromFavorite(FavoriteAd favoriteAd) {
+        if ( favoriteAd == null ) {
+            return null;
+        }
+
+        AdCardSummary adCardSummary = new AdCardSummary();
+
+        adCardSummary.setId( favoriteAdAdId( favoriteAd ) );
+        adCardSummary.setTitle( favoriteAdAdTitle( favoriteAd ) );
+        adCardSummary.setPrice( favoriteAdAdPrice( favoriteAd ) );
+        adCardSummary.setCityName( favoriteAdAdCityName( favoriteAd ) );
+        adCardSummary.setCategory( favoriteAdAdCategory( favoriteAd ) );
+        adCardSummary.setCreatedAt( favoriteAdAdCreatedAt( favoriteAd ) );
+        adCardSummary.setUpdatedAt( favoriteAdAdUpdatedAt( favoriteAd ) );
+
+        return adCardSummary;
+    }
+
+    @Override
+    public List<AdCardSummary> toCartSummeryFromFavorites(List<FavoriteAd> favoriteAds) {
+        if ( favoriteAds == null ) {
+            return null;
+        }
+
+        List<AdCardSummary> list = new ArrayList<AdCardSummary>( favoriteAds.size() );
+        for ( FavoriteAd favoriteAd : favoriteAds ) {
+            list.add( toCartSummeryFromFavorite( favoriteAd ) );
+        }
+
+        return list;
+    }
+
+    @Override
+    public AdCardSummary toCartSummery(Ad ad) {
+        if ( ad == null ) {
+            return null;
+        }
+
+        AdCardSummary adCardSummary = new AdCardSummary();
+
+        adCardSummary.setCityName( adCityName( ad ) );
+        adCardSummary.setId( ad.getId() );
+        adCardSummary.setTitle( ad.getTitle() );
+        adCardSummary.setPrice( ad.getPrice() );
+        adCardSummary.setCreatedAt( ad.getCreatedAt() );
+        adCardSummary.setUpdatedAt( ad.getUpdatedAt() );
+        adCardSummary.setCategory( ad.getCategory() );
+
+        return adCardSummary;
+    }
+
+    @Override
+    public List<AdCardSummary> toCartSummeryList(List<Ad> ads) {
         if ( ads == null ) {
             return null;
         }
 
-        List<AdCartSummery> list = new ArrayList<AdCartSummery>( ads.size() );
+        List<AdCardSummary> list = new ArrayList<AdCardSummary>( ads.size() );
         for ( Ad ad : ads ) {
-            list.add( adToAdCartSummery( ad ) );
+            list.add( toCartSummery( ad ) );
         }
 
         return list;
+    }
+
+    @Override
+    public PendingAd toPendingAd(Ad ad) {
+        if ( ad == null ) {
+            return null;
+        }
+
+        PendingAd pendingAd = new PendingAd();
+
+        pendingAd.setCityName( adCityName( ad ) );
+        pendingAd.setSellerFirstName( adSellerFirstname( ad ) );
+        pendingAd.setSellerLastName( adSellerLastname( ad ) );
+        pendingAd.setSellerId( adSellerId( ad ) );
+        pendingAd.setId( ad.getId() );
+        pendingAd.setTitle( ad.getTitle() );
+        pendingAd.setCategory( ad.getCategory() );
+        pendingAd.setCreatedAt( ad.getCreatedAt() );
+        pendingAd.setUpdatedAt( ad.getUpdatedAt() );
+
+        return pendingAd;
     }
 
     @Override
@@ -2625,7 +3970,7 @@ class AdMapperImpl implements AdMapper {
 
         List<PendingAd> list = new ArrayList<PendingAd>( ads.size() );
         for ( Ad ad : ads ) {
-            list.add( adToPendingAd( ad ) );
+            list.add( toPendingAd( ad ) );
         }
 
         return list;
@@ -2697,65 +4042,110 @@ class AdMapperImpl implements AdMapper {
         return list1;
     }
 
-    protected AdReportResponse adReportToAdReportResponse(AdReport adReport) {
-        if ( adReport == null ) {
-            return null;
-        }
-
-        AdReportResponse adReportResponse = new AdReportResponse();
-
-        return adReportResponse;
-    }
-
-    protected AdCartSummery favoriteAdToAdCartSummery(FavoriteAd favoriteAd) {
-        if ( favoriteAd == null ) {
-            return null;
-        }
-
-        AdCartSummery adCartSummery = new AdCartSummery();
-
-        adCartSummery.setId( favoriteAd.getId() );
-
-        return adCartSummery;
-    }
-
-    protected AdCartSummery adToAdCartSummery(Ad ad) {
+    private String adReportAdSellerFirstname(AdReport adReport) {
+        Ad ad = adReport.getAd();
         if ( ad == null ) {
             return null;
         }
-
-        AdCartSummery adCartSummery = new AdCartSummery();
-
-        adCartSummery.setId( ad.getId() );
-        adCartSummery.setTitle( ad.getTitle() );
-        adCartSummery.setPrice( ad.getPrice() );
-        adCartSummery.setCreatedAt( ad.getCreatedAt() );
-        adCartSummery.setUpdatedAt( ad.getUpdatedAt() );
-        adCartSummery.setCategory( ad.getCategory() );
-
-        return adCartSummery;
+        User seller = ad.getSeller();
+        if ( seller == null ) {
+            return null;
+        }
+        return seller.getFirstname();
     }
 
-    protected PendingAd adToPendingAd(Ad ad) {
+    private String adReportAdSellerLastname(AdReport adReport) {
+        Ad ad = adReport.getAd();
         if ( ad == null ) {
             return null;
         }
+        User seller = ad.getSeller();
+        if ( seller == null ) {
+            return null;
+        }
+        return seller.getLastname();
+    }
 
-        PendingAd pendingAd = new PendingAd();
+    private String adReportAdTitle(AdReport adReport) {
+        Ad ad = adReport.getAd();
+        if ( ad == null ) {
+            return null;
+        }
+        return ad.getTitle();
+    }
 
-        pendingAd.setId( ad.getId() );
-        pendingAd.setTitle( ad.getTitle() );
-        pendingAd.setCategory( ad.getCategory() );
-        pendingAd.setCreatedAt( ad.getCreatedAt() );
-        pendingAd.setUpdatedAt( ad.getUpdatedAt() );
+    private Long adReportAdId(AdReport adReport) {
+        Ad ad = adReport.getAd();
+        if ( ad == null ) {
+            return null;
+        }
+        return ad.getId();
+    }
 
-        return pendingAd;
+    private Long favoriteAdAdId(FavoriteAd favoriteAd) {
+        Ad ad = favoriteAd.getAd();
+        if ( ad == null ) {
+            return null;
+        }
+        return ad.getId();
+    }
+
+    private String favoriteAdAdTitle(FavoriteAd favoriteAd) {
+        Ad ad = favoriteAd.getAd();
+        if ( ad == null ) {
+            return null;
+        }
+        return ad.getTitle();
+    }
+
+    private long favoriteAdAdPrice(FavoriteAd favoriteAd) {
+        Ad ad = favoriteAd.getAd();
+        if ( ad == null ) {
+            return 0L;
+        }
+        return ad.getPrice();
+    }
+
+    private String favoriteAdAdCityName(FavoriteAd favoriteAd) {
+        Ad ad = favoriteAd.getAd();
+        if ( ad == null ) {
+            return null;
+        }
+        City city = ad.getCity();
+        if ( city == null ) {
+            return null;
+        }
+        return city.getName();
+    }
+
+    private AdCategory favoriteAdAdCategory(FavoriteAd favoriteAd) {
+        Ad ad = favoriteAd.getAd();
+        if ( ad == null ) {
+            return null;
+        }
+        return ad.getCategory();
+    }
+
+    private Instant favoriteAdAdCreatedAt(FavoriteAd favoriteAd) {
+        Ad ad = favoriteAd.getAd();
+        if ( ad == null ) {
+            return null;
+        }
+        return ad.getCreatedAt();
+    }
+
+    private Instant favoriteAdAdUpdatedAt(FavoriteAd favoriteAd) {
+        Ad ad = favoriteAd.getAd();
+        if ( ad == null ) {
+            return null;
+        }
+        return ad.getUpdatedAt();
     }
 }
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-07-17T23:16:13+0330",
+    date = "2026-07-21T08:36:45+0330",
     comments = "version: 1.6.3, compiler: javac, environment: Java 21 (Oracle Corporation)"
 )
 @Component
@@ -2810,7 +4200,7 @@ class ChatMapperImpl implements ChatMapper {
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-07-19T20:22:50+0330",
+    date = "2026-07-21T08:36:46+0330",
     comments = "version: 1.6.3, compiler: javac, environment: Java 21 (Oracle Corporation)"
 )
 @Component
@@ -2846,19 +4236,19 @@ class ProvinceMapperImpl implements ProvinceMapper {
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-07-20T14:59:50+0330",
+    date = "2026-07-21T08:36:46+0330",
     comments = "version: 1.6.3, compiler: javac, environment: Java 21 (Oracle Corporation)"
 )
 @Component
 class UserMapperImpl implements UserMapper {
 
     @Override
-    public List<UserResponse> toUserResponse(List<User> users) {
+    public List<UserInfoResponse> toUserResponse(List<User> users) {
         if ( users == null ) {
             return null;
         }
 
-        List<UserResponse> list = new ArrayList<UserResponse>( users.size() );
+        List<UserInfoResponse> list = new ArrayList<UserInfoResponse>( users.size() );
         for ( User user : users ) {
             list.add( userToUserResponse( user ) );
         }
@@ -2866,20 +4256,20 @@ class UserMapperImpl implements UserMapper {
         return list;
     }
 
-    protected UserResponse userToUserResponse(User user) {
+    protected UserInfoResponse userToUserResponse(User user) {
         if ( user == null ) {
             return null;
         }
 
-        UserResponse userResponse = new UserResponse();
+        UserInfoResponse userInfoResponse = new UserInfoResponse();
 
-        userResponse.setId( user.getId() );
-        userResponse.setUsername( user.getUsername() );
-        userResponse.setFirstname( user.getFirstname() );
-        userResponse.setLastname( user.getLastname() );
-        userResponse.setEmail( user.getEmail() );
-        userResponse.setPhoneNumber( user.getPhoneNumber() );
+        userInfoResponse.setId( user.getId() );
+        userInfoResponse.setUsername( user.getUsername() );
+        userInfoResponse.setFirstname( user.getFirstname() );
+        userInfoResponse.setLastname( user.getLastname() );
+        userInfoResponse.setEmail( user.getEmail() );
+        userInfoResponse.setPhoneNumber( user.getPhoneNumber() );
 
-        return userResponse;
+        return userInfoResponse;
     }
 }

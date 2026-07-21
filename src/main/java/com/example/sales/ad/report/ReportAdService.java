@@ -35,7 +35,6 @@ public class ReportAdService {
                 .reason(reportReason)
                 .build();
 
-        log.info("error happened while saving data");
         adReportRepository.save(adReport);
 
     }
