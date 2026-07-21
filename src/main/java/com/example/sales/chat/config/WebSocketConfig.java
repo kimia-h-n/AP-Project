@@ -24,11 +24,15 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.setApplicationDestinationPrefixes("/app");
         registry.setUserDestinationPrefix("/user");
     }
+
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/chat") //any request from front end, must start here
                 .setAllowedOriginPatterns("*")
                 .withSockJS(); //in case of web socket not working, try SockJS
+
+        registry.addEndpoint("/chat-native")
+                .setAllowedOriginPatterns("*");
     }
 
     @Override

@@ -3,7 +3,7 @@ package com.example.sales.stats;
 
 import com.example.sales.ad.AdRepository;
 import com.example.sales.ad.model.AdStatus;
-import com.example.sales.ad.report.AdReportRepository;
+import com.example.sales.ad.reported.AdReportRepository;
 import com.example.sales.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
