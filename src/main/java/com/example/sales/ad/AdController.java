@@ -13,7 +13,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.awt.datatransfer.DataFlavor;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +35,7 @@ public class AdController {
     //sample use case: GET /api/v1/ads?status=APPROVED
     //for now only gets active ads
     @GetMapping("/ads")
-    public List<AdCartSummery> getAllAds(Authentication authentication) {
+    public List<AdCardSummary> getAllAds(Authentication authentication) {
         String username = extractUsernameIfLoggedIn(authentication);
         return adService.getAllActiveAds(username);
     }
@@ -82,13 +81,13 @@ public class AdController {
     }
 
     @GetMapping("/search")
-    public List<AdCartSummery> searchByTitle(@RequestParam String title, Authentication authentication) {
+    public List<AdCardSummary> searchByTitle(@RequestParam String title, Authentication authentication) {
         String username = extractUsernameIfLoggedIn(authentication);
         return adService.searchByTitle(username, title);
     }
 
     @GetMapping("/filter")
-    public List<AdCartSummery> searchAds(
+    public List<AdCardSummary> searchAds(
             @RequestParam(required = false) Long minPrice,
             @RequestParam(required = false) Long maxPrice,
             @RequestParam(required = false) AdCategory category,

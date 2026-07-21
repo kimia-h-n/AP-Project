@@ -1,8 +1,7 @@
 package com.example.sales.ad.fav;
 
 
-import com.example.sales.ad.model.AdCartSummery;
-import com.example.sales.ad.model.AdResponse;
+import com.example.sales.ad.model.AdCardSummary;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -25,7 +24,7 @@ public class FavoriteAdController {
     }
 
     @GetMapping
-    public List<AdCartSummery> getAllUserFavoriteAds(Authentication authentication) {
+    public List<AdCardSummary> getAllUserFavoriteAds(Authentication authentication) {
         String username = authentication.getName();
         return favAdService.getAllUserFavoriteAds(username);
     }

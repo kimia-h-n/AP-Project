@@ -16,7 +16,12 @@ public interface AdRepository extends JpaRepository<Ad, Long>, JpaSpecificationE
 
     List<Ad> findAllBySeller(User seller);
 
+    List<Ad> findAllBySellerAndStatus(User seller, AdStatus status);
+
     List<Ad> findByTitleContainingIgnoreCaseAndStatus(String title, AdStatus status);
+
+    long countByStatus(AdStatus status);
+
 
     boolean existsById(Long id);
 }

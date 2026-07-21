@@ -1,6 +1,7 @@
 package com.example.sales.admin;
 
 
+import com.example.sales.ad.model.AdCardSummary;
 import com.example.sales.ad.model.AdResponse;
 import com.example.sales.ad.model.PendingAd;
 import com.example.sales.ad.model.moderation.AdModerationRequest;

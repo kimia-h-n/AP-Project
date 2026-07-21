@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Entity
 @Table(name = "favorites")
+//todo: later add unique for this.
 public class FavoriteAd {
     @Id
     @GeneratedValue

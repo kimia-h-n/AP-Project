@@ -59,6 +59,7 @@ public class SecurityConfiguration {
 
                         // ───────────────────── Admin ───────────────────────────────
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/admin/dashboard/stats").hasRole("ADMIN")
 
                         // ───────────────────── Everything else ─────────────────────
                         .anyRequest().authenticated()
