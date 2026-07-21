@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox alignment="CENTER" spacing="15.0" style="-fx-background-color: #ffffff; -fx-padding: 25; -fx-background-radius: 12;"
+      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.divar.component.SellerRatingDialog">
+
+    <padding>
+        <Insets top="20.0" right="20.0" bottom="20.0" left="20.0" />
+    </padding>
+
+    <children>
+        <VBox alignment="CENTER" spacing="10.0">
+            <children>
+                <Label fx:id="lblAvgRating" text="در حال دریافت میانگین امتیاز..." style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #333333;" />
+                <Label text="امتیاز خود را به فروشنده انتخاب کنید" style="-fx-font-size: 12px; -fx-text-fill: #666666;" />
+
+                <!-- بخش ستاره‌ها با رنگ مشخص پیش‌فرض -->
+                <HBox fx:id="starContainer" alignment="CENTER" spacing="8.0" style="-fx-padding: 10 0 10 0;">
+                    <children>
+                        <Button fx:id="btnStar1" onAction="#handleStarClick" text="★" style="-fx-font-size: 26px; -fx-background-color: transparent; -fx-text-fill: #ccc; -fx-cursor: hand;" />
+                        <Button fx:id="btnStar2" onAction="#handleStarClick" text="★" style="-fx-font-size: 26px; -fx-background-color: transparent; -fx-text-fill: #ccc; -fx-cursor: hand;" />
+                        <Button fx:id="btnStar3" onAction="#handleStarClick" text="★" style="-fx-font-size: 26px; -fx-background-color: transparent; -fx-text-fill: #ccc; -fx-cursor: hand;" />
+                        <Button fx:id="btnStar4" onAction="#handleStarClick" text="★" style="-fx-font-size: 26px; -fx-background-color: transparent; -fx-text-fill: #ccc; -fx-cursor: hand;" />
+                        <Button fx:id="btnStar5" onAction="#handleStarClick" text="★" style="-fx-font-size: 26px; -fx-background-color: transparent; -fx-text-fill: #ccc; -fx-cursor: hand;" />
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+
+        <Label fx:id="lblMessage" wrapText="true" style="-fx-font-size: 12px;" visible="false" />
+
+        <HBox alignment="CENTER" spacing="15.0">
+            <children>
+                <Button fx:id="btnSubmit" onAction="#handleSubmit" text="ثبت امتیاز" prefWidth="110.0" style="-fx-background-color: #a62626; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 4;" />
+                <Button fx:id="btnCancel" onAction="#handleCancel" text="انصراف" prefWidth="90.0" style="-fx-background-color: #f0f0f0; -fx-text-fill: #333333; -fx-cursor: hand; -fx-background-radius: 4;" />
+            </children>
+            <VBox.margin>
+                <Insets top="5.0" />
+            </VBox.margin>
+        </HBox>
+    </children>
+</VBox>

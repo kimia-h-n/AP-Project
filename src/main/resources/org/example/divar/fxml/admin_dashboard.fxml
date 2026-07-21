@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.divar.controller.AdminDashboardController"
+      spacing="18.0" nodeOrientation="RIGHT_TO_LEFT">
+    <children>
+
+        <HBox alignment="CENTER_LEFT">
+            <children>
+                <VBox spacing="4.0">
+                    <children>
+                        <Label text="داشبورد" styleClass="admin-page-title"/>
+                        <Label text="آگهی‌های در انتظار بررسی" styleClass="admin-page-subtitle"/>
+                    </children>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="بروزرسانی" styleClass="admin-topbar-btn" onAction="#refresh"/>
+            </children>
+        </HBox>
+
+        <Label fx:id="messageLabel" wrapText="true" maxWidth="Infinity" visible="false" managed="false"/>
+
+        <StackPane>
+            <children>
+                <TableView fx:id="pendingTable" styleClass="admin-table" prefHeight="480.0">
+                    <columns>
+                        <TableColumn fx:id="imageColumn" text="تصویر" prefWidth="90.0" sortable="false"/>
+                        <TableColumn fx:id="titleColumn" text="عنوان" prefWidth="230.0" sortable="false"/>
+                        <TableColumn fx:id="sellerColumn" text="فروشنده" prefWidth="150.0" sortable="false"/>
+                        <TableColumn fx:id="cityColumn" text="شهر" prefWidth="110.0" sortable="false"/>
+                        <TableColumn fx:id="createdAtColumn" text="تاریخ ثبت" prefWidth="140.0" sortable="false"/>
+                        <TableColumn fx:id="actionsColumn" text="عملیات" prefWidth="260.0" sortable="false"/>
+                    </columns>
+                    <columnResizePolicy>
+                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY_LAST_COLUMN"/>
+                    </columnResizePolicy>
+                    <placeholder>
+                        <Label text="در حال حاضر آگهی‌ای در انتظار بررسی نیست." style="-fx-text-fill: #999999; -fx-font-size: 14px;"/>
+                    </placeholder>
+                </TableView>
+            </children>
+        </StackPane>
+
+    </children>
+</VBox>

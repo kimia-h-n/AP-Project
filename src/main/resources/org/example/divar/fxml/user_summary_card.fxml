@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<fx:root type="javafx.scene.layout.HBox" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://fxml.com/fxml/1"
+         spacing="15.0" nodeOrientation="RIGHT_TO_LEFT" alignment="CENTER_RIGHT"
+         styleClass="user-row-card" prefHeight="80.0" maxWidth="Infinity">
+    <padding>
+        <Insets top="10.0" bottom="10.0" left="15.0" right="15.0"/>
+    </padding>
+    <children>
+
+        <VBox spacing="6.0" HBox.hgrow="ALWAYS" fx:id="infoContainer">
+            <children>
+                <HBox spacing="10.0" alignment="CENTER_RIGHT">
+                    <children>
+                        <Label fx:id="nameLabel" text="نام و نام خانوادگی" styleClass="user-row-name" style="-fx-font-weight: bold;"/>
+                        <Label fx:id="statusLabel" text="وضعیت" />
+                    </children>
+                </HBox>
+                <Label fx:id="phoneLabel" text="شماره تماس" styleClass="user-row-phone" style="-fx-font-weight: bold;"/>
+            </children>
+        </VBox>
+
+        <HBox spacing="8.0" alignment="CENTER">
+            <children>
+                <Button fx:id="detailsBtn" text="مشاهده جزئیات کاربر" styleClass="btn-user-secondary"/>
+                <Button fx:id="adsBtn" text="مشاهده آگهی‌ها" styleClass="btn-user-secondary"/>
+                <Button fx:id="actionBtn" text="اقدام" />
+            </children>
+        </HBox>
+
+    </children>
+</fx:root>

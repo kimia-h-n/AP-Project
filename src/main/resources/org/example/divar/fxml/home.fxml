@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.divar.controller.HomeController"
+            prefWidth="1150.0" prefHeight="750.0" style="-fx-background-color: #ffffff;" nodeOrientation="RIGHT_TO_LEFT">
+
+    <top>
+        <HBox spacing="15.0" alignment="CENTER_LEFT" style="-fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0; -fx-background-color: #ffffff;" prefHeight="65.0">
+            <padding>
+                <Insets top="10.0" bottom="10.0" left="20.0" right="20.0"/>
+            </padding>
+            <children>
+                <Label text="دیوار" style="-fx-text-fill: #a62626; -fx-font-size: 24px; -fx-font-weight: bold;"/>
+
+                <TextField fx:id="searchField" promptText="جستجو در همه آگهی‌ها" prefWidth="400.0" onAction="#handleSearch"
+                           style="-fx-background-color: #f5f5f5; -fx-background-radius: 4px; -fx-padding: 8px;"/>
+
+                <Region HBox.hgrow="ALWAYS" />
+
+                <Button text="پروفایل من" onAction="#goToProfile"
+                        style="-fx-background-color: transparent; -fx-text-fill: #666666; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 15 8 15; -fx-border-color: #cccccc; -fx-border-radius: 4px;"/>
+                <Button text="چت" onAction="#goToChat"
+                        style="-fx-background-color: transparent; -fx-text-fill: #666666; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 15 8 15; -fx-border-color: #cccccc; -fx-border-radius: 4px;"/>
+
+                <Button text="ثبت آگهی" onAction="#goToNewAd" style="-fx-background-color: #a62626; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 8px 16px; -fx-background-radius: 4px; -fx-cursor: hand;"/>
+            </children>
+        </HBox>
+    </top>
+
+    <left>
+        <ScrollPane fitToWidth="true" style="-fx-background-color: #ffffff; -fx-border-color: 0 1 0 0; -fx-border-color: #e0e0e0;" prefWidth="250.0" nodeOrientation="LEFT_TO_RIGHT">
+            <content>
+                <VBox spacing="15.0" style="-fx-padding: 20; -fx-background-color: #ffffff;" nodeOrientation="RIGHT_TO_LEFT">
+                    <children>
+                        <Label text="دسته بندی ‌ها" style="-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: #333333;"/>
+                        <VBox spacing="8.0" style="-fx-padding: 0 5 0 0;">
+                            <Hyperlink text="همه دسته‌بندی‌ها" onAction="#handleCategoryClick" style="-fx-text-fill: #a62626; -fx-font-size: 13px; -fx-font-weight: bold;"/>
+                            <Hyperlink text="املاک" onAction="#handleCategoryClick" style="-fx-text-fill: #555555; -fx-font-size: 13px;"/>
+                            <Hyperlink text="وسایل نقلیه" onAction="#handleCategoryClick" style="-fx-text-fill: #555555; -fx-font-size: 13px;"/>
+                            <Hyperlink text="کالای دیجیتال" onAction="#handleCategoryClick" style="-fx-text-fill: #555555; -fx-font-size: 13px;"/>
+                            <Hyperlink text="سرگرمی و فراغت" onAction="#handleCategoryClick" style="-fx-text-fill: #555555; -fx-font-size: 13px;"/>
+                            <Hyperlink text="استخدام و کاریابی" onAction="#handleCategoryClick" style="-fx-text-fill: #555555; -fx-font-size: 13px;"/>
+                            <Hyperlink text="خانه و آشپزخانه" onAction="#handleCategoryClick" style="-fx-text-fill: #555555; -fx-font-size: 13px;"/>
+                            <Hyperlink text="تجهیزات و صنعتی" onAction="#handleCategoryClick" style="-fx-text-fill: #555555; -fx-font-size: 13px;"/>
+                            <Hyperlink onAction="#handleCategoryClick" text="اجتماعی" style="-fx-text-fill: #555555; -fx-font-size: 13px;"/>
+                            <Hyperlink onAction="#handleCategoryClick" text="خدمات" style="-fx-text-fill: #555555; -fx-font-size: 13px;"/>
+                            <Hyperlink onAction="#handleCategoryClick" text="وسایل شخصی" style="-fx-text-fill: #555555; -fx-font-size: 13px;"/>
+                        </VBox>
+
+                        <Separator style="-fx-padding: 5 0 5 0;"/>
+
+                        <VBox spacing="8.0">
+                            <Label text="شهر" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #333333;"/>
+                            <ComboBox fx:id="cityFilterComboBox" promptText="انتخاب شهر" prefWidth="200.0"
+                                      style="-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-border-radius: 4px;"/>
+                        </VBox>
+
+                        <Separator style="-fx-padding: 5 0 5 0;"/>
+                        <VBox spacing="8.0">
+                            <Label text="قیمت (تومان)" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #333333;"/>
+                            <HBox spacing="5.0" alignment="CENTER">
+                                <children>
+                                    <TextField fx:id="minPriceField" promptText="از (حداقل)" prefWidth="95.0" style="-fx-font-size: 11px;"/>
+                                    <TextField fx:id="maxPriceField" promptText="تا (حداکثر)" prefWidth="95.0" style="-fx-font-size: 11px;"/>
+                                </children>
+                            </HBox>
+                        </VBox>
+
+                        <Separator style="-fx-padding: 5 0 5 0;"/>
+
+                        <VBox spacing="8.0">
+                            <Label text="زمان انتشار آگهی" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #333333;"/>
+                            <ComboBox fx:id="timeFilterComboBox" promptText="امروز، هفته گذشته و..." prefWidth="200.0"
+                                      style="-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-border-radius: 4px;"/>
+                        </VBox>
+
+                        <Separator style="-fx-padding: 10 0 5 10;"/>
+
+                        <Button text="اعمال فیلترها" onAction="#filterInputs" prefWidth="200.0"
+                                style="-fx-background-color: #a62626; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8; -fx-background-radius: 4px;"/>
+                    </children>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </left>
+
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background-color: #ffffff; -fx-padding: 15px 15px 15px 15px;" nodeOrientation="LEFT_TO_RIGHT">
+            <content>
+                <VBox spacing="15.0" style="-fx-padding: 25px 20px 0px 20px; -fx-background-color: #ffffff;" nodeOrientation="RIGHT_TO_LEFT">
+                    <children>
+                        <GridPane fx:id="adsGrid" hgap="15.0" vgap="15.0">
+                        </GridPane>
+                    </children>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+</BorderPane>
+
+
+
+
+
+

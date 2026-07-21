@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="org.example.divar.controller.RegisterController"
+           prefWidth="1100.0" prefHeight="750.0"
+           style="-fx-background-color: #f5f5f5;"
+           nodeOrientation="RIGHT_TO_LEFT">
+
+    <VBox alignment="CENTER" spacing="15.0" maxWidth="450.0" maxHeight="680.0"
+          style="-fx-background-color: #ffffff; -fx-background-radius: 8px; -fx-padding: 30px; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 0);" >
+
+        <Label text="دیوار" style="-fx-text-fill: #a62626; -fx-font-size: 32px; -fx-font-weight: bold;"/>
+        <Label text="ایجاد حساب کاربری جدید" style="-fx-text-fill: #555555; -fx-font-size: 16px; -fx-padding: 0 0 5 0;"/>
+
+        <VBox spacing="5.0" fillWidth="true">
+            <children>
+                <Label text="نام" style="-fx-text-fill: #333333; -fx-font-size: 13px;"/>
+                <TextField fx:id="firstnameField"
+                           style="-fx-padding: 10px; -fx-background-radius: 4px; -fx-border-color: #cccccc; -fx-border-radius: 4px; -fx-background-color: #ffffff;"/>
+            </children>
+        </VBox>
+
+        <VBox spacing="5.0" fillWidth="true">
+            <children>
+                <Label text="نام خانوادگی" style="-fx-text-fill: #333333; -fx-font-size: 13px;"/>
+                <TextField fx:id="lastnameField"
+                           style="-fx-padding: 10px; -fx-background-radius: 4px; -fx-border-color: #cccccc; -fx-border-radius: 4px; -fx-background-color: #ffffff;"/>
+            </children>
+        </VBox>
+
+        <VBox spacing="5.0" fillWidth="true">
+            <children>
+                <Label text="نام کاربری" style="-fx-text-fill: #333333; -fx-font-size: 13px;"/>
+                <TextField fx:id="usernameField" promptText="مثال: ali_alavi"
+                           style="-fx-padding: 10px; -fx-background-radius: 4px; -fx-border-color: #cccccc; -fx-border-radius: 4px; -fx-background-color: #ffffff;"/>
+            </children>
+        </VBox>
+
+        <VBox spacing="5.0" fillWidth="true">
+            <children>
+                <Label text="رمز عبور" style="-fx-text-fill: #333333; -fx-font-size: 13px;"/>
+                <PasswordField fx:id="passwordField" promptText="حداقل ۶ کاراکتر"
+                               style="-fx-padding: 10px; -fx-background-radius: 4px; -fx-border-color: #cccccc; -fx-border-radius: 4px; -fx-background-color: #ffffff;"/>
+            </children>
+        </VBox>
+
+        <VBox spacing="5.0" fillWidth="true">
+            <children>
+                <Label text="شماره تماس" style="-fx-text-fill: #333333; -fx-font-size: 13px;"/>
+                <TextField fx:id="phoneNumberField" promptText="مثال: 09123456789"
+                           style="-fx-padding: 10px; -fx-background-radius: 4px; -fx-border-color: #cccccc; -fx-border-radius: 4px; -fx-background-color: #ffffff;"/>
+            </children>
+        </VBox>
+
+        <VBox spacing="5.0" fillWidth="true">
+            <children>
+                <Label text="ایمیل" style="-fx-text-fill: #333333; -fx-font-size: 13px;"/>
+                <TextField fx:id="emailField" promptText="مثال: ali@example.com"
+                           style="-fx-padding: 10px; -fx-background-radius: 4px; -fx-border-color: #cccccc; -fx-border-radius: 4px; -fx-background-color: #ffffff;"/>
+            </children>
+        </VBox>
+
+        <Label fx:id="messageLabel"
+               visible="false"
+               managed="true"
+               wrapText="true"
+               maxWidth="380.0"
+               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-alignment: right;"/>
+
+        <Button text="ثبت نام" onAction="#register" maxWidth="Infinity"
+                style="-fx-background-color: #a62626; -fx-text-fill: #ffffff; -fx-font-size: 16px; -fx-font-weight: bold; -fx-padding: 10px; -fx-background-radius: 4px; -fx-cursor: hand;"/>
+
+        <HBox alignment="CENTER" spacing="5.0" style="-fx-padding: 5 0 0 0;">
+            <children>
+                <Label text="قبلاً ثبت‌نام کرده‌اید؟" style="-fx-text-fill: #666666; -fx-font-size: 13px;"/>
+                <Hyperlink text="وارد شوید" onAction="#goToLogin" style="-fx-text-fill: #a62626; -fx-font-weight: bold; -fx-font-size: 13px; -fx-underline: false;"/>
+            </children>
+        </HBox>
+    </VBox>
+</StackPane>
+

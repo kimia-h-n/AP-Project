@@ -1,0 +1,137 @@
+package org.example.divar.controller;
+
+import javafx.fxml.FXML;
+import javafx.scene.control.Label;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
+import org.example.divar.SwitchStage;
+import org.example.divar.component.ImageGallery;
+import org.example.divar.component.ReasonDialog;
+import org.example.divar.model.Advertisement;
+import org.example.divar.util.AppContext;
+
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+
+public class AdminAdDetailsController {
+
+    private static final DateTimeFormatter DATE_TIME_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy/MM/dd - HH:mm", Locale.ENGLISH)
+                    .withZone(ZoneId.of("Asia/Tehran"));
+
+    @FXML private ImageView mainImage;
+    @FXML private HBox thumbnailBox;
+    @FXML private Label counterLabel;
+
+    @FXML private Label titleLabel;
+    @FXML private Label descriptionLabel;
+    @FXML private Label categoryLabel;
+    @FXML private Label conditionLabel;
+    @FXML private Label priceLabel;
+    @FXML private Label cityLabel;
+    @FXML private Label createdAtLabel;
+    @FXML private Label updatedAtLabel;
+    @FXML private Label sellerLabel;
+    @FXML private Label messageLabel;
+
+    private Advertisement advertisement;
+    private ImageGallery gallery;
+
+    @FXML
+    public void initialize() {
+
+        gallery = new ImageGallery(mainImage, thumbnailBox, counterLabel);
+    }
+
+    public void showAdvertisement(Advertisement advertisement) {
+        this.advertisement = advertisement;
+
+        titleLabel.setText(advertisement.getTitle());
+        descriptionLabel.setText(advertisement.getDescription() != null ? advertisement.getDescription() : "-");
+        cityLabel.setText(advertisement.getCity() != null ? advertisement.getCity().toString() : "-");
+        createdAtLabel.setText(formatInstant(advertisement.getCreatedAt()));
+        updatedAtLabel.setText(formatInstant(advertisement.getUpdatedAt()));
+        sellerLabel.setText(advertisement.getSeller() != null ? advertisement.getSeller().getFullName() : "نامشخص");
+
+        if (advertisement.getCategory() != null) {
+            categoryLabel.setText(advertisement.getCategory().toString());
+        } else {
+            categoryLabel.setText("-");
+        }
+
+        if (advertisement.getCondition() != null) {
+            conditionLabel.setText(advertisement.getCondition().toString());
+        } else {
+            conditionLabel.setText("-");
+        }
+
+
+        String priceText = String.format("%,d", advertisement.getPrice()) + " تومان";
+        priceLabel.setText(priceText);
+
+        gallery.setImages(advertisement.getImagePaths(), advertisement.getImageIds());
+    }
+
+    private String formatInstant(Instant instant) {
+        if (instant == null) {
+            return "-";
+        }
+        return DATE_TIME_FORMATTER.format(instant);
+    }
+
+    @FXML
+    private void showNext() {
+        gallery.showNext();
+    }
+
+    @FXML
+    private void showPrevious() {
+        gallery.showPrevious();
+    }
+
+    @FXML
+    private void deleteAdvertisement() {
+        String fxmlPath = "/org/example/divar/fxml/delete_ad_dialog.fxml";
+        String title = "حذف آگهی";
+        String subtitle = "لطفاً دلیل حذف آگهی «" + advertisement.getTitle() + "» را وارد کنید.";
+
+        String reason = ReasonDialog.show(fxmlPath, title, subtitle, true);
+
+        if (reason == null || reason.isEmpty()) {
+            showError("برای حذف آگهی باید دلیل را وارد کنید.");
+            return;
+        }
+
+        try {
+            AppContext.getAdvertisementService().deleteAdvertisement(advertisement.getId());
+            SwitchStage.switchToAdminPanel();
+        } catch (RuntimeException ex) {
+            showError(ex.getMessage());
+        }
+    }
+
+    @FXML
+    private void openChat() {
+        SwitchStage.switchToChat();
+    }
+
+    @FXML
+    private void goBack() {
+        SwitchStage.goBack();
+    }
+
+    private void showError(String message) {
+        messageLabel.setText(message);
+        messageLabel.getStyleClass().setAll("error-message");
+        messageLabel.setVisible(true);
+        messageLabel.setManaged(true);
+    }
+}
+
+
+
+
+
+

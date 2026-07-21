@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<fx:root type="javafx.scene.layout.VBox" spacing="8.0" prefWidth="220.0" prefHeight="280.0"
+         styleClass="admin-card" style="-fx-padding: 12px; -fx-cursor: default;"
+         nodeOrientation="RIGHT_TO_LEFT"
+         xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <StackPane style="-fx-background-color: #f2f2f2; -fx-background-radius: 6px;" prefHeight="130.0">
+            <children>
+                <ImageView fx:id="cardImage" fitWidth="196.0" fitHeight="130.0" preserveRatio="true"/>
+            </children>
+        </StackPane>
+
+        <Label fx:id="cardTitle" styleClass="admin-card-title" wrapText="true" style="-fx-font-weight: bold;"/>
+        <Label fx:id="cardLocation" styleClass="admin-card-location" style="-fx-text-fill: #757575; -fx-font-size: 11px;"/>
+
+        <!-- کانتینر برای علت گزارش جهت یک‌دست ماندن فاصله -->
+        <VBox VBox.vgrow="ALWAYS" alignment="BOTTOM_RIGHT" spacing="2.0">
+            <children>
+                <Label fx:id="reasonLabel" styleClass="reason-value" wrapText="true"/>
+            </children>
+        </VBox>
+
+        <Button fx:id="handleBtn" text="رسیدگی" styleClass="link-btn" maxWidth="Infinity"/>
+    </children>
+</fx:root>

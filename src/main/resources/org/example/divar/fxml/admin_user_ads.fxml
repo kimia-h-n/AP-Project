@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.divar.controller.AdminUserAdsController"
+      spacing="18.0" nodeOrientation="RIGHT_TO_LEFT">
+    <children>
+
+        <!-- هدر صفحه شامل دکمه بازگشت و عنوان -->
+        <HBox alignment="CENTER_LEFT" spacing="15.0">
+            <children>
+                <Button fx:id="backBtn" text="← بازگشت به کاربران" onAction="#handleBack"
+                        style="-fx-background-color: #f0f0f0; -fx-text-fill: #333333; -fx-cursor: hand; -fx-font-size: 13px; -fx-padding: 8px 16px; -fx-background-radius: 6px;"/>
+                <VBox spacing="2.0" HBox.hgrow="ALWAYS">
+                    <children>
+                        <Label fx:id="pageTitleLbl" text="آگهی‌های کاربر" styleClass="admin-page-title"/>
+                        <Label fx:id="pageSubtitleLbl" text="لیست تمامی آگهی‌های ثبت‌شده توسط این کاربر" styleClass="admin-page-subtitle"/>
+                    </children>
+                </VBox>
+            </children>
+        </HBox>
+
+        <!-- پیام سیستم در صورت بروز خطا یا خالی بودن -->
+        <Label fx:id="messageLabel" wrapText="true" maxWidth="Infinity" visible="false" managed="false"/>
+
+        <!-- اسکرول برای شبکه‌ی کارت‌های آگهی -->
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;" VBox.vgrow="ALWAYS">
+            <content>
+                <FlowPane fx:id="adsContainer" hgap="15.0" vgap="15.0" style="-fx-background-color: transparent;">
+                    <padding>
+                        <Insets bottom="20.0" left="5.0" right="5.0" top="5.0"/>
+                    </padding>
+                </FlowPane>
+            </content>
+        </ScrollPane>
+
+    </children>
+</VBox>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.divar.controller.AdminAdsController"
+      spacing="18.0" nodeOrientation="RIGHT_TO_LEFT">
+    <children>
+
+        <VBox spacing="4.0">
+            <children>
+                <Label text="آگهی‌ها" styleClass="admin-page-title"/>
+                <Label text="تمام آگهی‌های فعال ثبت‌شده در دیوار" styleClass="admin-page-subtitle"/>
+            </children>
+        </VBox>
+
+        <Label fx:id="messageLabel" wrapText="true" maxWidth="Infinity" visible="false" managed="false"/>
+
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background-insets: 0;">
+            <content>
+                <FlowPane fx:id="adsFlowPane" hgap="18.0" vgap="18.0"/>
+            </content>
+        </ScrollPane>
+
+    </children>
+</VBox>

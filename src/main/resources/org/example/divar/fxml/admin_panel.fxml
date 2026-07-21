@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.divar.controller.AdminController"
+            prefWidth="1250.0" prefHeight="760.0"
+            style="-fx-background-color: #f9f9f9;"
+            nodeOrientation="RIGHT_TO_LEFT">
+
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="admin-topbar">
+            <children>
+                <Label text="دیوار" styleClass="admin-logo"/>
+                <Label text="پنل مدیریت" style="-fx-text-fill: #999999; -fx-font-size: 13px; -fx-padding: 4px 0 0 0;"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="چت با کاربر" styleClass="admin-topbar-btn" onAction="#openChat"/>
+            </children>
+        </HBox>
+    </top>
+
+    <left>
+        <VBox styleClass="admin-sidebar" prefWidth="230.0" spacing="4.0">
+            <children>
+                <Button fx:id="dashboardBtn" text="داشبورد" prefWidth="230.0" maxWidth="Infinity" alignment="CENTER_LEFT" onAction="#showDashboard"/>
+                <Button fx:id="adsBtn" text="آگهی‌ها" prefWidth="230.0" maxWidth="Infinity" alignment="CENTER_LEFT" onAction="#showAds"/>
+                <Button fx:id="reportsBtn" text="گزارش‌ها" prefWidth="230.0" maxWidth="Infinity" alignment="CENTER_LEFT" onAction="#showReports"/>
+                <Button fx:id="usersBtn" text="کاربران" prefWidth="230.0" maxWidth="Infinity" alignment="CENTER_LEFT" onAction="#showUsers"/>
+
+                <Region VBox.vgrow="ALWAYS"/>
+
+                <Separator/>
+                <Button text="خروج" prefWidth="230.0" maxWidth="Infinity" style="-fx-background-color: transparent; -fx-text-fill: #a62626; -fx-font-size: 14px; -fx-padding: 12px 24px; -fx-alignment: center-right; -fx-cursor: hand;" onAction="#logout"/>
+            </children>
+        </VBox>
+    </left>
+
+    <center>
+        <StackPane fx:id="contentArea" styleClass="admin-content" nodeOrientation="RIGHT_TO_LEFT"/>
+    </center>
+
+</BorderPane>
+
+

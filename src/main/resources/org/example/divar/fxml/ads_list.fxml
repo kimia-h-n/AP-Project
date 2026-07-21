@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fitToWidth="true" style="-fx-background-color: transparent; -fx-background-insets: 0;"
+            nodeOrientation="LEFT_TO_RIGHT">
+    <content>
+        <VBox spacing="20.0" style="-fx-padding: 10px 20px 20px 20px; -fx-background-color: #f9f9f9;" nodeOrientation="RIGHT_TO_LEFT">
+            <children>
+                <Label fx:id="pageTitleLabel" text="آگهی‌های من" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
+
+                <GridPane fx:id="adsGrid" hgap="15.0" vgap="15.0">
+                </GridPane>
+            </children>
+        </VBox>
+    </content>
+</ScrollPane>

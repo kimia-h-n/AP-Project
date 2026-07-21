@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.divar.controller.HandleReportDialogController"
+      spacing="12.0" prefWidth="420.0" styleClass="dialog-container"
+      stylesheets="@../css/styles.css" nodeOrientation="RIGHT_TO_LEFT">
+
+    <padding>
+        <Insets top="20.0" right="20.0" bottom="20.0" left="20.0"/>
+    </padding>
+
+    <children>
+        <Label text="رسیدگی به گزارش" styleClass="dialog-title"/>
+        <Label text="لطفاً نوع اقدام مورد نظر را انتخاب کرده و علت آن را ثبت کنید." styleClass="dialog-subtitle" wrapText="true"/>
+
+        <VBox spacing="8.0" styleClass="radio-group-container">
+            <children>
+                <RadioButton fx:id="deleteAdRadio" text="حذف آگهی" selected="true" styleClass="custom-radio"/>
+                <RadioButton fx:id="banUserRadio" text="مسدود کردن کاربر" styleClass="custom-radio"/>
+            </children>
+        </VBox>
+
+        <TextArea fx:id="reasonTextArea" promptText="علت اقدام خود را بنویسید..." prefRowCount="3" wrapText="true" styleClass="dialog-textarea"/>
+
+        <HBox spacing="10.0" alignment="CENTER_LEFT" styleClass="dialog-actions">
+            <children>
+                <Button fx:id="submitBtn" text="ثبت" onAction="#handleSubmit" styleClass="btn-primary"/>
+                <Button fx:id="cancelBtn" text="انصراف" onAction="#handleCancel" styleClass="btn-secondary"/>
+            </children>
+        </HBox>
+    </children>
+</VBox>

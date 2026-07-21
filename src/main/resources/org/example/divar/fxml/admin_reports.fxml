@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.divar.controller.AdminReportsController"
+      spacing="18.0" nodeOrientation="RIGHT_TO_LEFT">
+    <children>
+
+        <VBox spacing="4.0">
+            <children>
+                <Label text="گزارش‌ها" styleClass="admin-page-title"/>
+                <Label text="آگهی‌های گزارش‌شده توسط کاربران" styleClass="admin-page-subtitle"/>
+            </children>
+        </VBox>
+
+        <Label fx:id="messageLabel" wrapText="true" maxWidth="Infinity" visible="false" managed="false"/>
+        <Label fx:id="emptyLabel" text="در حال حاضر گزارشی ثبت نشده است." visible="false" managed="false"
+               style="-fx-text-fill: #999999; -fx-font-size: 14px;"/>
+
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background-insets: 0;">
+            <content>
+                <FlowPane fx:id="reportsFlowPane" hgap="18.0" vgap="18.0"/>
+            </content>
+        </ScrollPane>
+
+    </children>
+</VBox>
