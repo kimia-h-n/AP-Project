@@ -16,6 +16,7 @@ public class AdReportResponse {
     private String adTitle;
     private String sellerFirstName;
     private String sellerLastName;
+    private Long sellerId;
     private UUID primaryImageId;
     private String primaryImageUrl;
     private ReportReason reportReason;

@@ -1,5 +1,8 @@
-package com.example.sales.auth;
+package com.example.sales.authentication;
 
+import com.example.sales.authentication.dto.AuthenticationRequest;
+import com.example.sales.authentication.dto.AuthenticationResponse;
+import com.example.sales.authentication.dto.RegisterRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

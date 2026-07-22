@@ -240,7 +240,7 @@ PACKAGE: com.example.sales.admin
     - List<AdCardSummary> getUserAds(Long id)
 
 
-PACKAGE: com.example.sales.auth
+PACKAGE: com.example.sales.authentication
 --------------------------------------------------------------------------------
 
   FILE: AuthenticationController.java
