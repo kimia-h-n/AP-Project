@@ -4,10 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Conversation {
+
     private Advertisement advertisement;
     private String buyerUsername;
     private String sellerUsername;
     private List<Message> messages;
+    private Long buyerId;
+    private Long sellerId;
 
     public Conversation(Advertisement advertisement, String buyerUsername, String sellerUsername) {
         this.advertisement = advertisement;
@@ -21,7 +24,10 @@ public class Conversation {
     }
 
     public String getAdvertisementTitle() {
-        return advertisement != null ? advertisement.getTitle() : "بدون عنوان";
+        if (advertisement != null) {
+            return advertisement.getTitle();
+        }
+        return "No Title";
     }
 
     public String getBuyerUsername() {
@@ -42,9 +48,25 @@ public class Conversation {
 
     public String getLastMessage() {
         if (messages.isEmpty()) {
-            return "پیامی وجود ندارد";
+            return "No messages";
         }
         return messages.get(messages.size() - 1).getText();
+    }
+
+    public Long getBuyerId() {
+        return buyerId;
+    }
+
+    public void setBuyerId(Long buyerId) {
+        this.buyerId = buyerId;
+    }
+
+    public Long getSellerId() {
+        return sellerId;
+    }
+
+    public void setSellerId(Long sellerId) {
+        this.sellerId = sellerId;
     }
 }
 

@@ -33,7 +33,8 @@ public enum Category {
                 return category;
             }
         }
-        throw new RuntimeException("Category not found!" + text);
+        throw new RuntimeException("Category not found: " + text);
     }
 }
+
 

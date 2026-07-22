@@ -26,7 +26,7 @@ public enum ProductCondition {
                 return status;
             }
         }
-        throw new RuntimeException("Condition not found!" + text);
+        throw new RuntimeException("Condition not found: " + text);
     }
 }
 

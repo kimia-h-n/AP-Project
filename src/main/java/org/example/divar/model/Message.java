@@ -3,6 +3,7 @@ package org.example.divar.model;
 import java.time.LocalDateTime;
 
 public class Message {
+
     private String senderUsername;
     private String receiverUsername;
     private String text;

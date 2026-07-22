@@ -28,7 +28,7 @@ public enum AdvertisementStatus {
                 return status;
             }
         }
-        throw new RuntimeException("Status not found: " + text);
+        throw new RuntimeException("Advertisement status not found: " + text);
     }
 }
 
