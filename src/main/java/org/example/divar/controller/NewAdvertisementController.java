@@ -1,8 +1,10 @@
 package org.example.divar.controller;
 
 import org.example.divar.model.*;
+import org.example.divar.model.City;
 import org.example.divar.util.SessionManager;
 import org.example.divar.util.AppContext;
+import org.example.divar.util.ImageLoader;
 import org.example.divar.validation.AdvertisementValidation;
 import org.example.divar.SwitchStage;
 import javafx.fxml.FXML;
@@ -18,6 +20,8 @@ import java.util.List;
 
 public class NewAdvertisementController {
 
+    @FXML private Label pageTitleLabel;
+    @FXML private Button submitButton;
     @FXML private ComboBox<Category> category;
     @FXML private ComboBox<ProductCondition> condition;
     @FXML private ComboBox<City> city;
@@ -29,13 +33,77 @@ public class NewAdvertisementController {
     @FXML private Label imagePathLabel;
     @FXML private Label messageLabel;
 
-    private final ArrayList<String> imagePaths = new ArrayList<>();
+    private static class ExistingImageRef {
+        final String id;
+        final String url;
+        ExistingImageRef(String id, String url) {
+            this.id = id;
+            this.url = url;
+        }
+    }
+
+    private final List<ExistingImageRef> existingImages = new ArrayList<>();
+    private final List<String> imagesToDelete = new ArrayList<>();
+    private final ArrayList<String> newLocalFiles = new ArrayList<>();
+
+    private Long editingAdId = null;
 
     @FXML
     public void initialize() {
         category.getItems().setAll(Category.values());
         condition.getItems().setAll(ProductCondition.values());
-        city.getItems().setAll(City.values());
+
+        city.setConverter(new javafx.util.StringConverter<City>() {
+            @Override
+            public String toString(City cityObject) {
+                return cityObject == null ? "" : cityObject.getName();
+            }
+
+            @Override
+            public City fromString(String string) {
+                return null;
+            }
+        });
+
+        try {
+            ArrayList<City> serverCities = AppContext.getAdvertisementService().getAllProvinces();
+            city.getItems().setAll(serverCities);
+        } catch (Exception e) {
+            showError("امکان دریافت لیست شهرها از سرور وجود ندارد.");
+            System.err.println("Error loading cities: " + e.getMessage());
+        }
+    }
+
+    public void initializeForEdit(Advertisement advertisement) {
+        this.editingAdId = advertisement.getId();
+
+        pageTitleLabel.setText("ویرایش آگهی");
+        submitButton.setText("ذخیره تغییرات");
+
+        titleField.setText(advertisement.getTitle());
+        descriptionArea.setText(advertisement.getDescription());
+        addressField.setText(advertisement.getAddress());
+        priceField.setText(String.valueOf(advertisement.getPrice()));
+        category.setValue(advertisement.getCategory());
+        condition.setValue(advertisement.getCondition());
+        city.setValue(advertisement.getCity());
+
+        existingImages.clear();
+        imagesToDelete.clear();
+        newLocalFiles.clear();
+        images.getChildren().clear();
+
+        ArrayList<String> urls = advertisement.getImagePaths();
+        ArrayList<String> ids = advertisement.getImageIds();
+        if (urls != null) {
+            for (int i = 0; i < urls.size(); i++) {
+                String id = (ids != null && i < ids.size()) ? ids.get(i) : null;
+                ExistingImageRef ref = new ExistingImageRef(id, urls.get(i));
+                existingImages.add(ref);
+                addExistingImageThumbnail(ref);
+            }
+        }
+        updateImagePathLabel();
     }
 
     @FXML
@@ -50,37 +118,66 @@ public class NewAdvertisementController {
 
         if (selectedFiles != null && !selectedFiles.isEmpty()) {
             for (File file : selectedFiles) {
-                String absolutePath = file.getAbsolutePath();
-                imagePaths.add(absolutePath);
-
-                Image image = new Image(file.toURI().toString());
-                ImageView thumb = new ImageView(image);
-                thumb.setFitWidth(100.0);
-                thumb.setFitHeight(100.0);
-                thumb.setPreserveRatio(true);
-
-                Button deleteBtn = new Button("حذف عکس");
-                deleteBtn.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
-
-                VBox imageRow = new VBox(5);
-                imageRow.setAlignment(Pos.CENTER);
-                imageRow.getChildren().addAll(thumb, deleteBtn);
-
-                deleteBtn.setOnAction(e -> {
-                    imagePaths.remove(absolutePath);
-                    images.getChildren().remove(imageRow);
-
-                    if (imagePaths.isEmpty()) {
-                        imagePathLabel.setText("عکسی انتخاب نشده");
-                    } else {
-                        imagePathLabel.setText(imagePaths.size() + " عکس");
-                    }
-                });
-
-                images.getChildren().add(imageRow);
+                String path = file.getAbsolutePath();
+                newLocalFiles.add(path);
+                addNewLocalThumbnail(path);
             }
+        }
+    }
 
-            imagePathLabel.setText(imagePaths.size() + " عکس انتخاب شد");
+    private void addExistingImageThumbnail(ExistingImageRef ref) {
+        Image image = ImageLoader.loadMainImageFromUrl(ref.url);
+        if (image == null) {
+            image = ImageLoader.loadDefault();
+        }
+        VBox imageRow = buildImageRow(image, () -> {
+            existingImages.remove(ref);
+            if (ref.id != null) {
+                imagesToDelete.add(ref.id);
+            }
+        });
+        images.getChildren().add(imageRow);
+        updateImagePathLabel();
+    }
+
+    private void addNewLocalThumbnail(String path) {
+        Image image = ImageLoader.loadFromPath(path);
+        if (image == null) {
+            image = ImageLoader.loadDefault();
+        }
+        VBox imageRow = buildImageRow(image, () -> newLocalFiles.remove(path));
+        images.getChildren().add(imageRow);
+        updateImagePathLabel();
+    }
+
+    private VBox buildImageRow(Image image, Runnable onDelete) {
+        ImageView thumb = new ImageView(image);
+        thumb.setFitWidth(100.0);
+        thumb.setFitHeight(100.0);
+        thumb.setPreserveRatio(true);
+
+        Button deleteBtn = new Button("حذف عکس");
+        deleteBtn.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
+
+        VBox imageRow = new VBox(5);
+        imageRow.setAlignment(Pos.CENTER);
+        imageRow.getChildren().addAll(thumb, deleteBtn);
+
+        deleteBtn.setOnAction(e -> {
+            onDelete.run();
+            images.getChildren().remove(imageRow);
+            updateImagePathLabel();
+        });
+
+        return imageRow;
+    }
+
+    private void updateImagePathLabel() {
+        int total = existingImages.size() + newLocalFiles.size();
+        if (total == 0) {
+            imagePathLabel.setText("عکسی انتخاب نشده");
+        } else {
+            imagePathLabel.setText(total + " عکس انتخاب شد");
         }
     }
 
@@ -96,56 +193,36 @@ public class NewAdvertisementController {
             messageLabel.setText("");
         }
 
-        Object categoryValue = category.getValue();
-        Object conditionValue = condition.getValue();
-        Object cityValue = city.getValue();
+        Category selectedCategory = category.getValue();
+        ProductCondition selectedCondition = condition.getValue();
+        City selectedCity = city.getValue();
 
-        if (categoryValue == null) {
+        if (selectedCategory == null) {
             showError("لطفاً یک دسته‌بندی برای آگهی خود انتخاب کنید.");
             return;
         }
 
-        if (conditionValue == null) {
+        if (selectedCondition == null) {
             showError("لطفاً وضعیت کالا را انتخاب کنید.");
             return;
         }
 
-        if (cityValue == null) {
+        if (selectedCity == null) {
             showError("لطفاً شهر خود را انتخاب کنید.");
             return;
         }
 
         try {
-            Category selectedCategory = Category.fromString(categoryValue.toString());
-            ProductCondition selectedCondition = ProductCondition.fromString(conditionValue.toString());
-            City selectedCity = City.fromString(cityValue.toString());
-
             AdvertisementValidation validation = AppContext.getAdvertisementValidation();
-            validation.advertisementValidation(title, price, selectedCategory, selectedCity, selectedCondition, address); //
+            validation.advertisementValidation(title, price, selectedCategory, selectedCity, selectedCondition, address);
 
             long lPrice = Long.parseLong(price.trim());
 
-            User currentUser = new User();
-            currentUser.setUsername(SessionManager.getCurrentUsername());
-
-            AppContext.getAdvertisementService().createAdvertisement(
-                    title, description, address, lPrice,
-                    selectedCategory, selectedCondition, selectedCity,
-                    imagePaths, currentUser
-            );
-
-            showSuccess("آگهی شما با موفقیت ثبت شد و در انتظار بررسی مدیر است.");
-
-            new Thread(() -> {
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                Platform.runLater(() -> {
-                    goBack();
-                });
-            }).start();
+            if (editingAdId == null) {
+                submitNewAdvertisement(title, description, address, lPrice, selectedCategory, selectedCondition, selectedCity);
+            } else {
+                submitEditedAdvertisement(title, description, address, lPrice, selectedCategory, selectedCondition, selectedCity);
+            }
 
         } catch (IllegalArgumentException e) {
             showError(e.getMessage());
@@ -154,20 +231,105 @@ public class NewAdvertisementController {
         }
     }
 
-    @FXML
-    private void goBack() {
-        SwitchStage.goBack();
+    private void submitNewAdvertisement(String title, String description, String address, long price,
+                                        Category category, ProductCondition condition, City city) {
+        User currentUser = new User();
+        currentUser.setUsername(SessionManager.getCurrentUsername());
+
+        try {
+            long newAdId = AppContext.getAdvertisementService().createAdvertisement(
+                    title, description, address, price, category, condition, city, currentUser);
+
+            if (!newLocalFiles.isEmpty()) {
+                AppContext.getAdvertisementService().uploadAdvertisementImages(newAdId, newLocalFiles);
+            }
+
+            showSuccess("آگهی شما با موفقیت ثبت شد و در انتظار بررسی مدیر است.");
+            goBackAfterDelay();
+
+        } catch (Exception e) {
+            showError("خطا در ثبت آگهی یا آپلود تصاویر: " + e.getMessage());
+        }
     }
 
-    @FXML
-    private void goToProfile() {
-        SwitchStage.switchToProfile();
+    private void submitEditedAdvertisement(String title, String description, String address, long price,
+                                           Category category, ProductCondition condition, City city) {
+        try {
+            AppContext.getAdvertisementService().updateAdvertisement(
+                    editingAdId, title, description, address, price, category, condition, city, null);
+
+            applyImageChanges();
+
+            showSuccess("آگهی شما با موفقیت ویرایش شد.");
+            goBackAfterDelay();
+
+        } catch (Exception e) {
+            showError("خطا در ثبت تغییرات آگهی: " + e.getMessage());
+        }
     }
 
-    @FXML
-    private void goToChat() {
-        SwitchStage.switchToChat();
+    private void applyImageChanges() {
+        var adService = AppContext.getAdvertisementService();
+
+        System.out.println("=== DEBUG IMAGE CHANGES ===");
+        System.out.println("imagesToDelete count: " + imagesToDelete.size());
+        System.out.println("newLocalFiles count: " + newLocalFiles.size());
+
+        int localIndex = 0;
+        int deleteIndex = 0;
+
+        while (deleteIndex < imagesToDelete.size() && localIndex < newLocalFiles.size()) {
+            String imageIdToReplace = imagesToDelete.get(deleteIndex);
+            String newFilePath = newLocalFiles.get(localIndex);
+            System.out.println("Executing REPLACE (PUT) for imageId: " + imageIdToReplace);
+            try {
+                adService.replaceAdvertisementImage(imageIdToReplace, newFilePath);
+            } catch (RuntimeException e) {
+                System.err.println("Error REPLACE: " + e.getMessage());
+            }
+            deleteIndex++;
+            localIndex++;
+        }
+
+        while (deleteIndex < imagesToDelete.size()) {
+            String imageIdToDelete = imagesToDelete.get(deleteIndex);
+            System.out.println("Executing DELETE for imageId: " + imageIdToDelete);
+            try {
+                adService.deleteAdvertisementImage(imageIdToDelete);
+            } catch (RuntimeException e) {
+                System.err.println("Error DELETE: " + e.getMessage());
+            }
+            deleteIndex++;
+        }
+
+        if (localIndex < newLocalFiles.size()) {
+            ArrayList<String> remainingFiles = new ArrayList<>(newLocalFiles.subList(localIndex, newLocalFiles.size()));
+            System.out.println("Executing POST /images for remaining new files count: " + remainingFiles.size());
+            try {
+                adService.uploadAdvertisementImages(editingAdId, remainingFiles);
+            } catch (RuntimeException e) {
+                System.err.println("Error POST Upload: " + e.getMessage());
+            }
+        }
+        System.out.println("==========================");
     }
+
+    private void goBackAfterDelay() {
+        new Thread(() -> {
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            Platform.runLater(() -> {
+                goBack();
+            });
+        }).start();
+    }
+
+    @FXML private void goBack() { SwitchStage.goBack(); }
+    @FXML private void goToProfile() { SwitchStage.switchToProfile(); }
+    @FXML private void goToChat() { SwitchStage.switchToChat(); }
 
     private void showError(String message) {
         if (messageLabel != null) {
@@ -177,6 +339,7 @@ public class NewAdvertisementController {
                 messageLabel.getStyleClass().add("error-message");
             }
             messageLabel.setVisible(true);
+            messageLabel.setManaged(true);
         } else {
             System.err.println("Error: " + message);
         }
@@ -195,3 +358,7 @@ public class NewAdvertisementController {
         }
     }
 }
+
+
+
+

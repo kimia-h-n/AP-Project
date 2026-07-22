@@ -1,10 +1,11 @@
 package org.example.divar.controller;
 
 import org.example.divar.SwitchStage;
-import org.example.divar.component.AdvertisementCard;
+import org.example.divar.component.AdSummaryCard;
 import org.example.divar.model.Advertisement;
+import org.example.divar.model.Category;
 import org.example.divar.model.City;
-import org.example.divar.service.AdvertisementService;
+import org.example.divar.model.DateFilter;
 import org.example.divar.util.AppContext;
 
 import javafx.event.ActionEvent;
@@ -17,33 +18,50 @@ import javafx.scene.layout.GridPane;
 
 import java.util.ArrayList;
 
-
 public class HomeController {
 
     @FXML private GridPane adsGrid;
-    @FXML private ComboBox<String> cityFilterComboBox;
+    @FXML private ComboBox<City> cityFilterComboBox;
     @FXML private ComboBox<String> timeFilterComboBox;
     @FXML private TextField minPriceField;
     @FXML private TextField maxPriceField;
     @FXML private TextField searchField;
 
-    private ArrayList<Advertisement> advertisements = new ArrayList<>();
     private ArrayList<Advertisement> activeAds = new ArrayList<>();
-
-    private String selectedCategory = "همه دسته‌بندی‌ها";
+    private Category selectedCategoryEnum = null;
+    private Hyperlink lastClickedCategoryLink = null;
 
     @FXML
     public void initialize() {
+        cityFilterComboBox.setConverter(new javafx.util.StringConverter<City>() {
+            @Override
+            public String toString(City cityObject) {
+                return cityObject == null ? "" : cityObject.getName();
+            }
 
-        cityFilterComboBox.getItems().add("همه شهرها");
-        for (City city : City.values()) {
-            cityFilterComboBox.getItems().add(city.getLabel());
+            @Override
+            public City fromString(String string) {
+                return null;
+            }
+        });
+
+        try {
+            ArrayList<City> serverCities = AppContext.getAdvertisementService().getAllProvinces();
+
+            City allCitiesPlaceholder = new City(null, "همه شهرها");
+            cityFilterComboBox.getItems().add(allCitiesPlaceholder);
+            cityFilterComboBox.getItems().addAll(serverCities);
+            cityFilterComboBox.setValue(allCitiesPlaceholder);
+        } catch (Exception e) {
+            System.err.println("Error loading cities in home: " + e.getMessage());
         }
-        cityFilterComboBox.setValue("همه شهرها");
 
-        timeFilterComboBox.getItems().addAll("همه زمان‌ها", "امروز", "دیروز", "هفته گذشته");
+        timeFilterComboBox.getItems().clear();
+        timeFilterComboBox.getItems().add("همه زمان‌ها");
+        for (DateFilter df : DateFilter.values()) {
+            timeFilterComboBox.getItems().add(df.getLabel());
+        }
         timeFilterComboBox.setValue("همه زمان‌ها");
-
         loadActiveAd();
 
         adsGrid.widthProperty().addListener((obs, old, newVal) -> {
@@ -54,97 +72,96 @@ public class HomeController {
     }
 
     private void loadActiveAd() {
-        AdvertisementService service = AppContext.getAdvertisementService();
-        advertisements = service.getActiveAdvertisements();
-        activeAds = new ArrayList<>(advertisements);
-
-        System.out.println("تعداد آگهی‌ها: " + advertisements.size());
-        showAds(adsGrid.getWidth() > 0 ? adsGrid.getWidth() : 900);
+        try {
+            activeAds = AppContext.getAdvertisementService().getActiveAdvertisements();
+            showAds(adsGrid.getWidth() > 0 ? adsGrid.getWidth() : 900);
+        } catch (Exception e) {
+            System.err.println("خطا در لود اولیه آگهی‌ها: " + e.getMessage());
+        }
     }
 
     @FXML
     private void handleCategoryClick(ActionEvent event) {
         Hyperlink clickedLink = (Hyperlink) event.getSource();
-        selectedCategory = clickedLink.getText();
 
-        filterInputs();
+        if (lastClickedCategoryLink != null) {
+            lastClickedCategoryLink.setStyle("-fx-text-fill: #303030; -fx-font-weight: normal;");
+        }
+        clickedLink.setStyle("-fx-text-fill: #A62626; -fx-font-weight: bold;");
+        lastClickedCategoryLink = clickedLink;
+
+        String categoryText = clickedLink.getText();
+
+        if ("همه دسته‌بندی‌ها".equals(categoryText)) {
+            selectedCategoryEnum = null;
+            loadActiveAd();
+            return;
+        }
+
+        try {
+            selectedCategoryEnum = Category.fromString(categoryText);
+            activeAds = AppContext.getAdvertisementService().filterAdvertisements(null, null, selectedCategoryEnum, null, null);
+            showAds(adsGrid.getWidth() > 0 ? adsGrid.getWidth() : 900);
+        } catch (Exception e) {
+            System.err.println("خطا در فیلتر دسته‌بندی: " + e.getMessage());
+        }
     }
 
     @FXML
     private void filterInputs() {
+        City selectedCity = cityFilterComboBox.getValue();
+        Long cityId = (selectedCity != null && selectedCity.getId() != null) ? selectedCity.getId() : null;
 
-        String keyword;
-        if (searchField.getText() == null) {
-            keyword = "";
-        } else {
-            keyword = searchField.getText().trim().toLowerCase();
+        Long minPrice = getPriceFromField(minPriceField);
+        Long maxPrice = getPriceFromField(maxPriceField);
+
+        String selectedTimeLabel = timeFilterComboBox.getValue();
+        DateFilter dateFilter = DateFilter.fromString(selectedTimeLabel);
+
+        try {
+            activeAds = AppContext.getAdvertisementService().filterAdvertisements(
+                    minPrice, maxPrice, selectedCategoryEnum, cityId, dateFilter
+            );
+            showAds(adsGrid.getWidth() > 0 ? adsGrid.getWidth() : 900);
+        } catch (Exception e) {
+            System.err.println("خطا در اعمال فیلترها: " + e.getMessage());
         }
-
-        String selectedCity = cityFilterComboBox.getValue();
-        long minPrice = getPriceFromField(minPriceField, 0);
-        long maxPrice = getPriceFromField(maxPriceField, Long.MAX_VALUE);
-
-        activeAds = processFilters(keyword, selectedCity, minPrice, maxPrice);
-        showAds(adsGrid.getWidth() > 0 ? adsGrid.getWidth() : 900);
     }
 
+    @FXML
+    private void handleSearch() {
+        String keyword = (searchField.getText() != null) ? searchField.getText().trim() : "";
 
-    private long getPriceFromField(TextField field, long defaultValue) {
-        String text = field.getText().trim();
-        if (text.isEmpty()) {
-            return defaultValue;
+        try {
+            if (keyword.isEmpty()) {
+                activeAds = AppContext.getAdvertisementService().getActiveAdvertisements();
+            } else {
+                activeAds = AppContext.getAdvertisementService().searchAdvertisements(keyword);
+            }
+
+            double currentWidth = adsGrid.getWidth() > 0 ? adsGrid.getWidth() : 900;
+            showAds(currentWidth);
+
+        } catch (Exception e) {
+            System.err.println("خطا در سرچ آگهی: " + e.getMessage());
         }
+    }
+
+    private Long getPriceFromField(TextField field) {
+        if (field == null || field.getText() == null) return null;
+        String text = field.getText().trim();
+        if (text.isEmpty()) return null;
         try {
             return Long.parseLong(text);
         } catch (NumberFormatException e) {
-            System.out.println("Invalid input!");
-            return defaultValue;
+            return null;
         }
-    }
-
-    private ArrayList<Advertisement> processFilters(String keyword, String city, long min, long max) {
-        ArrayList<Advertisement> filteredList = new ArrayList<>();
-
-        for (Advertisement advertisement : advertisements) {
-
-            boolean hasKeyword = false;
-            if (keyword.isEmpty()) {
-                hasKeyword = true;
-            } else if (advertisement.getTitle().toLowerCase().contains(keyword) ||
-                    (advertisement.getDescription() != null && advertisement.getDescription().toLowerCase().contains(keyword))) {
-                hasKeyword = true;
-            }
-
-            boolean hasCategory = false;
-            if (selectedCategory.equals("همه دسته‌بندی‌ها")) {
-                hasCategory = true;
-            } else if (advertisement.getCategory() != null && advertisement.getCategory().getLabel().equals(selectedCategory)) {
-                hasCategory = true;
-            }
-
-            boolean hasCity = false;
-            if (city.equals("همه شهرها")) {
-                hasCity = true;
-            } else if (advertisement.getCity() != null && advertisement.getCity().getLabel().equals(city)) {
-                hasCity = true;
-            }
-
-            boolean hasPrice = false;
-            if (advertisement.getPrice() >= min && advertisement.getPrice() <= max){
-                hasPrice = true;
-            }
-
-            if (hasKeyword && hasCity && hasPrice && hasCategory) {
-                filteredList.add(advertisement);
-            }
-        }
-        return filteredList;
     }
 
     private void showAds(double width) {
         adsGrid.getChildren().clear();
 
-        if (activeAds.isEmpty()) {
+        if (activeAds == null || activeAds.isEmpty()) {
             Label empty = new Label("هیچ آگهی‌ای با این فیلترها پیدا نشد.");
             empty.setStyle("-fx-font-size: 16px; -fx-text-fill: #888;");
             adsGrid.add(empty, 0, 0);
@@ -152,10 +169,10 @@ public class HomeController {
         }
 
         int columns = (int) Math.max(1, width / 240);
-
         int row = 0, col = 0;
+
         for (Advertisement ad : activeAds) {
-            AdvertisementCard card = new AdvertisementCard(ad);
+            AdSummaryCard card = new AdSummaryCard(ad, false);
             adsGrid.add(card, col, row);
 
             col++;
@@ -166,14 +183,11 @@ public class HomeController {
         }
     }
 
-    @FXML private void goToNewAd() {
-        SwitchStage.switchToNewAd(); }
-
-    @FXML private void goToChat() {
-        SwitchStage.switchToChat(); }
-
-    @FXML private void goToProfile() {
-        SwitchStage.switchToProfile(); }
+    @FXML private void goToNewAd() { SwitchStage.switchToNewAd(); }
+    @FXML private void goToChat() { SwitchStage.switchToChat(); }
+    @FXML private void goToProfile() { SwitchStage.switchToProfile(); }
 }
+
+
 
 

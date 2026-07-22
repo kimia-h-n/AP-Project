@@ -1,6 +1,9 @@
 package org.example.divar.controller;
 
+import org.example.divar.model.User;
+import org.example.divar.model.UserRole;
 import org.example.divar.util.AppContext;
+import org.example.divar.util.SessionManager;
 import org.example.divar.SwitchStage;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -13,19 +16,29 @@ public class LoginController {
 
     @FXML
     private void login() {
-        String username = usernameField.getText();
+        String username = usernameField.getText().trim();
         String password = passwordField.getText();
 
-        if (messageLabel != null) {
-            messageLabel.setVisible(false);
-            messageLabel.setText("");
-        }
+        messageLabel.setVisible(false);
+        messageLabel.setText("");
 
         try {
+
             AppContext.getUserValidation().loginValidation(username, password);
             AppContext.getUserService().login(username, password);
 
-            SwitchStage.switchToHome();
+            UserRole role = SessionManager.getRole();
+            if (role == null) {
+                User currentUser = AppContext.getUserService().getUserProfile(username);
+                role = currentUser.getRole();
+                SessionManager.setRole(role);
+            }
+
+            if (role == UserRole.ADMIN) {
+                SwitchStage.switchToAdminPanel();
+            } else {
+                SwitchStage.switchToHome();
+            }
 
         } catch (IllegalArgumentException e) {
             showError(e.getMessage());
@@ -40,16 +53,17 @@ public class LoginController {
     }
 
     private void showError(String message) {
-        if (messageLabel != null) {
-            messageLabel.setText(message);
-            if (!messageLabel.getStyleClass().contains("error-message")) {
-                messageLabel.getStyleClass().add("error-message");
-            }
-            messageLabel.setVisible(true);
-        } else {
-            System.err.println("Error: " + message);
-        }
+        messageLabel.setText(message);
+        messageLabel.getStyleClass().setAll("error-message");
+        messageLabel.setVisible(true);
     }
 }
+
+
+
+
+
+
+
 
 

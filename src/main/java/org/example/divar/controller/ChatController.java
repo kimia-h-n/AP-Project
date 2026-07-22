@@ -6,6 +6,7 @@ import org.example.divar.component.ChatList;
 import org.example.divar.component.MessageSection;
 import org.example.divar.model.Conversation;
 import org.example.divar.model.Message;
+import org.example.divar.service.ChatSocketService;
 import org.example.divar.util.AppContext;
 import javafx.fxml.FXML;
 import javafx.application.Platform;
@@ -26,18 +27,18 @@ public class ChatController {
 
     private Conversation selectedConversation = null;
 
+    private ChatSocketService chatSocketService = null;
+
     @FXML
     public void initialize() {
-
         loadTargetChatsList();
+
+        connectToChatSocket();
 
         chatsList.setCellFactory(param -> new ListCell<>() {
             @Override
-            // یک متد آماده درون ListCell است که وقتی برای اولین بار لود میکنیم باید حتما اورراید کنیم
-            // اگر empty برابر true باشه یعنی این ردیف خالیه و میتونه یه چت داخلش قرار بگیره
             protected void updateItem(Conversation item, boolean empty) {
                 super.updateItem(item, empty);
-
                 if (empty || item == null) {
                     setText(null);
                     setGraphic(null);
@@ -70,24 +71,19 @@ public class ChatController {
 
     private void loadTargetChatsList() {
         String currentUsername = SessionManager.getCurrentUsername();
-
         if (currentUsername == null) return;
 
         List<Conversation> conversations = new ArrayList<>();
-
         List<Conversation> allConversations = AppContext.getConversationService().getConversations();
 
         for (Conversation conversation : allConversations) {
             if (conversation.getBuyerUsername().equals(currentUsername) ||
                     conversation.getSellerUsername().equals(currentUsername)) {
-
                 conversations.add(conversation);
             }
         }
-
         chatsList.getItems().setAll(conversations);
     }
-
 
     private void ShowMessageInUI(Message message) {
         MessageSection messageUI = new MessageSection(message);
@@ -113,13 +109,11 @@ public class ChatController {
         chatScrollPane.setVvalue(1.0);
     }
 
-
     @FXML
     private void sendMessage() {
         String text = messageField.getText().trim();
         if (!text.isEmpty() && selectedConversation != null) {
             String myUsername = SessionManager.getCurrentUsername();
-
             String otherUsername = selectedConversation.getBuyerUsername().equals(myUsername)
                     ? selectedConversation.getSellerUsername()
                     : selectedConversation.getBuyerUsername();
@@ -128,22 +122,76 @@ public class ChatController {
             selectedConversation.addMessage(newMessage);
             ShowMessageInUI(newMessage);
 
+            // منطق وب‌سوکت جدید برای فرستادن پیام به سرور
+            boolean myUsernameIsBuyer = selectedConversation.getBuyerUsername().equals(myUsername);
+            Long otherId = myUsernameIsBuyer
+                    ? selectedConversation.getSellerId()
+                    : selectedConversation.getBuyerId();
+
+            if (otherId != null && chatSocketService != null) {
+                chatSocketService.sendLiveMessage(otherId, text);
+            }
+
             messageField.clear();
-
             chatsList.refresh();
-
             Platform.runLater(() -> chatScrollPane.setVvalue(1.0));
         }
     }
 
+    private void connectToChatSocket() {
+        String myUsername = SessionManager.getCurrentUsername();
+        if (myUsername == null) return;
+
+        try {
+            String myId = AppContext.getUserService().getUserProfile(myUsername).getId();
+            long myUserId = Long.parseLong(myId);
+
+            chatSocketService = new ChatSocketService(myUserId, this);
+            chatSocketService.connect();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void onLiveMessageReceived(long senderId, long receiverId, String text) {
+        String myUsername = SessionManager.getCurrentUsername();
+
+        for (Conversation conversation : chatsList.getItems()) {
+            boolean myUsernameIsBuyer = conversation.getBuyerUsername().equals(myUsername);
+            Long otherId = myUsernameIsBuyer ? conversation.getSellerId() : conversation.getBuyerId();
+
+            if (otherId != null && otherId == senderId) {
+                String otherUsername = myUsernameIsBuyer
+                        ? conversation.getSellerUsername()
+                        : conversation.getBuyerUsername();
+
+                Message newMessage = new Message(otherUsername, myUsername, text);
+                conversation.addMessage(newMessage);
+
+                if (conversation == selectedConversation) {
+                    ShowMessageInUI(newMessage);
+                    chatScrollPane.setVvalue(1.0);
+                }
+                chatsList.refresh();
+                return;
+            }
+        }
+    }
 
     @FXML
     private void goBack() {
+        if (chatSocketService != null) {
+            chatSocketService.close();
+        }
         SwitchStage.goBack();
     }
 
     @FXML
     private void goToProfile() {
+        if (chatSocketService != null) {
+            chatSocketService.close();
+        }
         SwitchStage.switchToProfile();
     }
 }

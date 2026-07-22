@@ -3,12 +3,15 @@ package org.example.divar.controller;
 import org.example.divar.SwitchStage;
 import org.example.divar.model.*;
 import org.example.divar.util.AppContext;
-import org.example.divar.component.AdvertisementCard;
+import org.example.divar.component.AdSummaryCard;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.Button;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.Region;
+import javafx.geometry.Insets;
 import org.example.divar.util.SessionManager;
 import org.example.divar.component.FavoriteAdCard;
 
@@ -18,42 +21,30 @@ import java.util.List;
 public class ProfileController {
 
     @FXML private VBox menu;
-    @FXML private Button favoriteBtn;
-    @FXML private Button AdvertisementBtn;
-    @FXML private Button backBtn;
+    @FXML private Hyperlink favoriteLink;
+    @FXML private Hyperlink advertisementLink;
     @FXML private Label emptyLabel;
-    @FXML private Button adminPanelBtn;
+    @FXML private Region activeIndicator;
 
     private GridPane adsGrid;
-    private VBox favoritesBox;
     private List<Advertisement> currentAds = new ArrayList<>();
+    private String currentMode = "";
 
     @FXML
     public void initialize() {
-        String currentUsername = SessionManager.getCurrentUsername();
-        boolean isAdmin = "admin".equals(currentUsername);
-
-        if (!isAdmin) {
-            adminPanelBtn.setVisible(false);
-            adminPanelBtn.setManaged(false);
-        }
-
         adsGrid = new GridPane();
         adsGrid.setHgap(15.0);
         adsGrid.setVgap(15.0);
         adsGrid.setVisible(false);
         adsGrid.setManaged(false);
 
-        favoritesBox = new VBox(12.0);
-        favoritesBox.setMaxWidth(700.0);
-        favoritesBox.setVisible(false);
-        favoritesBox.setManaged(false);
-
-        menu.getChildren().addAll(adsGrid, favoritesBox);
+        menu.getChildren().add(adsGrid);
 
         menu.widthProperty().addListener((obs, old, newVal) -> {
-            if (newVal.doubleValue() > 0 && adsGrid.isVisible()) {
-                renderMyAds(newVal.doubleValue());
+            if (newVal.doubleValue() > 0) {
+                if (adsGrid.isVisible()) {
+                    renderGrid(newVal.doubleValue());
+                }
             }
         });
     }
@@ -62,64 +53,52 @@ public class ProfileController {
         String currentUsername = SessionManager.getCurrentUsername();
         if (currentUsername == null) {
             return new ArrayList<>();
+        } else {
+            return AppContext.getAdvertisementService().getFavoriteAdvertisements(currentUsername);
         }
-        return AppContext.getAdvertisementService().getFavoriteAdvertisements(currentUsername);
     }
 
     @FXML
     private void showFavorites() {
-        setStyleForButton(favoriteBtn);
+        setActiveMenu(favoriteLink, 0);
+        currentMode = "favorites";
         currentAds = getFavorites();
 
-        adsGrid.setVisible(false);
-        adsGrid.setManaged(false);
-        favoritesBox.setVisible(true);
-        favoritesBox.setManaged(true);
+        adsGrid.setVisible(true);
+        adsGrid.setManaged(true);
 
-        renderFavorites();
+        double targetWidth;
+        if (menu.getWidth() > 0) {
+            targetWidth = menu.getWidth();
+        } else {
+            targetWidth = 900;
+        }
+        renderGrid(targetWidth);
     }
 
     private List<Advertisement> getMyAdvertisements() {
-        String currentUsername = SessionManager.getCurrentUsername();
-        if (currentUsername == null) {
-            return new ArrayList<>();
-        }
-        return AppContext.getAdvertisementService().getAdvertisementsByUser(currentUsername);
+        return AppContext.getAdvertisementService().getMyAdvertisements();
     }
 
     @FXML
     private void showMyAdvertisements() {
-        setStyleForButton(AdvertisementBtn);
+        setActiveMenu(advertisementLink, 42);
+        currentMode = "myAdvertisements";
         currentAds = getMyAdvertisements();
 
-        favoritesBox.setVisible(false);
-        favoritesBox.setManaged(false);
         adsGrid.setVisible(true);
         adsGrid.setManaged(true);
 
-        renderMyAds(menu.getWidth() > 0 ? menu.getWidth() : 900);
+        double targetWidth;
+        if (menu.getWidth() > 0) {
+            targetWidth = menu.getWidth();
+        } else {
+            targetWidth = 900;
+        }
+        renderGrid(targetWidth);
     }
 
-    private void renderFavorites() {
-        favoritesBox.getChildren().clear();
-
-        if (currentAds.isEmpty()) {
-            emptyLabel.setText("موردی برای نمایش وجود ندارد.");
-            emptyLabel.setVisible(true);
-            return;
-        }
-        emptyLabel.setVisible(false);
-
-        for (Advertisement ad : currentAds) {
-            FavoriteAdCard card = new FavoriteAdCard(ad, removedAd -> {
-                currentAds.remove(removedAd);
-                renderFavorites();
-            });
-            favoritesBox.getChildren().add(card);
-        }
-    }
-
-    private void renderMyAds(double width) {
+    private void renderGrid(double width) {
         adsGrid.getChildren().clear();
 
         if (currentAds.isEmpty()) {
@@ -129,11 +108,35 @@ public class ProfileController {
         }
         emptyLabel.setVisible(false);
 
-        int columns = (int) Math.max(1, width / 240);
-        int row = 0, col = 0;
+        double calcColumns = width / 240;
+        int columns;
+        if (calcColumns > 1) {
+            columns = (int) calcColumns;
+        } else {
+            columns = 1;
+        }
+
+        int row = 0;
+        int col = 0;
+
         for (Advertisement ad : currentAds) {
-            AdvertisementCard card = new AdvertisementCard(ad);
-            adsGrid.add(card, col, row);
+            if (currentMode.equals("favorites")) {
+                FavoriteAdCard card = new FavoriteAdCard(ad, () -> {
+                    currentAds.remove(ad);
+                    double currentWidth;
+                    if (menu.getWidth() > 0) {
+                        currentWidth = menu.getWidth();
+                    } else {
+                        currentWidth = 900;
+                    }
+                    renderGrid(currentWidth);
+                });
+                adsGrid.add(card, col, row);
+            } else {
+                AdSummaryCard card = new AdSummaryCard(ad, false);
+                adsGrid.add(card, col, row);
+            }
+
             col++;
             if (col >= columns) {
                 col = 0;
@@ -142,19 +145,22 @@ public class ProfileController {
         }
     }
 
-    private void setStyleForButton(Button activeButton) {
-        Button[] buttons = {favoriteBtn, AdvertisementBtn, adminPanelBtn};
+    private void setActiveMenu(Hyperlink selectedMenu, double linePosition) {
+        Hyperlink[] allMenus = {favoriteLink, advertisementLink};
 
-        for (Button btn : buttons) {
-            if (btn != null) {
-                btn.getStyleClass().remove("menu-btn-active");
-                btn.getStyleClass().add("menu-btn-normal");
+        for (Hyperlink menuLink : allMenus) {
+            if (menuLink != null) {
+                menuLink.getStyleClass().remove("menu-link-active");
+                menuLink.getStyleClass().add("menu-link-normal");
             }
         }
 
-        if (activeButton != null) {
-            activeButton.getStyleClass().remove("menu-btn-normal");
-            activeButton.getStyleClass().add("menu-btn-active");
+        if (selectedMenu != null) {
+            selectedMenu.getStyleClass().remove("menu-link-normal");
+            selectedMenu.getStyleClass().add("menu-link-active");
+
+            activeIndicator.setVisible(true);
+            VBox.setMargin(activeIndicator, new Insets(linePosition, 0, 0, 0));
         }
     }
 
@@ -170,10 +176,14 @@ public class ProfileController {
     }
 
     @FXML
-    private void goToAdminPanel() {
-        SwitchStage.switchToAdminPanel();
+    private void goToChat() {
+        SwitchStage.switchToChat();
     }
 }
+
+
+
+
 
 
 
