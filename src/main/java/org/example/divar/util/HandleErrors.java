@@ -25,18 +25,44 @@ public class HandleErrors {
                 case "NOT_ALLOWED_AD_VIEW":
                     return "این آگهی هنوز تایید نشده و قابل مشاهده نیست.";
                 case "OPERATION_NOT_ALLOWED":
-                    return "شما اجازه‌ی حذف این آگهی را ندارید.";
+                    return "شما اجازه انجام این عملیات را ندارید.";
                 case "AD_NOT_REMOVABLE":
                     return "این آگهی قبلاً حذف شده است.";
-
+                case "USER_ALREADY_BLOCKED":
+                    return "این کاربر از قبل مسدود شده است.";
+                case "USER_ALREADY_ENABLED":
+                    return "این کاربر از قبل فعال است.";
+                case "INTERNAL_SERVER_ERROR":
+                    return "خطای داخلی سرور رخ داده است.";
+                case "CANNOT_REPORT_OWN_AD":
+                    return "شما نمی‌توانید آگهی خودتان را گزارش کنید.";
+                case "AD_ALREADY_SPAMMED":
+                    return "این آگهی قبلاً گزارش شده و در دست بررسی است.";
+                case "INVALID_REPORT_REASON":
+                    return "دلیل گزارش انتخاب شده معتبر نیست.";
+                case "INVALID_IMAGE_FORMAT":
+                    return "فرمت فایل انتخابی باید تصویر (png, jpg, jpeg) باشد.";
+                case "ALREADY_VOTED":
+                case "USER_ALREADY_VOTED":
+                    return "شما قبلاً به این فروشنده امتیاز داده‌اید.";
             }
         }
 
         if (message != null && !message.isBlank()) {
+            if (message.equalsIgnoreCase("User already voted!")) {
+                return "شما قبلاً به این فروشنده امتیاز داده‌اید.";
+            }
+            if (message.equalsIgnoreCase("You cannot rate yourself!")) {
+                return "شما نمی‌توانید به خودتان امتیاز دهید.";
+            }
             return message;
         }
 
-        return   status  + "Error: " ;
+        if (status == 403) {
+            return "دسترسی غیرمجاز یا عملیات نامعتبر است.";
+        }
+
+        return "خطای ناشناخته (کد: " + status + ")";
     }
 }
 
