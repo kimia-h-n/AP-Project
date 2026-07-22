@@ -16,8 +16,6 @@ import org.example.divar.util.ConvertToAdvertisement;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-
 public class AdminUserAdsController {
 
     @FXML private FlowPane adsContainer;
@@ -30,47 +28,59 @@ public class AdminUserAdsController {
     }
 
     private void loadUserAds() {
-        if (targetUser == null || targetUser.getId() == null) return;
+        if (targetUser == null || targetUser.getId() == null) {
+            return;
+        }
 
-        new Thread(() -> {
+        new Thread(() -> fetchAndDisplayUserAds()).start();
+    }
+
+    private void fetchAndDisplayUserAds() {
+        try {
+            String endpoint = "/api/v1/admin/users/" + targetUser.getId() + "/ads";
+            JSONArray jsonArray = ApiClient.getList(endpoint);
+
+            Platform.runLater(() -> renderUserAds(jsonArray));
+
+        } catch (Exception e) {
+            System.err.println("Error fetching user advertisements: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void renderUserAds(JSONArray jsonArray) {
+        if (adsContainer == null) return;
+
+        adsContainer.getChildren().clear();
+
+        if (jsonArray == null || jsonArray.isEmpty()) {
+            showEmptyAdsState();
+        } else {
+            populateAdCards(jsonArray);
+        }
+    }
+
+    private void showEmptyAdsState() {
+        Label noAdLabel = new Label("هیچ آگهی برای این کاربر یافت نشد.");
+        noAdLabel.getStyleClass().add("empty-ad-label");
+        adsContainer.getChildren().add(noAdLabel);
+    }
+
+    private void populateAdCards(JSONArray jsonArray) {
+        for (int i = 0; i < jsonArray.length(); i++) {
             try {
-                String endpoint = "/api/v1/admin/users/" + targetUser.getId() + "/ads";
-                JSONArray jsonArray = ApiClient.getList(endpoint);
+                JSONObject adJson = jsonArray.getJSONObject(i);
+                AdResponseDTO dto = AdResponseDTO.fromJson(adJson);
+                Advertisement ad = ConvertToAdvertisement.convertToAdvertisement(dto);
 
-                Platform.runLater(() -> {
-                    if (adsContainer != null) {
-                        adsContainer.getChildren().clear();
+                AdSummaryCard card = new AdSummaryCard(ad, true);
+                adsContainer.getChildren().add(card);
 
-                        if (jsonArray == null || jsonArray.isEmpty()) {
-                            Label noAdLabel = new Label("هیچ آگهی برای این کاربر یافت نشد.");
-                            noAdLabel.setStyle("-fx-text-fill: #757575; -fx-font-size: 14px;");
-                            adsContainer.getChildren().add(noAdLabel);
-                        } else {
-                            for (int i = 0; i < jsonArray.length(); i++) {
-                                try {
-                                    JSONObject adJson = jsonArray.getJSONObject(i);
-
-                                    AdResponseDTO dto = AdResponseDTO.fromJson(adJson);
-                                    Advertisement ad = ConvertToAdvertisement.convertToAdvertisement(dto);
-
-                                    AdSummaryCard card = new AdSummaryCard(ad, true);
-
-                                    adsContainer.getChildren().add(card);
-
-                                } catch (Exception ex) {
-                                    System.err.println("خطا در ساخت کارت آگهی: " + ex.getMessage());
-                                    ex.printStackTrace();
-                                }
-                            }
-                        }
-                    }
-                });
-
-            } catch (Exception e) {
-                System.err.println("خطا در دریافت آگهی‌های کاربر: " + e.getMessage());
-                e.printStackTrace();
+            } catch (Exception ex) {
+                System.err.println("Error creating advertisement card: " + ex.getMessage());
+                ex.printStackTrace();
             }
-        }).start();
+        }
     }
 
     @FXML
@@ -85,7 +95,7 @@ public class AdminUserAdsController {
                 contentArea.getChildren().setAll(usersPage);
             }
         } catch (Exception e) {
-            System.err.println("خطا در بازگشت به صفحه کاربران: " + e.getMessage());
+            System.err.println("Error returning to users page: " + e.getMessage());
             e.printStackTrace();
         }
     }

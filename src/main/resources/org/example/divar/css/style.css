@@ -739,3 +739,8 @@
 .btn-secondary:hover {
     -fx-background-color: #f5f5f5;
 }
+
+.empty-ad-label {
+    -fx-text-fill: #757575;
+    -fx-font-size: 14px;
+}
