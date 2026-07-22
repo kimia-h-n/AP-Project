@@ -20,14 +20,14 @@
                 <fx:define>
                     <ToggleGroup fx:id="reportGroup" />
                 </fx:define>
-                <RadioButton text="کلاهبرداری" toggleGroup="$reportGroup" selected="true" style="-fx-font-size: 14px; -fx-text-fill: #444444; -fx-cursor: hand;" maxWidth="Infinity" alignment="CENTER_LEFT"/>
-                <RadioButton text="غیرقانونی یا غیراخلاقی" toggleGroup="$reportGroup" style="-fx-font-size: 14px; -fx-text-fill: #444444; -fx-cursor: hand;" maxWidth="Infinity" alignment="CENTER_LEFT"/>
-                <RadioButton text="دسته‌بندی اشتباه" toggleGroup="$reportGroup" style="-fx-font-size: 14px; -fx-text-fill: #444444; -fx-cursor: hand;" maxWidth="Infinity" alignment="CENTER_LEFT"/>
-                <RadioButton text="قیمت اشتباه" toggleGroup="$reportGroup" style="-fx-font-size: 14px; -fx-text-fill: #444444; -fx-cursor: hand;" maxWidth="Infinity" alignment="CENTER_LEFT"/>
-                <RadioButton text="اطلاعات اشتباه" toggleGroup="$reportGroup" style="-fx-font-size: 14px; -fx-text-fill: #444444; -fx-cursor: hand;" maxWidth="Infinity" alignment="CENTER_LEFT"/>
-                <RadioButton text="تکراری یا اسپم" toggleGroup="$reportGroup" style="-fx-font-size: 14px; -fx-text-fill: #444444; -fx-cursor: hand;" maxWidth="Infinity" alignment="CENTER_LEFT"/>
-                <RadioButton text="ناموجود یا پاسخگو نبودن" toggleGroup="$reportGroup" style="-fx-font-size: 14px; -fx-text-fill: #444444; -fx-cursor: hand;" maxWidth="Infinity" alignment="CENTER_LEFT"/>
-                <RadioButton text="سایر" toggleGroup="$reportGroup" style="-fx-font-size: 14px; -fx-text-fill: #444444; -fx-cursor: hand;" maxWidth="Infinity" alignment="CENTER_LEFT"/>
+                <RadioButton fx:id="reasonFraud" text="کلاهبرداری" toggleGroup="$reportGroup" selected="true" style="-fx-font-size: 14px; -fx-text-fill: #444444; -fx-cursor: hand;" maxWidth="Infinity" alignment="CENTER_LEFT"/>
+                <RadioButton fx:id="reasonImmoral" text="غیرقانونی یا غیراخلاقی" toggleGroup="$reportGroup" style="-fx-font-size: 14px; -fx-text-fill: #444444; -fx-cursor: hand;" maxWidth="Infinity" alignment="CENTER_LEFT"/>
+                <RadioButton fx:id="reasonWrongCategory" text="دسته‌بندی اشتباه" toggleGroup="$reportGroup" style="-fx-font-size: 14px; -fx-text-fill: #444444; -fx-cursor: hand;" maxWidth="Infinity" alignment="CENTER_LEFT"/>
+                <RadioButton fx:id="reasonWrongPrice" text="قیمت اشتباه" toggleGroup="$reportGroup" style="-fx-font-size: 14px; -fx-text-fill: #444444; -fx-cursor: hand;" maxWidth="Infinity" alignment="CENTER_LEFT"/>
+                <RadioButton fx:id="reasonWrongInfo" text="اطلاعات اشتباه" toggleGroup="$reportGroup" style="-fx-font-size: 14px; -fx-text-fill: #444444; -fx-cursor: hand;" maxWidth="Infinity" alignment="CENTER_LEFT"/>
+                <RadioButton fx:id="reasonDuplicate" text="تکراری یا اسپم" toggleGroup="$reportGroup" style="-fx-font-size: 14px; -fx-text-fill: #444444; -fx-cursor: hand;" maxWidth="Infinity" alignment="CENTER_LEFT"/>
+                <RadioButton fx:id="reasonUnavailable" text="ناموجود یا پاسخگو نبودن" toggleGroup="$reportGroup" style="-fx-font-size: 14px; -fx-text-fill: #444444; -fx-cursor: hand;" maxWidth="Infinity" alignment="CENTER_LEFT"/>
+                <RadioButton fx:id="reasonOthers" text="سایر" toggleGroup="$reportGroup" style="-fx-font-size: 14px; -fx-text-fill: #444444; -fx-cursor: hand;" maxWidth="Infinity" alignment="CENTER_LEFT"/>
             </children>
         </VBox>
 

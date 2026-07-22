@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.example.divar.controller.UserDetailsDialogController"
+      spacing="15" prefWidth="380" nodeOrientation="RIGHT_TO_LEFT"
+      style="-fx-background-color: #ffffff; -fx-padding: 20; -fx-background-radius: 12; -fx-border-color: #e0e0e0; -fx-border-radius: 12; -fx-border-width: 1;">
+
+    <!-- بخش نام و وضعیت -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label fx:id="lblFullName" text="سارا نریمانی"
+               style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #212121;"/>
+        <Label fx:id="lblStatus" text="مسدود شده"
+               style="-fx-background-color: #ffebee; -fx-text-fill: #a52a2a; -fx-padding: 4 8; -fx-background-radius: 6; -fx-font-size: 12px;"/>
+    </HBox>
+
+    <Label fx:id="lblUsername" text="@sara" style="-fx-text-fill: #757575; -fx-font-size: 13px;"/>
+
+    <!-- باکس خاکستری روشن اطلاعات -->
+    <VBox spacing="10" style="-fx-background-color: #f8f9fa; -fx-padding: 15; -fx-background-radius: 8;">
+        <HBox spacing="10">
+            <Label text="شماره تماس:" style="-fx-text-fill: #616161;"/>
+            <Label fx:id="lblPhone" text="09196589478" style="-fx-text-fill: #212121; -fx-font-weight: bold;"/>
+        </HBox>
+        <HBox spacing="10">
+            <Label text="ایمیل:" style="-fx-text-fill: #616161;"/>
+            <Label fx:id="lblEmail" text="sara@gmail.com" style="-fx-text-fill: #212121; -fx-font-weight: bold;"/>
+        </HBox>
+        <HBox spacing="10">
+            <Label text="میانگین امتیاز:" style="-fx-text-fill: #616161;"/>
+            <Label fx:id="lblRating" text="بدون امتیاز" style="-fx-text-fill: #2e7d32; -fx-font-weight: bold;"/>
+            <!-- اگر امتیاز داشت سبز (#2e7d32) و اگر نبود خاکستری تیره‌تر -->
+        </HBox>
+    </VBox>
+
+    <!-- دکمه بستن قرمز (مطابق با دکمه‌های اصلی دیوار) -->
+    <Button text="بستن" onAction="#handleClose"
+            style="-fx-background-color: #a52a2a; -fx-text-fill: white; -fx-font-size: 14px; -fx-background-radius: 6; -fx-padding: 8 20; -fx-cursor: hand;"/>
+
+</VBox>

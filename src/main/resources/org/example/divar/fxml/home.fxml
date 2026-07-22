@@ -16,7 +16,7 @@
             <children>
                 <Label text="دیوار" style="-fx-text-fill: #a62626; -fx-font-size: 24px; -fx-font-weight: bold;"/>
 
-                <TextField fx:id="searchField" promptText="جستجو در همه آگهی‌ها" prefWidth="400.0" onAction="#filterInputs"
+                <TextField fx:id="searchField" promptText="جستجو در همه آگهی‌ها" prefWidth="400.0" onAction="#handleSearch"
                            style="-fx-background-color: #f5f5f5; -fx-background-radius: 4px; -fx-padding: 8px;"/>
 
                 <Region HBox.hgrow="ALWAYS" />
@@ -46,6 +46,9 @@
                             <Hyperlink text="استخدام و کاریابی" onAction="#handleCategoryClick" style="-fx-text-fill: #555555; -fx-font-size: 13px;"/>
                             <Hyperlink text="خانه و آشپزخانه" onAction="#handleCategoryClick" style="-fx-text-fill: #555555; -fx-font-size: 13px;"/>
                             <Hyperlink text="تجهیزات و صنعتی" onAction="#handleCategoryClick" style="-fx-text-fill: #555555; -fx-font-size: 13px;"/>
+                            <Hyperlink onAction="#handleCategoryClick" text="اجتماعی" style="-fx-text-fill: #555555; -fx-font-size: 13px;"/>
+                            <Hyperlink onAction="#handleCategoryClick" text="خدمات" style="-fx-text-fill: #555555; -fx-font-size: 13px;"/>
+                            <Hyperlink onAction="#handleCategoryClick" text="وسایل شخصی" style="-fx-text-fill: #555555; -fx-font-size: 13px;"/>
                         </VBox>
 
                         <Separator style="-fx-padding: 5 0 5 0;"/>

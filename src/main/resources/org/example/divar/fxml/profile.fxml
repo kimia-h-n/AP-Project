@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
@@ -9,36 +10,54 @@
             style="-fx-background-color: #f9f9f9;"
             nodeOrientation="RIGHT_TO_LEFT">
 
-    <left>
-        <VBox spacing="10.0" prefWidth="260.0" alignment="TOP_LEFT"
-              style="-fx-background-color: #ffffff; -fx-border-color: #e3e3e3; -fx-border-width: 0 0 0 1px; -fx-padding: 30px 20px 30px 20px;">
+    <top>
+        <HBox spacing="15.0" alignment="CENTER_LEFT" style="-fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0; -fx-background-color: #ffffff;" prefHeight="65.0">
+            <padding>
+                <Insets top="10.0" bottom="10.0" left="20.0" right="20.0"/>
+            </padding>
             <children>
-
-                <VBox spacing="6.0" alignment="TOP_LEFT" style="-fx-padding: 0 0 20 0; -fx-border-color: #f2f2f2; -fx-border-width: 0 0 1px 0;">
+                <VBox alignment="CENTER_RIGHT" spacing="2.0">
                     <children>
-                        <Label text="دیوار من" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
-                        <Label text="حساب کاربری کاربر" style="-fx-font-size: 13px; -fx-text-fill: #888888;"/>
+                        <Label text="دیوار من" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #a62626;"/>
+                        <Label text="حساب کاربری کاربر" style="-fx-font-size: 11px; -fx-text-fill: #999999;"/>
                     </children>
                 </VBox>
 
-                <Button fx:id="favoriteBtn" text="آگهی‌های نشان‌شده" onAction="#showFavorites" styleClass="menu-btn-normal" maxWidth="Infinity" alignment="CENTER_LEFT"
-                        style="-fx-background-color: transparent; -fx-text-fill: #444444; -fx-font-size: 14px; -fx-padding: 12px 10px; -fx-cursor: hand; -fx-background-radius: 6px;"/>
+                <Region HBox.hgrow="ALWAYS" />
 
-                <Button fx:id="AdvertisementBtn" text="آگهی‌های من" onAction="#showMyAdvertisements" styleClass="menu-btn-normal" maxWidth="Infinity" alignment="CENTER_LEFT"
-                        style="-fx-background-color: transparent; -fx-text-fill: #444444; -fx-font-size: 14px; -fx-padding: 12px 10px; -fx-cursor: hand; -fx-background-radius: 6px;"/>
-
-                <Button fx:id="adminPanelBtn" text="پنل مدیریت" onAction="#goToAdminPanel" styleClass="menu-btn-normal"  maxWidth="Infinity" alignment="CENTER_LEFT"
-                        style="-fx-background-color: transparent; -fx-text-fill: #444444; -fx-font-size: 14px; -fx-padding: 12px 10px; -fx-cursor: hand; -fx-background-radius: 6px;"/>
-
-                <Button fx:id="backBtn" text="بازگشت" onAction="#goBack" styleClass="menu-btn-normal" maxWidth="Infinity" alignment="CENTER_LEFT"
-                        style="-fx-background-color: transparent; -fx-text-fill: #444444; -fx-font-size: 14px; -fx-padding: 12px 10px; -fx-cursor: hand; -fx-background-radius: 6px; -fx-font-weight: bold;"/>
-
-                <Region VBox.vgrow="ALWAYS" />
-
-                <Button text="خروج از حساب" onAction="#logout" maxWidth="Infinity" alignment="CENTER_LEFT"
-                        style="-fx-background-color: transparent; -fx-text-fill: #a62626; -fx-font-size: 14px; -fx-padding: 12px 10px; -fx-cursor: hand; -fx-background-radius: 6px; -fx-font-weight: bold;"/>
+                <Button text="چت" onAction="#goToChat"
+                        style="-fx-background-color: white; -fx-text-fill: #222222; -fx-border-color: #cccccc; -fx-border-radius: 4px; -fx-padding: 6px 14px; -fx-cursor: hand; -fx-font-weight: bold; -fx-font-size: 13px;"/>
+                <Button fx:id="backBtn" text="بازگشت" onAction="#goBack"
+                        style="-fx-background-color: white; -fx-text-fill: #222222; -fx-border-color: #cccccc; -fx-border-radius: 4px; -fx-padding: 6px 14px; -fx-cursor: hand; -fx-font-weight: bold; -fx-font-size: 13px;"/>
             </children>
-        </VBox>
+        </HBox>
+    </top>
+
+    <left>
+        <HBox prefWidth="180.0" styleClass="profile-sidebar">
+            <children>
+                <VBox fx:id="indicatorContainer" prefWidth="4.0" style="-fx-padding: 30px 0 30px 0;">
+                    <children>
+                        <Region fx:id="activeIndicator" prefHeight="26.0" prefWidth="4.0" style="-fx-background-color: #a62626;" visible="false"/>
+                    </children>
+                </VBox>
+
+                <VBox spacing="18.0" alignment="TOP_LEFT" HBox.hgrow="ALWAYS" style="-fx-padding: 30px 15px 30px 10px;">
+                    <children>
+                        <Hyperlink fx:id="favoriteLink" text="آگهی‌های نشان‌شده" onAction="#showFavorites"
+                                   styleClass="menu-link-normal"/>
+
+                        <Hyperlink fx:id="advertisementLink" text="آگهی‌های من" onAction="#showMyAdvertisements"
+                                   styleClass="menu-link-normal"/>
+
+                        <Region VBox.vgrow="ALWAYS" />
+
+                        <Button text="خروج از حساب" onAction="#logout" alignment="CENTER_LEFT"
+                                style="-fx-background-color: transparent; -fx-text-fill: #a62626; -fx-font-size: 14px; -fx-padding: 5px 0; -fx-cursor: hand; -fx-font-weight: bold;"/>
+                    </children>
+                </VBox>
+            </children>
+        </HBox>
     </left>
 
     <center>
@@ -46,19 +65,15 @@
             <content>
                 <StackPane style="-fx-background-color: #f9f9f9; -fx-padding: 40px;" alignment="CENTER">
                     <children>
-
                         <VBox fx:id="menu" spacing="15.0" style="-fx-background-color: transparent;" alignment="TOP_RIGHT" />
-
                         <Label fx:id="emptyLabel" text="لطفاً یکی از گزینه‌های منو را انتخاب کنید."
                                style="-fx-font-size: 15px; -fx-text-fill: #888888; -fx-font-weight: bold;"
                                StackPane.alignment="CENTER" />
-
                     </children>
                 </StackPane>
             </content>
         </ScrollPane>
     </center>
-
 </BorderPane>
 
 

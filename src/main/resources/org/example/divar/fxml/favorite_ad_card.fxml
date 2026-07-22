@@ -4,31 +4,27 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 
-<fx:root type="javafx.scene.layout.VBox" spacing="10.0"
-         style="-fx-background-color: white; -fx-border-color: #e3e3e3; -fx-border-radius: 8px; -fx-background-radius: 8px; -fx-padding: 15px; -fx-cursor: hand;"
+<fx:root type="javafx.scene.layout.VBox" spacing="10.0" prefWidth="220.0"
+         styleClass="admin-card" style="-fx-padding: 12px;"
+         nodeOrientation="RIGHT_TO_LEFT"
          xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
     <children>
-        <HBox spacing="15.0" alignment="CENTER_RIGHT">
+        <StackPane style="-fx-background-color: #f2f2f2; -fx-background-radius: 6px;" prefHeight="140.0">
             <children>
-                <ImageView fx:id="adImage" fitWidth="110.0" fitHeight="90.0" preserveRatio="true"/>
-                <VBox spacing="6.0" HBox.hgrow="ALWAYS">
-                    <children>
-                        <Label fx:id="titleLabel" wrapText="true" maxWidth="Infinity"
-                               style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #222222;"/>
-                        <Label fx:id="infoLabel" style="-fx-font-size: 12px; -fx-text-fill: #888888;"/>
-                    </children>
-                </VBox>
+                <ImageView fx:id="adImage" fitWidth="196.0" fitHeight="140.0" preserveRatio="true"/>
             </children>
-        </HBox>
+        </StackPane>
 
-        <Label fx:id="errorLabel" visible="false" wrapText="true" maxWidth="Infinity"
-               style="-fx-font-size: 12px; -fx-text-fill: #a62626; -fx-font-weight: bold;"/>
+        <Label fx:id="titleLabel" styleClass="admin-card-title" wrapText="true" maxWidth="Infinity"/>
+        <Label fx:id="priceLabel" styleClass="admin-card-price" maxWidth="Infinity"/>
+        <Label fx:id="cityLabel" styleClass="admin-card-location" maxWidth="Infinity"/>
 
-        <HBox spacing="10.0" alignment="CENTER_RIGHT">
-            <children>
-                <Button fx:id="removeBtn" text="🗑 حذف نشان"
-                        style="-fx-background-color: transparent; -fx-border-color: #cccccc; -fx-text-fill: #444444; -fx-border-radius: 4px; -fx-padding: 6px 14px; -fx-cursor: hand; -fx-font-size: 13px;"/>
-            </children>
-        </HBox>
+        <Label fx:id="errorLabel" visible="false" managed="false" wrapText="true" maxWidth="Infinity"
+               style="-fx-font-size: 11px; -fx-text-fill: #a62626; -fx-font-weight: bold;"/>
+
+        <Region VBox.vgrow="ALWAYS" />
+
+        <Button fx:id="removeBtn" text="حذف نشان" maxWidth="Infinity" prefHeight="32.0"
+                style="-fx-background-color: transparent; -fx-border-color: #a62626; -fx-text-fill: #a62626; -fx-border-radius: 4px; -fx-cursor: hand; -fx-font-weight: bold; -fx-font-size: 12px;"/>
     </children>
 </fx:root>

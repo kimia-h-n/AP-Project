@@ -3,7 +3,6 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.image.ImageView?>
 
 <BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="org.example.divar.controller.NewAdvertisementController"
@@ -16,7 +15,7 @@
             </padding>
             <children>
                 <Label text="دیوار" style="-fx-text-fill: #a62626; -fx-font-size: 24px; -fx-font-weight: bold; -fx-cursor: hand"/>
-                <Label text="ثبت آگهی جدید" style="-fx-font-size: 16px; -fx-text-fill: #666666; -fx-padding: 0 0 0 10;"/>
+                <Label fx:id="pageTitleLabel" text="ثبت آگهی جدید" style="-fx-font-size: 16px; -fx-text-fill: #666666; -fx-padding: 0 0 0 10;"/>
 
                 <Region HBox.hgrow="ALWAYS" />
 
@@ -91,7 +90,7 @@
 
                         <HBox spacing="15.0" alignment="CENTER_LEFT">
                             <children>
-                                <Button text="ثبت و انتشار آگهی" onAction="#createAdvertisement" prefHeight="40.0" prefWidth="160.0" style="-fx-background-color: #a62626; -fx-text-fill: white; -fx-font-weight: bold;"/>
+                                <Button fx:id="submitButton" text="ثبت و انتشار آگهی" onAction="#createAdvertisement" prefHeight="40.0" prefWidth="160.0" style="-fx-background-color: #a62626; -fx-text-fill: white; -fx-font-weight: bold;"/>
                                 <Button text="انصراف" onAction="#goBack" prefHeight="40.0" prefWidth="100.0" style="-fx-background-color: transparent; -fx-text-fill: #555555; -fx-border-color: #cccccc; -fx-border-radius: 4px;"/>
                                 <Label fx:id="messageLabel" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 13px; " visible="false"/>
                             </children>
@@ -103,4 +102,6 @@
         </ScrollPane>
     </center>
 </BorderPane>
+
+
 
