@@ -31,13 +31,10 @@ public class AdvertisementServiceHttp implements AdvertisementService {
 
         JSONObject response = ApiClient.post("/api/v1/ads", json);
 
-        System.out.println("====== SERVER RESPONSE DEBUG ======");
         if (response == null) {
-            System.out.println("Response object is NULL");
-        } else {
-            System.out.println("Raw Response JSON: " + response.toString());
+            throw new RuntimeException("No response received from the server.");
         }
-        System.out.println("===================================");
+
         return response.getLong("id");
     }
 
@@ -116,29 +113,6 @@ public class AdvertisementServiceHttp implements AdvertisementService {
     }
 
     @Override
-    public ArrayList<Advertisement> getAdvertisementsByUser(String userId) {
-        if (userId == null || userId.isBlank()) {
-            return new ArrayList<>();
-        }
-
-        ArrayList<Advertisement> allAds = getActiveAdvertisements();
-        ArrayList<Advertisement> userAds = new ArrayList<>();
-
-        for (Advertisement ad : allAds) {
-            if (ad.getSeller() != null && ad.getSeller().getId() != null) {
-                String sellerId = String.valueOf(ad.getSeller().getId()).trim();
-                String targetId = userId.trim();
-
-                if (sellerId.equalsIgnoreCase(targetId) ||
-                        (ad.getSeller().getUsername() != null && ad.getSeller().getUsername().equalsIgnoreCase(targetId))) {
-                    userAds.add(ad);
-                }
-            }
-        }
-        return userAds;
-    }
-
-    @Override
     public boolean isFavorite(long adId) {
         JSONObject responseJson = ApiClient.get("/api/v1/ads/" + adId);
         AdResponseDTO dto = AdResponseDTO.fromJson(responseJson);
@@ -171,14 +145,16 @@ public class AdvertisementServiceHttp implements AdvertisementService {
             JSONArray responseArray = ApiClient.getList("/api/v1/search?title=" + encodedQuery);
 
             ArrayList<Advertisement> result = new ArrayList<>();
-            for (int i = 0; i < responseArray.length(); i++) {
-                JSONObject adJson = responseArray.getJSONObject(i);
-                AdResponseDTO dto = AdResponseDTO.fromJson(adJson);
-                result.add(ConvertToAdvertisement.convertToAdvertisement(dto));
+            if (responseArray != null) {
+                for (int i = 0; i < responseArray.length(); i++) {
+                    JSONObject adJson = responseArray.getJSONObject(i);
+                    AdResponseDTO dto = AdResponseDTO.fromJson(adJson);
+                    result.add(ConvertToAdvertisement.convertToAdvertisement(dto));
+                }
             }
             return result;
         } catch (Exception e) {
-            throw new RuntimeException("خطا در سرچ آگهی: " + e.getMessage());
+            throw new RuntimeException("Error searching advertisements: " + e.getMessage());
         }
     }
 
@@ -222,16 +198,18 @@ public class AdvertisementServiceHttp implements AdvertisementService {
             JSONArray responseArray = ApiClient.getList("/api/v1/province");
             ArrayList<City> cities = new ArrayList<>();
 
-            for (int i = 0; i < responseArray.length(); i++) {
-                JSONObject obj = responseArray.getJSONObject(i);
-                Long id = obj.getLong("id");
-                String name = obj.getString("name");
+            if (responseArray != null) {
+                for (int i = 0; i < responseArray.length(); i++) {
+                    JSONObject obj = responseArray.getJSONObject(i);
+                    Long id = obj.getLong("id");
+                    String name = obj.getString("name");
 
-                cities.add(new City(id, name));
+                    cities.add(new City(id, name));
+                }
             }
             return cities;
         } catch (Exception e) {
-            throw new RuntimeException("خطا در دریافت لیست شهرها از سرور: " + e.getMessage());
+            throw new RuntimeException("Error fetching provinces list from server: " + e.getMessage());
         }
     }
 }
