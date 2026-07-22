@@ -66,7 +66,7 @@ public class AdResponseDTO {
             }
         }
 
-        boolean isFavorite = json.optBoolean("favorite", json.optBoolean("isFavorite", false));
+        boolean isFavorite = json.optBoolean("isFavorite", false);
 
         String primaryImageUrl = json.optString("primaryImageUrl", null);
 
@@ -89,7 +89,6 @@ public class AdResponseDTO {
             primaryImageUrl = imageUrls.get(0);
         }
 
-        // استخراج نام شهر
         String cityName = json.optString("cityName", null);
 
         if (cityName == null && json.has("city")) {
@@ -101,9 +100,7 @@ public class AdResponseDTO {
             }
         }
 
-        double rating = json.optDouble("sellerRatingAvg",
-                json.optDouble("sellerRating",
-                        json.optDouble("rating", 0.0)));
+        double rating = json.optDouble("sellerRatingAvg", 0.0);
 
         return new AdResponseDTO(
                 json.optLong("id", 0),
@@ -124,36 +121,99 @@ public class AdResponseDTO {
                 isFavorite,
                 json.optString("createdAt", null),
                 json.optString("updatedAt", null),
-                json.optString("sellerFirstname", json.optString("sellerFirstName", "")),
-                json.optString("sellerLastname", json.optString("sellerLastName", "")),
+                json.optString("sellerFirstname", ""),
+                json.optString("sellerLastname", ""),
                 rating
         );
     }
 
-    public long getId() { return id; }
-    public String getTitle() { return title; }
-    public String getDescription() { return description; }
-    public String getAddress() { return address; }
-    public long getPrice() { return price; }
-    public String getCategory() { return category; }
-    public String getCondition() { return condition; }
-    public String getCity() { return city; }
-    public String getCityName() { return city; }
-    public ArrayList<String> getImagePaths() { return imagePaths; }
-    public String getPrimaryImageUrl() { return primaryImageUrl; }
-    public ArrayList<String> getImageUrls() { return imageUrls; }
-    public ArrayList<String> getImageIds() { return imageIds; }
-    public String getStatus() { return status; }
+    public long getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public long getPrice() {
+        return price;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public String getCondition() {
+        return condition;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public String getCityName() {
+        return city;
+    }
+
+    public ArrayList<String> getImagePaths() {
+        return imagePaths;
+    }
+
+    public String getPrimaryImageUrl() {
+        return primaryImageUrl;
+    }
+
+    public ArrayList<String> getImageUrls() {
+        return imageUrls;
+    }
+
+    public ArrayList<String> getImageIds() {
+        return imageIds;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
     public String getSellerId() {
         return String.valueOf(sellerId);
     }
-    public String getSellerUsername() { return sellerUsername; }
-    public String getSellerFirstName() { return sellerFirstName; }
-    public String getSellerLastName() { return sellerLastName; }
-    public boolean isFavorite() { return favorite; }
-    public String getCreatedAt() { return createdAt; }
-    public String getUpdatedAt() { return updatedAt; }
-    public double getSellerRating() { return sellerRating; }
+
+    public String getSellerUsername() {
+        return sellerUsername;
+    }
+
+    public String getSellerFirstName() {
+        return sellerFirstName;
+    }
+
+    public String getSellerLastName() {
+        return sellerLastName;
+    }
+
+    public boolean isFavorite() {
+        return favorite;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public String getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public double getSellerRating() {
+        return sellerRating;
+    }
 }
 
 
