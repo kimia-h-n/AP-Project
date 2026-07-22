@@ -744,3 +744,8 @@
     -fx-text-fill: #757575;
     -fx-font-size: 14px;
 }
+
+.empty-user-label {
+    -fx-text-fill: #999999;
+    -fx-font-size: 14px;
+}

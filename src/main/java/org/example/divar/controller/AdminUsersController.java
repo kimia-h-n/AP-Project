@@ -47,7 +47,7 @@ public class AdminUsersController {
 
         if (users == null || users.isEmpty()) {
             Label noUserLabel = new Label("هیچ کاربری یافت نشد.");
-            noUserLabel.setStyle("-fx-text-fill: #999999; -fx-font-size: 14px;");
+            noUserLabel.getStyleClass().add("empty-user-label");
             cardsContainer.getChildren().add(noUserLabel);
             return;
         }
@@ -121,23 +121,7 @@ public class AdminUsersController {
         }
     }
 
-    private void showError(String message) {
-        messageLabel.setText(message);
-        messageLabel.getStyleClass().setAll("error-message");
-        messageLabel.setVisible(true);
-        messageLabel.setManaged(true);
-    }
-
-    private void showSuccess(String message) {
-        messageLabel.setText(message);
-        messageLabel.getStyleClass().setAll("success-message");
-        messageLabel.setVisible(true);
-        messageLabel.setManaged(true);
-    }
-
     private void handleDetailsClick(User user) {
-        System.out.println("Redirecting to admin user details for: " + user.getId());
-
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/divar/fxml/user_details_dialog.fxml"));
             Parent root = loader.load();
@@ -150,7 +134,7 @@ public class AdminUsersController {
             stage.showAndWait();
 
         } catch (Exception e) {
-            System.err.println("خطا در باز کردن پنجره جزئیات کاربر: " + e.getMessage());
+            System.err.println("Error opening user details window: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -177,9 +161,23 @@ public class AdminUsersController {
                 contentArea.getChildren().setAll(userAdsPage);
             }
         } catch (Exception e) {
-            System.err.println("خطا در باز کردن آگهی‌های کاربر: " + e.getMessage());
+            System.err.println("Error opening user advertisements: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private void showError(String message) {
+        messageLabel.setText(message);
+        messageLabel.getStyleClass().setAll("error-message");
+        messageLabel.setVisible(true);
+        messageLabel.setManaged(true);
+    }
+
+    private void showSuccess(String message) {
+        messageLabel.setText(message);
+        messageLabel.getStyleClass().setAll("success-message");
+        messageLabel.setVisible(true);
+        messageLabel.setManaged(true);
     }
 }
 
