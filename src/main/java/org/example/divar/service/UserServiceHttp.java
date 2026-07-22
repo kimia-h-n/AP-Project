@@ -3,7 +3,9 @@ package org.example.divar.service;
 import org.example.divar.dto.auth.AuthenticationRequestDTO;
 import org.example.divar.dto.auth.AuthenticationResponseDTO;
 import org.example.divar.dto.auth.RegisterRequestDTO;
+import org.example.divar.model.User;
 import org.example.divar.util.ApiClient;
+import org.example.divar.util.ConvertToUser;
 import org.example.divar.util.SessionManager;
 import org.json.JSONObject;
 
@@ -16,6 +18,10 @@ public class UserServiceHttp implements UserService {
         AuthenticationResponseDTO responseDTO = AuthenticationResponseDTO.fromJson(responseJson);
 
         SessionManager.login(username, responseDTO.getToken());
+
+        if (responseDTO.getRole() != null) {
+            SessionManager.setRole(responseDTO.getRole());
+        }
     }
 
     @Override
@@ -23,7 +29,6 @@ public class UserServiceHttp implements UserService {
                          String phoneNumber, String email) {
 
         RegisterRequestDTO requestDTO = new RegisterRequestDTO(username, password, firstname, lastname, phoneNumber, email);
-
         JSONObject responseJson = ApiClient.post("/api/v1/auth/register", requestDTO.toJson());
         AuthenticationResponseDTO responseDTO = AuthenticationResponseDTO.fromJson(responseJson);
 
@@ -41,7 +46,23 @@ public class UserServiceHttp implements UserService {
 
         return firstName + " " + lastName;
     }
+
+    @Override
+    public User getUserProfile(String username) {
+        JSONObject userJson = ApiClient.get("/api/v1/users/" + username);
+        return ConvertToUser.convertToUser(userJson);
+    }
 }
+
+
+
+
+
+
+
+
+
+
 
 
 

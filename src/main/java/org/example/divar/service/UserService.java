@@ -1,5 +1,7 @@
 package org.example.divar.service;
 
+import org.example.divar.model.User;
+
 public interface UserService {
 
     void login(String username, String password) throws RuntimeException;
@@ -8,6 +10,7 @@ public interface UserService {
 
     String getNameByUsername(String username);
 
+    User getUserProfile(String username) throws RuntimeException;
 }
 
 
