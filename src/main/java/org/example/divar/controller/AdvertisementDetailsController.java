@@ -142,14 +142,7 @@ public class AdvertisementDetailsController {
         }
         updateFavoriteButtonUI();
 
-        if (currentUsername != null) {
-            isFavoriteAdvertisement = freshAd.isFavorite();
-        }
-        updateFavoriteButtonUI();
-
         boolean isMine = checkIfAdvertisementIsMine(freshAd, currentUsername);
-        updateActionButtonsVisibility(isMine);
-
         updateActionButtonsVisibility(isMine);
 
         gallery.setImages(freshAd.getImagePaths());
