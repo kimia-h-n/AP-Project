@@ -9,6 +9,7 @@ import org.example.divar.util.AppContext;
 import org.example.divar.util.SessionManager;
 
 public class ChatList extends VBox {
+
     @FXML private Label nameLabel;
     @FXML private Label lastMessageLabel;
 
@@ -20,17 +21,21 @@ public class ChatList extends VBox {
             loader.load();
 
             String myUsername = SessionManager.getCurrentUsername();
-            String otherUsername = conversation.getBuyerUsername().equals(myUsername)
-                    ? conversation.getSellerUsername()
-                    : conversation.getBuyerUsername();
+            String otherUsername;
+
+            if (conversation.getBuyerUsername().equals(myUsername)) {
+                otherUsername = conversation.getSellerUsername();
+            } else {
+                otherUsername = conversation.getBuyerUsername();
+            }
 
             String displayName = AppContext.getUserService().getNameByUsername(otherUsername);
 
             nameLabel.setText(displayName + " (" + conversation.getAdvertisementTitle() + ")");
-
             lastMessageLabel.setText(conversation.getLastMessage());
 
         } catch (Exception e) {
+            System.err.println("Error loading chat list item: " + e.getMessage());
             e.printStackTrace();
         }
     }
