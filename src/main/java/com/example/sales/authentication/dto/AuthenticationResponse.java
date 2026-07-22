@@ -1,4 +1,4 @@
-package com.example.sales.auth;
+package com.example.sales.authentication.dto;
 
 import com.example.sales.user.Role;
 import lombok.AllArgsConstructor;

@@ -55,6 +55,7 @@ public interface AdMapper {
     @Mapping(target = "adTitle", source = "ad.title")
     @Mapping(target = "sellerFirstName", source = "ad.seller.firstname")
     @Mapping(target = "sellerLastName", source = "ad.seller.lastname")
+    @Mapping(target = "sellerId", source = "ad.seller.id")
     @Mapping(target = "reportReason", source = "reason")
     @Mapping(target = "primaryImageId", ignore = true)
     @Mapping(target = "primaryImageUrl", ignore = true)
