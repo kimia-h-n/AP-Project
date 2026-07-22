@@ -228,6 +228,19 @@ public class ApiClient {
         }
     }
 
+    public static String getString(String path) {
+        HttpRequest.Builder builder = createBuilder(path).GET();
+        try {
+            HttpResponse<String> response = client.send(builder.build(), HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                return response.body();
+            }
+            return null;
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException("Error fetching raw string response from server: " + e.getMessage());
+        }
+    }
+
 
 }
 
