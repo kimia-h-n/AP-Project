@@ -40,8 +40,11 @@ public class AdRequestDTO {
         json.put("price", price);
         json.put("category", category.name());
         json.put("condition", condition.name());
-        json.put("city", city.name());
-        json.put("imagePaths", new JSONArray(imagePaths));
+
+        if (city != null) {
+            json.put("cityId", city.getId());
+        }
+
         return json;
     }
 }
