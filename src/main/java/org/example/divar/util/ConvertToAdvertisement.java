@@ -42,7 +42,7 @@ public class ConvertToAdvertisement {
         if (dto.getSellerUsername() != null) {
             User seller = new User();
             seller.setUsername(dto.getSellerUsername());
-            seller.setId(String.valueOf(dto.getSellerId()));
+            seller.setId(dto.getSellerId());
 
             // دریافت نام و نام خانوادگی فروشنده از DTO
             seller.setFirstname(dto.getSellerFirstName());

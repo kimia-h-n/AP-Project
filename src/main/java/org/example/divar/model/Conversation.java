@@ -34,6 +34,7 @@ public class Conversation {
         return buyerUsername;
     }
 
+
     public String getSellerUsername() {
         return sellerUsername;
     }
@@ -45,6 +46,7 @@ public class Conversation {
     public void addMessage(Message message) {
         this.messages.add(message);
     }
+
 
     public String getLastMessage() {
         if (messages.isEmpty()) {

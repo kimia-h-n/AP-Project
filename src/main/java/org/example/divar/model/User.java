@@ -1,7 +1,5 @@
 package org.example.divar.model;
 
-import java.util.ArrayList;
-
 public class User {
 
     private String id;
@@ -13,16 +11,10 @@ public class User {
     private String email;
     private UserRole role;
     private UserStatus status;
-    private String blockReason;
     private double averageRating;
-    private ArrayList<Advertisement> favoriteAds = new ArrayList<>();
 
     public User() {
         this.status = UserStatus.ACTIVE;
-    }
-
-    public boolean isPasswordCorrect(String password) {
-        return this.password != null && this.password.equals(password);
     }
 
     public String getId() {
@@ -33,20 +25,13 @@ public class User {
         this.id = id;
     }
 
+
     public String getUsername() {
         return username;
     }
 
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public String getFirstname() {
@@ -63,21 +48,6 @@ public class User {
 
     public void setLastname(String lastname) {
         this.lastname = lastname;
-    }
-
-    public String getFullName() {
-        boolean hasFirst = firstname != null && !firstname.isBlank();
-        boolean hasLast = lastname != null && !lastname.isBlank();
-
-        if (hasFirst && hasLast) {
-            return firstname + " " + lastname;
-        } else if (hasFirst) {
-            return firstname;
-        } else if (hasLast) {
-            return lastname;
-        }
-
-        return "-";
     }
 
     public String getPhoneNumber() {
@@ -100,10 +70,6 @@ public class User {
         return role;
     }
 
-    public void setRole(UserRole role) {
-        this.role = role;
-    }
-
     public UserStatus getStatus() {
         return status;
     }
@@ -112,38 +78,37 @@ public class User {
         this.status = status;
     }
 
-    public String getBlockReason() {
-        return blockReason;
-    }
-
-    public void setBlockReason(String blockReason) {
-        this.blockReason = blockReason;
+    public void setAverageRating(double sellerRating) {
     }
 
     public double getAverageRating() {
         return averageRating;
     }
 
-    public void setAverageRating(double averageRating) {
-        this.averageRating = averageRating;
-    }
-
-    public ArrayList<Advertisement> getFavoriteAds() {
-        return favoriteAds;
-    }
-
-    public void addFavoriteAdvertisement(Advertisement advertisement) {
-        if (!favoriteAds.contains(advertisement)) {
-            favoriteAds.add(advertisement);
+    public String getFullName() {
+        if (firstname == null && lastname == null) {
+            return username;
         }
-    }
 
-    public void removeFavoriteAdvertisement(Advertisement advertisement) {
-        favoriteAds.remove(advertisement);
-    }
+        String fName = "";
+        if (firstname != null) {
+            fName = firstname;
+        } else {
+            fName = "";
+        }
 
-    public boolean isFavoriteAdvertisement(Advertisement advertisement) {
-        return favoriteAds.contains(advertisement);
+        String lName = "";
+        if (lastname != null) {
+            lName = lastname;
+        } else {
+            lName = "";
+        }
+
+        String fullName = fName + " " + lName;
+        return fullName.trim();
     }
 }
+
+
+
 

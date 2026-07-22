@@ -1,6 +1,7 @@
 package org.example.divar.model;
 
 public enum Category {
+
     PROPERTY("املاک"),
     VEHICLE("وسایل نقلیه"),
     ELECTRONIC("کالای دیجیتال"),
@@ -28,13 +29,16 @@ public enum Category {
     }
 
     public static Category fromString(String text) {
+
         for (Category category : Category.values()) {
             if (category.getLabel().equals(text)) {
                 return category;
             }
         }
+
         throw new RuntimeException("Category not found: " + text);
     }
+
 }
 
 

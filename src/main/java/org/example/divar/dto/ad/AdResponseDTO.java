@@ -144,7 +144,9 @@ public class AdResponseDTO {
     public ArrayList<String> getImageUrls() { return imageUrls; }
     public ArrayList<String> getImageIds() { return imageIds; }
     public String getStatus() { return status; }
-    public long getSellerId() { return sellerId; }
+    public String getSellerId() {
+        return String.valueOf(sellerId);
+    }
     public String getSellerUsername() { return sellerUsername; }
     public String getSellerFirstName() { return sellerFirstName; }
     public String getSellerLastName() { return sellerLastName; }

@@ -1,6 +1,7 @@
 package org.example.divar.model;
 
 public enum DateFilter {
+
     YESTERDAY("دیروز"),
     PAST_WEEK("هفته گذشته"),
     OLDER("قدیمی‌تر");
@@ -16,11 +17,13 @@ public enum DateFilter {
     }
 
     public static DateFilter fromString(String text) {
+
         for (DateFilter df : DateFilter.values()) {
             if (df.getLabel().equals(text)) {
                 return df;
             }
         }
+
         return null;
     }
 }

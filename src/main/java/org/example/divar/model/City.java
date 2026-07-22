@@ -1,6 +1,7 @@
 package org.example.divar.model;
 
 public class City {
+
     private Long id;
     private String name;
 
@@ -29,4 +30,5 @@ public class City {
     public String toString() {
         return this.name;
     }
+
 }
