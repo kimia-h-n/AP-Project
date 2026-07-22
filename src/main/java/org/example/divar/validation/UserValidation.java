@@ -16,18 +16,6 @@ public class UserValidation {
         }
     }
 
-    public void userValidation(User user, String password) throws RuntimeException {
-        if (user == null) {
-            throw new RuntimeException("نام کاربری یا رمز عبور اشتباه است.");
-        }
-        if (!user.isPasswordCorrect(password)) {
-            throw new RuntimeException("نام کاربری یا رمز عبور اشتباه است.");
-        }
-        if (user.getStatus() == UserStatus.BANNED) {
-            throw new RuntimeException("حساب کاربری شما مسدود شده است!");
-        }
-    }
-
     public void registerValidation(String firstname, String lastname, String username, String password, String phoneNumber, String email) throws IllegalArgumentException {
 
         if (firstname == null || firstname.trim().isEmpty()) {

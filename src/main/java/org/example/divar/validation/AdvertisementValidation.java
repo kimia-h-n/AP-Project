@@ -1,8 +1,8 @@
 package org.example.divar.validation;
 
 import org.example.divar.model.Category;
-import org.example.divar.model.City;
 import org.example.divar.model.ProductCondition;
+import org.example.divar.model.City; // اضافه شدن امپورت پکیج درست شهر
 
 public class AdvertisementValidation {
 
