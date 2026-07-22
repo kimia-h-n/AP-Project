@@ -7,7 +7,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.RadioButton;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -35,9 +34,6 @@ public class AdvertisementDetailsController {
             DateTimeFormatter.ofPattern("yyyy/MM/dd - HH:mm", Locale.ENGLISH)
                     .withZone(ZoneId.of("Asia/Tehran"));
 
-    @FXML private RadioButton reasonFraud, reasonImmoral, reasonWrongCategory, reasonWrongPrice,
-            reasonWrongInfo, reasonDuplicate, reasonUnavailable, reasonOthers;
-
     @FXML private Label titleLabel;
     @FXML private Label descriptionLabel;
     @FXML private Label categoryLabel;
@@ -60,8 +56,6 @@ public class AdvertisementDetailsController {
     @FXML private Button reportButton;
     @FXML private Button rateSellerBtn;
 
-    private Stage reportWindow;
-    private Stage successWindow;
     private Advertisement currentAdvertisement;
     private boolean isFavoriteAdvertisement = false;
     private ImageGallery gallery;
@@ -82,20 +76,59 @@ public class AdvertisementDetailsController {
 
         this.currentAdvertisement = freshAd;
 
-        titleLabel.setText(safe(freshAd.getTitle()));
-        descriptionLabel.setText(safe(freshAd.getDescription()));
-        categoryLabel.setText(freshAd.getCategory() != null ? freshAd.getCategory().toString() : "-");
-        conditionLabel.setText(freshAd.getCondition() != null ? freshAd.getCondition().toString() : "-");
-        priceLabel.setText(freshAd.getPrice() > 0 ? String.format("%,d", freshAd.getPrice()) + " تومان" : "-");
-        cityLabel.setText(freshAd.getCity() != null ? freshAd.getCity().toString() : "-");
+        if (freshAd.getTitle() != null && !freshAd.getTitle().isBlank()) {
+            titleLabel.setText(freshAd.getTitle());
+        } else {
+            titleLabel.setText("-");
+        }
+
+        if (freshAd.getDescription() != null && !freshAd.getDescription().isBlank()) {
+            descriptionLabel.setText(freshAd.getDescription());
+        } else {
+            descriptionLabel.setText("-");
+        }
+
+        if (freshAd.getCategory() != null) {
+            categoryLabel.setText(freshAd.getCategory().toString());
+        } else {
+            categoryLabel.setText("-");
+        }
+
+        if (freshAd.getCondition() != null) {
+            conditionLabel.setText(freshAd.getCondition().toString());
+        } else {
+            conditionLabel.setText("-");
+        }
+
+        if (freshAd.getPrice() > 0) {
+            priceLabel.setText(String.format("%,d", freshAd.getPrice()) + " تومان");
+        } else {
+            priceLabel.setText("-");
+        }
+
+        if (freshAd.getCity() != null) {
+            cityLabel.setText(freshAd.getCity().toString());
+        } else {
+            cityLabel.setText("-");
+        }
+
         createdAtLabel.setText(formatInstant(freshAd.getCreatedAt()));
         updatedAtLabel.setText(formatInstant(freshAd.getUpdatedAt()));
-        addressLabel.setText(freshAd.getAddress() != null && !freshAd.getAddress().isBlank() ? freshAd.getAddress() : "-");
-        sellerLabel.setText(freshAd.getSeller() != null ? safe(freshAd.getSeller().getFullName()) : "-");
 
-        // ست کردن مستقیم امتیاز از دیتای آگهی (freshAd)
+        if (freshAd.getAddress() != null && !freshAd.getAddress().isBlank()) {
+            addressLabel.setText(freshAd.getAddress());
+        } else {
+            addressLabel.setText("-");
+        }
+
+        if (freshAd.getSeller() != null && freshAd.getSeller().getFullName() != null && !freshAd.getSeller().getFullName().isBlank()) {
+            sellerLabel.setText(freshAd.getSeller().getFullName());
+        } else {
+            sellerLabel.setText("-");
+        }
+
         if (lblSellerRating != null) {
-            double avg = freshAd.getSellerRating(); // یا freshAd.getAverageRating() بسته به اسم فیلد توی Advertisement
+            double avg = freshAd.getSellerRating();
             if (avg > 0) {
                 lblSellerRating.setText(String.format("%.1f از ۵", avg));
             } else {
@@ -104,31 +137,43 @@ public class AdvertisementDetailsController {
         }
 
         String currentUsername = SessionManager.getCurrentUsername();
+        if (currentUsername != null) {
+            isFavoriteAdvertisement = freshAd.isFavorite();
+        }
+        updateFavoriteButtonUI();
 
         if (currentUsername != null) {
             isFavoriteAdvertisement = freshAd.isFavorite();
         }
         updateFavoriteButtonUI();
 
-        boolean isMine = false;
-        if (currentUsername != null) {
-            if (freshAd.getSeller() != null && currentUsername.equals(freshAd.getSeller().getUsername())) {
-                isMine = true;
-            } else {
-                try {
-                    var myAds = AppContext.getAdvertisementService().getMyAdvertisements();
-                    isMine = myAds.stream().anyMatch(ad -> ad.getId() == freshAd.getId());
-                } catch (Exception ignored) {}
-            }
-        }
+        boolean isMine = checkIfAdvertisementIsMine(freshAd, currentUsername);
+        updateActionButtonsVisibility(isMine);
 
         updateActionButtonsVisibility(isMine);
 
         gallery.setImages(freshAd.getImagePaths());
     }
 
-    private String safe(String value) {
-        return (value == null || value.isBlank()) ? "-" : value;
+    private boolean checkIfAdvertisementIsMine(Advertisement freshAd, String currentUsername) {
+        if (currentUsername == null) {
+            return false;
+        }
+
+        if (freshAd.getSeller() != null && currentUsername.equals(freshAd.getSeller().getUsername())) {
+            return true;
+        }
+
+        try {
+            var myAds = AppContext.getAdvertisementService().getMyAdvertisements();
+            for (Advertisement ad : myAds) {
+                if (ad.getId() == freshAd.getId()) {
+                    return true;
+                }
+            }
+        } catch (Exception ignored) {}
+
+        return false;
     }
 
     private String formatInstant(Instant instant) {
@@ -229,32 +274,6 @@ public class AdvertisementDetailsController {
         SwitchStage.switchToChat(conversation);
     }
 
-    private void showError(String message) {
-        if (messageLabel != null) {
-            messageLabel.setText(message);
-            messageLabel.getStyleClass().remove("success-message");
-            if (!messageLabel.getStyleClass().contains("error-message")) {
-                messageLabel.getStyleClass().add("error-message");
-            }
-            messageLabel.setVisible(true);
-            messageLabel.setManaged(true);
-        } else {
-            System.err.println("Error: " + message);
-        }
-    }
-
-    private void showSuccess(String message) {
-        if (messageLabel != null) {
-            messageLabel.setText(message);
-            messageLabel.getStyleClass().remove("error-message");
-            if (!messageLabel.getStyleClass().contains("success-message")) {
-                messageLabel.getStyleClass().add("success-message");
-            }
-            messageLabel.setVisible(true);
-            messageLabel.setManaged(true);
-        }
-    }
-
     @FXML
     private void manageFavoriteAdvertisement() {
         String currentUsername = SessionManager.getCurrentUsername();
@@ -298,17 +317,20 @@ public class AdvertisementDetailsController {
     private void reportAdvertisement() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/divar/fxml/report.fxml"));
-            loader.setController(this);
             Parent root = loader.load();
 
-            reportWindow = new Stage();
+            ReportDialogController controller = loader.getController();
+            Stage reportWindow = new Stage();
+            controller.setDialogStage(reportWindow);
+            controller.setAdvertisementId(currentAdvertisement.getId());
+
             reportWindow.initModality(Modality.APPLICATION_MODAL);
             reportWindow.initStyle(StageStyle.TRANSPARENT);
 
             StackPane blackBackground = new StackPane(root);
             blackBackground.setStyle("-fx-background-color: rgba(0,0,0,0.1); -fx-padding: 30px;");
             blackBackground.setOnMouseClicked(e -> {
-                if (e.getTarget() == blackBackground) closeReportWindow();
+                if (e.getTarget() == blackBackground) reportWindow.close();
             });
 
             Scene scene = new Scene(blackBackground);
@@ -321,65 +343,6 @@ public class AdvertisementDetailsController {
         } catch (IOException e) {
             System.err.println("Could not load the FXML file: " + e.getMessage());
         }
-    }
-
-    @FXML
-    private void closeReportWindow() {
-        if (reportWindow != null) {
-            reportWindow.close();
-        }
-    }
-
-    @FXML
-    public void showSuccessReportPopup() {
-        closeReportWindow();
-
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/divar/fxml/success_report.fxml"));
-            loader.setController(this);
-            Parent root = loader.load();
-
-            successWindow = new Stage();
-            successWindow.initModality(Modality.APPLICATION_MODAL);
-            successWindow.initStyle(StageStyle.TRANSPARENT);
-
-            StackPane shadowBackground = new StackPane(root);
-            shadowBackground.setStyle("-fx-background-color: rgba(0, 0, 0, 0.4); -fx-padding: 20px;");
-
-            Scene scene = new Scene(shadowBackground);
-            scene.setFill(Color.TRANSPARENT);
-            scene.getStylesheets().add(java.util.Objects.requireNonNull(
-                    getClass().getResource("/org/example/divar/css/style.css")).toExternalForm());
-            successWindow.setScene(scene);
-            successWindow.showAndWait();
-
-        } catch (IOException e) {
-            System.err.println("خطا در باز کردن فایل FXML موفقیت: " + e.getMessage());
-        }
-    }
-
-    @FXML
-    public void sendReport() {
-        ReportReason selectedReason = getSelectedReportReason();
-        closeReportWindow();
-
-        try {
-            AppContext.getAdvertisementService().reportAdvertisement(currentAdvertisement.getId(), selectedReason);
-            showSuccessReportPopup();
-        } catch (RuntimeException e) {
-            showError(e.getMessage());
-        }
-    }
-
-    private ReportReason getSelectedReportReason() {
-        if (reasonFraud.isSelected()) return ReportReason.FRAUD;
-        if (reasonImmoral.isSelected()) return ReportReason.IMMORAL;
-        if (reasonWrongCategory.isSelected()) return ReportReason.WRONG_CATEGORY;
-        if (reasonWrongPrice.isSelected()) return ReportReason.WRONG_PRICE;
-        if (reasonWrongInfo.isSelected()) return ReportReason.WRONG_INFORMATION;
-        if (reasonDuplicate.isSelected()) return ReportReason.DUPLICATE;
-        if (reasonUnavailable.isSelected()) return ReportReason.UNAVAILABLE;
-        return ReportReason.OTHERS;
     }
 
     @FXML
@@ -442,13 +405,38 @@ public class AdvertisementDetailsController {
             ratingWindow.sizeToScene();
             ratingWindow.showAndWait();
 
-            // رلوود کردن مجدد آگهی جهت آپدیت امتیاز
             showAdvertisement(currentAdvertisement);
 
         } catch (NumberFormatException e) {
-            System.err.println("شناسه فروشنده معتبر نیست: " + e.getMessage());
+            System.err.println("Invalid seller ID: " + e.getMessage());
         } catch (IOException e) {
-            System.err.println("خطا در بارگذاری FXML امتیازدهی: " + e.getMessage());
+            System.err.println("Could not load rating FXML file: " + e.getMessage());
+        }
+    }
+
+    private void showError(String message) {
+        if (messageLabel != null) {
+            messageLabel.setText(message);
+            messageLabel.getStyleClass().remove("success-message");
+            if (!messageLabel.getStyleClass().contains("error-message")) {
+                messageLabel.getStyleClass().add("error-message");
+            }
+            messageLabel.setVisible(true);
+            messageLabel.setManaged(true);
+        } else {
+            System.err.println("Error: " + message);
+        }
+    }
+
+    private void showSuccess(String message) {
+        if (messageLabel != null) {
+            messageLabel.setText(message);
+            messageLabel.getStyleClass().remove("error-message");
+            if (!messageLabel.getStyleClass().contains("success-message")) {
+                messageLabel.getStyleClass().add("success-message");
+            }
+            messageLabel.setVisible(true);
+            messageLabel.setManaged(true);
         }
     }
 
@@ -462,13 +450,6 @@ public class AdvertisementDetailsController {
 
     @FXML private void goToChat() {
         SwitchStage.switchToChat();
-    }
-
-    @FXML
-    private void closeSuccessWindow() {
-        if (successWindow != null) {
-            successWindow.close();
-        }
     }
 }
 
