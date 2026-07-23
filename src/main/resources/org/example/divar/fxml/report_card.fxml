@@ -6,7 +6,7 @@
 
 <fx:root type="javafx.scene.layout.VBox" spacing="8.0" prefWidth="220.0" prefHeight="280.0"
          styleClass="admin-card" style="-fx-padding: 12px; -fx-cursor: default;"
-         nodeOrientation="RIGHT_TO_LEFT"
+         nodeOrientation="LEFT_TO_RIGHT"
          xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <StackPane style="-fx-background-color: #f2f2f2; -fx-background-radius: 6px;" prefHeight="130.0">
@@ -15,13 +15,29 @@
             </children>
         </StackPane>
 
-        <Label fx:id="cardTitle" styleClass="admin-card-title" wrapText="true" style="-fx-font-weight: bold;"/>
-        <Label fx:id="cardLocation" styleClass="admin-card-location" style="-fx-text-fill: #757575; -fx-font-size: 11px;"/>
+        <Label fx:id="cardTitle"
+               styleClass="admin-card-title"
+               wrapText="true"
+               alignment="CENTER_RIGHT"
+               textAlignment="RIGHT"
+               maxWidth="Infinity"
+               style="-fx-font-weight: bold;"/>
 
-        <!-- کانتینر برای علت گزارش جهت یک‌دست ماندن فاصله -->
+        <Label fx:id="cardLocation"
+               styleClass="admin-card-location"
+               alignment="CENTER_RIGHT"
+               textAlignment="RIGHT"
+               maxWidth="Infinity"
+               style="-fx-text-fill: #757575; -fx-font-size: 11px;"/>
+
         <VBox VBox.vgrow="ALWAYS" alignment="BOTTOM_RIGHT" spacing="2.0">
             <children>
-                <Label fx:id="reasonLabel" styleClass="reason-value" wrapText="true"/>
+                <Label fx:id="reasonLabel"
+                       styleClass="reason-value"
+                       wrapText="true"
+                       alignment="CENTER_RIGHT"
+                       textAlignment="RIGHT"
+                       maxWidth="Infinity"/>
             </children>
         </VBox>
 

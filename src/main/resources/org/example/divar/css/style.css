@@ -1,11 +1,6 @@
 @font-face {
     font-family: 'Vazirmatn';
-    src: url('../fonts/Vazirmatn-Regular.ttf');
-}
-
-@font-face {
-    font-family: 'Vazirmatn Bold';
-    src: url('../fonts/Vazirmatn-Bold.ttf');
+    src: url('../fonts/Vazirmatn-Medium.ttf');
 }
 
 .root, root {
@@ -96,6 +91,16 @@
     -fx-padding: 12px 10px;
     -fx-alignment: center-left;
     -fx-cursor: hand;
+}
+
+.menu-link-normal {
+    -fx-text-fill: #444444;
+    -fx-font-size: 14px;
+    -fx-underline: false;
+    -fx-padding: 5px 0;
+    -fx-font-weight: normal;
+    -fx-alignment: CENTER_RIGHT;
+    -fx-text-alignment: RIGHT;
 }
 
 .menu-btn-active {
@@ -619,8 +624,6 @@
     -fx-border-color: #cccccc;
 }
 
-
-/* وضعیت مسدود شده */
 .status-pill-blocked {
     -fx-background-color: #ffebee;
     -fx-text-fill: #c62828;
@@ -906,4 +909,84 @@
 .rating-error-label {
     -fx-text-fill: #a62626;
     -fx-font-size: 12px;
+}
+
+.category-link {
+    -fx-text-fill: #555555;
+    -fx-font-size: 13px;
+    -fx-font-weight: normal;
+    -fx-underline: false;
+}
+
+.category-link-selected {
+    -fx-text-fill: #a62626;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-underline: false;
+}
+
+/* ====== استایل‌های دیالوگ امتیاز ====== */
+
+.rating-avg-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333333;
+}
+
+.rating-title-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #666666;
+}
+
+.rating-message-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #a62626;
+}
+
+/* ====== دیالوگ امتیاز ====== */
+.star-active {
+    -fx-font-size: 26px;
+    -fx-background-color: transparent;
+    -fx-text-fill: #ffc107;
+    -fx-cursor: hand;
+}
+
+.star-inactive {
+    -fx-font-size: 26px;
+    -fx-background-color: transparent;
+    -fx-text-fill: #cccccc;
+    -fx-cursor: hand;
+}
+
+/* دکمه ثبت امتیاز */
+.rating-submit-btn {
+    -fx-background-color: #a62626;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+    -fx-background-radius: 4px;
+}
+
+.rating-submit-btn:hover {
+    -fx-background-color: #8c1e1e;
+}
+
+.rating-submit-btn:disabled {
+    -fx-opacity: 0.5;
+    -fx-cursor: default;
+}
+
+/* دکمه انصراف */
+.rating-cancel-btn {
+    -fx-background-color: #f0f0f0;
+    -fx-text-fill: #333333;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+    -fx-background-radius: 4px;
+}
+
+.rating-cancel-btn:hover {
+    -fx-background-color: #e0e0e0;
 }

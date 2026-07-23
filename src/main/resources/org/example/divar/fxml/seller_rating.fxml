@@ -19,8 +19,6 @@
             <children>
                 <Label fx:id="lblAvgRating" text="در حال دریافت میانگین امتیاز..." style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #333333;" />
                 <Label text="امتیاز خود را به فروشنده انتخاب کنید" style="-fx-font-size: 12px; -fx-text-fill: #666666;" />
-
-                <!-- بخش ستاره‌ها با رنگ مشخص پیش‌فرض -->
                 <HBox fx:id="starContainer" alignment="CENTER" spacing="8.0" style="-fx-padding: 10 0 10 0;">
                     <children>
                         <Button fx:id="btnStar1" onAction="#handleStarClick" text="★" style="-fx-font-size: 26px; -fx-background-color: transparent; -fx-text-fill: #ccc; -fx-cursor: hand;" />
@@ -46,3 +44,5 @@
         </HBox>
     </children>
 </VBox>
+
+

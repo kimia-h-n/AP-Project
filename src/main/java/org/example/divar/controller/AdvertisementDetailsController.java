@@ -49,6 +49,7 @@ public class AdvertisementDetailsController {
     @FXML private ImageView mainImage;
     @FXML private HBox thumbnailBox;
     @FXML private Label counterLabel;
+    @FXML private Button topChatBtn;
     @FXML private Button chatBtn;
     @FXML private Button favoriteBtn;
     @FXML private Button editBtn;
@@ -177,14 +178,24 @@ public class AdvertisementDetailsController {
     }
 
     private void updateActionButtonsVisibility(boolean isMine) {
-        editBtn.setVisible(isMine);
-        editBtn.setManaged(isMine);
-        deleteBtn.setVisible(isMine);
-        deleteBtn.setManaged(isMine);
+        boolean isAdmin = SessionManager.isAdmin();
 
-        boolean showBuyerActions = !isMine;
-        chatBtn.setVisible(showBuyerActions);
-        chatBtn.setManaged(showBuyerActions);
+        editBtn.setVisible(isMine && !isAdmin);
+        editBtn.setManaged(isMine && !isAdmin);
+
+        deleteBtn.setVisible(isMine || isAdmin);
+        deleteBtn.setManaged(isMine || isAdmin);
+
+        boolean showBuyerActions = !isMine && !isAdmin;
+
+        if (topChatBtn != null) {
+            topChatBtn.setVisible(showBuyerActions);
+            topChatBtn.setManaged(showBuyerActions);
+        }
+        if (chatBtn != null) {
+            chatBtn.setVisible(showBuyerActions);
+            chatBtn.setManaged(showBuyerActions);
+        }
         favoriteBtn.setVisible(showBuyerActions);
         favoriteBtn.setManaged(showBuyerActions);
         reportButton.setVisible(showBuyerActions);
@@ -215,8 +226,14 @@ public class AdvertisementDetailsController {
         editBtn.setManaged(false);
         deleteBtn.setVisible(false);
         deleteBtn.setManaged(false);
-        chatBtn.setVisible(false);
-        chatBtn.setManaged(false);
+        if (topChatBtn != null) {
+            topChatBtn.setVisible(false);
+            topChatBtn.setManaged(false);
+        }
+        if (chatBtn != null) {
+            chatBtn.setVisible(false);
+            chatBtn.setManaged(false);
+        }
         reportButton.setVisible(false);
         reportButton.setManaged(false);
 
@@ -375,7 +392,10 @@ public class AdvertisementDetailsController {
             Parent root = loader.load();
 
             SellerRatingDialog controller = loader.getController();
-            Long sellerId = Long.parseLong(currentAdvertisement.getSeller().getId());
+
+            String rawId = currentAdvertisement.getSeller().getId();
+            Long sellerId = (rawId != null && !rawId.isBlank()) ? Long.parseLong(rawId) : null;
+
             controller.setSellerData(sellerId);
 
             Stage ratingWindow = new Stage();
@@ -401,36 +421,22 @@ public class AdvertisementDetailsController {
             showAdvertisement(currentAdvertisement);
 
         } catch (NumberFormatException e) {
-            System.err.println("Invalid seller ID: " + e.getMessage());
+            System.err.println("Invalid seller ID format: " + e.getMessage());
         } catch (IOException e) {
             System.err.println("Could not load rating FXML file: " + e.getMessage());
         }
     }
 
     private void showError(String message) {
-        if (messageLabel != null) {
-            messageLabel.setText(message);
-            messageLabel.getStyleClass().remove("success-message");
-            if (!messageLabel.getStyleClass().contains("error-message")) {
-                messageLabel.getStyleClass().add("error-message");
-            }
-            messageLabel.setVisible(true);
-            messageLabel.setManaged(true);
-        } else {
-            System.err.println("Error: " + message);
-        }
+        messageLabel.setText(message);
+        messageLabel.getStyleClass().setAll("error-message");
+        messageLabel.setVisible(true);
     }
 
     private void showSuccess(String message) {
-        if (messageLabel != null) {
-            messageLabel.setText(message);
-            messageLabel.getStyleClass().remove("error-message");
-            if (!messageLabel.getStyleClass().contains("success-message")) {
-                messageLabel.getStyleClass().add("success-message");
-            }
-            messageLabel.setVisible(true);
-            messageLabel.setManaged(true);
-        }
+        messageLabel.setText(message);
+        messageLabel.getStyleClass().setAll("success-message");
+        messageLabel.setVisible(true);
     }
 
     @FXML private void goToProfile() {
@@ -445,10 +451,6 @@ public class AdvertisementDetailsController {
         SwitchStage.switchToChat();
     }
 }
-
-
-
-
 
 
 

@@ -26,6 +26,9 @@ public class HomeController {
     @FXML private TextField minPriceField;
     @FXML private TextField maxPriceField;
     @FXML private TextField searchField;
+    @FXML private Hyperlink allCategoriesLink, realEstateLink, vehiclesLink, digitalLink,
+            entertainmentLink, jobsLink, homeKitchenLink, industrialLink,
+            socialLink, servicesLink, personalGoodsLink;
 
     private ArrayList<Advertisement> activeAds = new ArrayList<>();
     private Category selectedCategoryEnum = null;
@@ -35,13 +38,16 @@ public class HomeController {
     public void initialize() {
         cityFilterComboBox.setConverter(CityFormatter.createStringConverter());
 
+        lastClickedCategoryLink = allCategoriesLink;
+        if (allCategoriesLink != null) {
+            allCategoriesLink.getStyleClass().add("category-link-selected");
+        }
+
         try {
             ArrayList<City> serverCities = AppContext.getAdvertisementService().getAllProvinces();
-
             City allCitiesPlaceholder = new City(null, "همه شهرها");
             cityFilterComboBox.getItems().add(allCitiesPlaceholder);
             cityFilterComboBox.getItems().addAll(serverCities);
-            //cityFilterComboBox.setValue(allCitiesPlaceholder);
         } catch (Exception e) {
             System.err.println("Error loading cities in home: " + e.getMessage());
         }

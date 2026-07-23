@@ -13,10 +13,10 @@ public class AppContext {
     private static final ConversationService CONVERSATION_SERVICE = new ConversationServiceHttp();
     private static final AdminService ADMIN_SERVICE = new AdminServiceHttp();
     private static final ChatService CHAT_SERVICE = new ChatServiceWebSocket();
-    private static final RatingService ratingService = new RatingServiceHttp();
+    private static final RatingService RATING_SERVICE = new RatingServiceHttp();
 
     public static RatingService getRatingService() {
-        return ratingService;
+        return RATING_SERVICE;
     }
 
     public static UserValidation getUserValidation() {

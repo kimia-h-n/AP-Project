@@ -214,6 +214,10 @@ public class AdResponseDTO {
     public double getSellerRating() {
         return sellerRating;
     }
+
+    public double getSellerRatingAvg() {
+        return sellerRating;
+    }
 }
 
 

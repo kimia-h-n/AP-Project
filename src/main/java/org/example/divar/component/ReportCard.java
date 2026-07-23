@@ -49,7 +49,6 @@ public class ReportCard extends VBox {
             if (reasonLabel != null) {
                 ReportReason reasonEnum = ReportReason.fromString(report.getReason());
                 reasonLabel.setText("علت گزارش: " + reasonEnum.getLabel());
-                reasonLabel.getStyleClass().add("report-reason-label");
             }
 
             if (handleBtn != null) {
