@@ -62,11 +62,20 @@ public class ApiClient {
     private static Object sendRequest(HttpRequest.Builder builder, boolean isList) {
         try {
             HttpRequest request = builder.build();
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return handleResponse(response, isList);
+            System.out.println("=== API REQUEST DEBUG ===");
+            System.out.println("METHOD: " + request.method());
+            System.out.println("URI: " + request.uri());
+            System.out.println("TOKEN SENT: " + SessionManager.getToken());
 
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            System.out.println("HTTP STATUS: " + response.statusCode());
+            System.out.println("RESPONSE BODY: " + response.body());
+            System.out.println("========================");
+
+            return handleResponse(response, isList);
         } catch (IOException | InterruptedException e) {
-            throw new RuntimeException("Error: Failed to connect to the server.");
+            throw new RuntimeException("خطا: ارتباط با سرور برقرار نشد.");
         }
     }
 

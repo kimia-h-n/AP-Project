@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <fx:root type="javafx.scene.layout.HBox" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-         style="-fx-padding: 6px 15px 6px 15px;">
+         style="-fx-padding: 8px 18px 8px 18px;">
     <children>
         <VBox fx:id="messageBox" spacing="4.0" style="-fx-padding: 8px 14px 6px 14px;">
             <children>

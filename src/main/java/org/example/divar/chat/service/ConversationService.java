@@ -1,7 +1,7 @@
-package org.example.divar.service;
+package org.example.divar.chat.service;
 
 import org.example.divar.model.Advertisement;
-import org.example.divar.model.Conversation;
+import org.example.divar.chat.model.Conversation;
 import java.util.ArrayList;
 
 public interface ConversationService {
