@@ -16,25 +16,28 @@
     </properties>
 
     <dependencies>
+        <!-- JavaFX UI controls and layout components -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
             <version>${javafx.version}</version>
         </dependency>
 
+        <!-- JavaFX FXML support for loading UI layout files -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
             <version>${javafx.version}</version>
         </dependency>
 
+        <!-- WebSocket client library for real-time communication -->
         <dependency>
             <groupId>org.java-websocket</groupId>
             <artifactId>Java-WebSocket</artifactId>
             <version>1.5.3</version>
         </dependency>
 
-        <!-- برای ساخت و خواندن JSON، چون قراره با بک‌اند JSON رد و بدل کنیم -->
+        <!-- JSON parser library for handling API requests and responses -->
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
