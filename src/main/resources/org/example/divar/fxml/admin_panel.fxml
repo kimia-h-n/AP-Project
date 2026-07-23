@@ -2,6 +2,7 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="org.example.divar.controller.AdminController"
@@ -25,36 +26,56 @@
                         prefWidth="230.0"
                         maxWidth="Infinity"
                         alignment="CENTER_RIGHT"
+                        contentDisplay="RIGHT"
                         nodeOrientation="LEFT_TO_RIGHT"
                         style="-fx-alignment: CENTER_RIGHT; -fx-padding: 12px 24px;"
-                        onAction="#showDashboard"/>
+                        onAction="#showDashboard">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-tachometer-alt" iconSize="15" iconColor="#666666"/>
+                    </graphic>
+                </Button>
 
                 <Button fx:id="adsBtn"
                         text="آگهی‌ها"
                         prefWidth="230.0"
                         maxWidth="Infinity"
                         alignment="CENTER_RIGHT"
+                        contentDisplay="RIGHT"
                         nodeOrientation="LEFT_TO_RIGHT"
                         style="-fx-alignment: CENTER_RIGHT; -fx-padding: 12px 24px;"
-                        onAction="#showAds"/>
+                        onAction="#showAds">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-bullhorn" iconSize="15" iconColor="#666666"/>
+                    </graphic>
+                </Button>
 
                 <Button fx:id="reportsBtn"
                         text="گزارش‌ها"
                         prefWidth="230.0"
                         maxWidth="Infinity"
                         alignment="CENTER_RIGHT"
+                        contentDisplay="RIGHT"
                         nodeOrientation="LEFT_TO_RIGHT"
                         style="-fx-alignment: CENTER_RIGHT; -fx-padding: 12px 24px;"
-                        onAction="#showReports"/>
+                        onAction="#showReports">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-flag" iconSize="15" iconColor="#666666"/>
+                    </graphic>
+                </Button>
 
                 <Button fx:id="usersBtn"
                         text="کاربران"
                         prefWidth="230.0"
                         maxWidth="Infinity"
                         alignment="CENTER_RIGHT"
+                        contentDisplay="RIGHT"
                         nodeOrientation="LEFT_TO_RIGHT"
                         style="-fx-alignment: CENTER_RIGHT; -fx-padding: 12px 24px;"
-                        onAction="#showUsers"/>
+                        onAction="#showUsers">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-users" iconSize="15" iconColor="#666666"/>
+                    </graphic>
+                </Button>
 
                 <Region VBox.vgrow="ALWAYS"/>
 
@@ -64,9 +85,14 @@
                         prefWidth="230.0"
                         maxWidth="Infinity"
                         alignment="CENTER_RIGHT"
+                        contentDisplay="RIGHT"
                         nodeOrientation="LEFT_TO_RIGHT"
                         style="-fx-background-color: transparent; -fx-text-fill: #a62626; -fx-font-size: 14px; -fx-padding: 12px 24px; -fx-alignment: CENTER_RIGHT; -fx-cursor: hand;"
-                        onAction="#logout"/>
+                        onAction="#logout">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-sign-out-alt" iconSize="15" iconColor="#a62626"/>
+                    </graphic>
+                </Button>
             </children>
         </VBox>
     </right>
@@ -76,5 +102,8 @@
     </center>
 
 </BorderPane>
+
+
+
 
 
