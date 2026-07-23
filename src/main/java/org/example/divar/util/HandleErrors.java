@@ -57,6 +57,9 @@ public class HandleErrors {
             if (message.equalsIgnoreCase("You cannot rate yourself!")) {
                 return "شما نمی‌توانید به خودتان امتیاز دهید.";
             }
+            if (message.equalsIgnoreCase("Spam is not allowed")) {
+                return "این آگهی قبلاً گزارش شده و در دست بررسی است.";
+            }
             return message;
         }
 

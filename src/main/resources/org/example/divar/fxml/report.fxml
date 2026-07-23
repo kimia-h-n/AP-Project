@@ -29,6 +29,8 @@
                 <RadioButton fx:id="reasonDuplicate" text="تکراری یا اسپم" toggleGroup="$reportGroup" styleClass="dialog-radio" maxWidth="Infinity" alignment="CENTER_LEFT"/>
                 <RadioButton fx:id="reasonUnavailable" text="ناموجود یا پاسخگو نبودن" toggleGroup="$reportGroup" styleClass="dialog-radio" maxWidth="Infinity" alignment="CENTER_LEFT"/>
                 <RadioButton fx:id="reasonOthers" text="سایر" toggleGroup="$reportGroup" styleClass="dialog-radio" maxWidth="Infinity" alignment="CENTER_LEFT"/>
+
+                <Label fx:id="messageLabel" visible="false" managed="false" style="-fx-text-fill: #a62626; -fx-font-size: 13px; -fx-font-weight: bold;" wrapText="true"/>
             </children>
         </VBox>
 

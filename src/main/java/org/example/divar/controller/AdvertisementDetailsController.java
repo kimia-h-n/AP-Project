@@ -340,6 +340,8 @@ public class AdvertisementDetailsController {
             controller.setDialogStage(reportWindow);
             controller.setAdvertisementId(currentAdvertisement.getId());
 
+            controller.setDetailsController(this);
+
             reportWindow.initModality(Modality.APPLICATION_MODAL);
             reportWindow.initStyle(StageStyle.TRANSPARENT);
 
@@ -433,7 +435,7 @@ public class AdvertisementDetailsController {
         }
     }
 
-    private void showError(String message) {
+    void showError(String message) {
         messageLabel.setText(message);
         messageLabel.getStyleClass().setAll("error-message");
         messageLabel.setVisible(true);

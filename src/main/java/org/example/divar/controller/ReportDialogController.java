@@ -11,6 +11,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.example.divar.model.ReportReason;
 import org.example.divar.util.AppContext;
+import org.example.divar.util.HandleErrors;
 
 import java.io.IOException;
 
@@ -21,6 +22,7 @@ public class ReportDialogController {
 
     private Stage dialogStage;
     private long advertisementId;
+    private AdvertisementDetailsController detailsController;
 
     public void setDialogStage(Stage dialogStage) {
         this.dialogStage = dialogStage;
@@ -28,6 +30,10 @@ public class ReportDialogController {
 
     public void setAdvertisementId(long advertisementId) {
         this.advertisementId = advertisementId;
+    }
+
+    public void setDetailsController(AdvertisementDetailsController detailsController) {
+        this.detailsController = detailsController;
     }
 
     @FXML
@@ -38,7 +44,13 @@ public class ReportDialogController {
             closeReportWindow();
             showSuccessReportPopup();
         } catch (RuntimeException e) {
-            System.err.println("Error reporting advertisement: " + e.getMessage());
+            String persianMessage = HandleErrors.getPersianMessage(e.getMessage(), e.getMessage(), 400);
+
+            closeReportWindow();
+
+            if (detailsController != null) {
+                detailsController.showError(persianMessage);
+            }
         }
     }
 
@@ -80,27 +92,13 @@ public class ReportDialogController {
     }
 
     private ReportReason getSelectedReportReason() {
-        if (reasonFraud.isSelected()) {
-            return ReportReason.FRAUD;
-        }
-        if (reasonImmoral.isSelected()) {
-            return ReportReason.IMMORAL;
-        }
-        if (reasonWrongCategory.isSelected()) {
-            return ReportReason.WRONG_CATEGORY;
-        }
-        if (reasonWrongPrice.isSelected()) {
-            return ReportReason.WRONG_PRICE;
-        }
-        if (reasonWrongInfo.isSelected()) {
-            return ReportReason.WRONG_INFORMATION;
-        }
-        if (reasonDuplicate.isSelected()) {
-            return ReportReason.DUPLICATE;
-        }
-        if (reasonUnavailable.isSelected()) {
-            return ReportReason.UNAVAILABLE;
-        }
+        if (reasonFraud.isSelected()) return ReportReason.FRAUD;
+        if (reasonImmoral.isSelected()) return ReportReason.IMMORAL;
+        if (reasonWrongCategory.isSelected()) return ReportReason.WRONG_CATEGORY;
+        if (reasonWrongPrice.isSelected()) return ReportReason.WRONG_PRICE;
+        if (reasonWrongInfo.isSelected()) return ReportReason.WRONG_INFORMATION;
+        if (reasonDuplicate.isSelected()) return ReportReason.DUPLICATE;
+        if (reasonUnavailable.isSelected()) return ReportReason.UNAVAILABLE;
         return ReportReason.OTHERS;
     }
 
