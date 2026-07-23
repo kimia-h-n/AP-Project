@@ -30,6 +30,8 @@ public class ProfileController {
     private List<Advertisement> currentAds = new ArrayList<>();
     private String currentMode = "";
 
+    private static String lastProfileTab = "myAdvertisements";
+
     @FXML
     public void initialize() {
         adsGrid = new GridPane();
@@ -47,6 +49,12 @@ public class ProfileController {
                 }
             }
         });
+
+        if ("favorites".equals(lastProfileTab)) {
+            showFavorites();
+        } else {
+            showMyAdvertisements();
+        }
     }
 
     private List<Advertisement> getFavorites() {
@@ -60,6 +68,7 @@ public class ProfileController {
 
     @FXML
     private void showFavorites() {
+        lastProfileTab = "favorites";
         setActiveMenu(favoriteLink, 0);
         currentMode = "favorites";
         currentAds = getFavorites();
@@ -82,6 +91,7 @@ public class ProfileController {
 
     @FXML
     private void showMyAdvertisements() {
+        lastProfileTab = "myAdvertisements";
         setActiveMenu(advertisementLink, 42);
         currentMode = "myAdvertisements";
         currentAds = getMyAdvertisements();
