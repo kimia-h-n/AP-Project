@@ -1,6 +1,5 @@
 package com.example.sales.chat.dto;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,8 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MessageRequest {
-    private Long receiverId;
-    private String message;
-    private Long adId;
+public class UpdateSeenRequest {
+    Long messageId;
 }

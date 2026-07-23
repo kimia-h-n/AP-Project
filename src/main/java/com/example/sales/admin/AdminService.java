@@ -6,23 +6,17 @@ import com.example.sales.ad.AdRepository;
 import com.example.sales.ad.dto.AdCardSummary;
 import com.example.sales.ad.dto.PendingAdResponse;
 import com.example.sales.ad.mapper.AdMapper;
+import com.example.sales.exception.*;
 import com.example.sales.rating.SellerRatingService;
-import com.example.sales.user.UserInfoResponse;
-import com.example.sales.user.UserSummary;
+import com.example.sales.user.*;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.sales.ad.model.*;
 import com.example.sales.ad.moderation.AdModerationRequest;
 import com.example.sales.ad.reported.model.AdReport;
 import com.example.sales.ad.reported.AdReportRepository;
 import com.example.sales.ad.reported.dto.AdReportResponse;
-import com.example.sales.exception.AdNotFoundException;
-import com.example.sales.exception.AlreadyBlockedException;
-import com.example.sales.exception.UserAlreadyEnabled;
-import com.example.sales.exception.UserNotFoundException;
 import com.example.sales.picture.AdPrimaryImageEnricher;
 import com.example.sales.repository.UserRepository;
-import com.example.sales.user.User;
-import com.example.sales.user.UserMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +35,7 @@ public class AdminService {
     private final SellerRatingService sellerRatingService;
 
     public List<UserSummary> getAllUsers() {
-        return userMapper.toUserSummary(userRepository.findAll());
+        return userMapper.toUserSummary(userRepository.findAllByRole(Role.USER));
     }
 
 
@@ -49,6 +43,10 @@ public class AdminService {
     public void blockUser(Long id) {
 
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
+
+        if (user.getRole() == Role.ADMIN)
+            throw new OperationNotAllowedException();
+
         if (!user.isEnabled())
             throw new AlreadyBlockedException();
         user.setEnabled(false);

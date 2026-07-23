@@ -1,5 +1,7 @@
 package com.example.sales.chat;
 
+import com.example.sales.chat.model.ChatMessage;
+import com.example.sales.chat.model.MessageStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,13 +17,32 @@ public interface ChatRepository extends JpaRepository<ChatMessage, Long> {
     @Query("""
             SELECT m
             FROM ChatMessage m
-            WHERE (m.sender.id = :user1Id AND m.receiver.id = :user2Id)
-               OR (m.sender.id = :user2Id AND m.receiver.id = :user1Id)
+            WHERE m.ad.id = :adId
+              AND ((m.sender.id = :user1Id AND m.receiver.id = :user2Id)
+                   OR (m.sender.id = :user2Id AND m.receiver.id = :user1Id))
             ORDER BY m.sentAt ASC
             """)
-    List<ChatMessage> findChatMessagesBetweenUsers(
+    List<ChatMessage> findChatMessagesBetweenUsersForAd(
             @Param("user1Id") Long user1Id,
-            @Param("user2Id") Long user2Id
+            @Param("user2Id") Long user2Id,
+            @Param("adId") Long adId
     );
 
+    @Query("""
+            SELECT m FROM ChatMessage m
+            WHERE m.id IN (
+                SELECT MAX(msg.id)
+                FROM ChatMessage msg
+                WHERE msg.sender.id = :userId OR msg.receiver.id = :userId
+                GROUP BY 
+                    CASE 
+                        WHEN msg.sender.id = :userId THEN msg.receiver.id 
+                        ELSE msg.sender.id 
+                    END
+            )
+            ORDER BY m.sentAt DESC
+            """)
+    List<ChatMessage> findActiveConversationsForUser(@Param("userId") Long userId);
+
+    List<ChatMessage> findBySenderIdAndReceiverIdAndStatus(Long senderId, Long receiverId, MessageStatus status);
 }
