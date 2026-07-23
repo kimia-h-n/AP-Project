@@ -5,6 +5,9 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.Objects;
 
+/**
+ * ImageLoader utility class for loading images from URLs or local file paths.
+ */
 public class ImageLoader {
 
     private static final String DEFAULT_IMAGE_PATH = "/org/example/divar/images/current.jpg";
@@ -18,7 +21,7 @@ public class ImageLoader {
                     return new Image(new ByteArrayInputStream(imageBytes));
                 }
             } catch (Exception e) {
-                System.err.println("خطا در تبدیل بایت‌های تصویر: " + e.getMessage());
+                System.err.println("Error converting image bytes: " + e.getMessage());
             }
         }
         return loadDefault();
@@ -29,7 +32,7 @@ public class ImageLoader {
             return new Image(Objects.requireNonNull(
                     ImageLoader.class.getResourceAsStream(DEFAULT_IMAGE_PATH)));
         } catch (Exception e) {
-            System.err.println("تصویر پیش‌فرض پیدا نشد.");
+            System.err.println("Default image not found.");
             return null;
         }
     }
