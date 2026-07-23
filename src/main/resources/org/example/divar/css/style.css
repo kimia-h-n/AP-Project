@@ -836,3 +836,17 @@
     -fx-cursor: hand;
 }
 
+.category-link {
+    -fx-text-fill: #303030;
+    -fx-font-weight: normal;
+}
+
+.category-link-selected {
+    -fx-text-fill: #A62626;
+    -fx-font-weight: bold;
+}
+
+.empty-ads-label {
+    -fx-font-size: 16px;
+    -fx-text-fill: #888;
+}
