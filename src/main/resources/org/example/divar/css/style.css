@@ -855,3 +855,17 @@
     -fx-text-fill: red;
     -fx-font-size: 11px;
 }
+
+.status-active {
+    -fx-background-color: #e8f5e9;
+    -fx-text-fill: #2e7d32;
+    -fx-padding: 4 8;
+    -fx-background-radius: 6;
+}
+
+.status-banned {
+    -fx-background-color: #ffebee;
+    -fx-text-fill: #c62828;
+    -fx-padding: 4 8;
+    -fx-background-radius: 6;
+}
