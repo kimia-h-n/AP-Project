@@ -1,8 +1,8 @@
-package com.example.sales.chat;
+package com.example.sales.chat.model;
 
 
+import com.example.sales.ad.Ad;
 import com.example.sales.user.User;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,5 +29,13 @@ public class ChatMessage {
     @JoinColumn(name = "receiver_id")
     private User receiver;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ad_id")
+    private Ad ad;
+
+    @Enumerated(EnumType.STRING)
+    private MessageStatus status;
+
     private Instant sentAt;
+    private Instant seenAt;
 }

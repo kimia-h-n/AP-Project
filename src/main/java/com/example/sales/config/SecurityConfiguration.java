@@ -61,6 +61,8 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/admin/dashboard/stats").hasRole("ADMIN")
 
+                        // ───────────────────── Chat ───────────────────────────────
+                        .requestMatchers("/chat-native").permitAll()
                         // ───────────────────── Everything else ─────────────────────
                         .anyRequest().authenticated()
                 )
