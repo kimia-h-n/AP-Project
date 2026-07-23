@@ -888,3 +888,22 @@
     -fx-text-fill: #b71c1c;
     -fx-font-size: 11px;
 }
+
+.star-button-active {
+    -fx-font-size: 24px;
+    -fx-background-color: transparent;
+    -fx-text-fill: #ffc107;
+    -fx-cursor: hand;
+}
+
+.star-button-inactive {
+    -fx-font-size: 24px;
+    -fx-background-color: transparent;
+    -fx-text-fill: #ccc;
+    -fx-cursor: hand;
+}
+
+.rating-error-label {
+    -fx-text-fill: #a62626;
+    -fx-font-size: 12px;
+}

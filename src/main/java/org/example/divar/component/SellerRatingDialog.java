@@ -30,7 +30,9 @@ public class SellerRatingDialog {
     }
 
     private void loadAverageRating() {
-        if (sellerId == null) return;
+        if (sellerId == null) {
+            return;
+        }
 
         try {
             double avg = AppContext.getRatingService().getAverageRating(sellerId);
@@ -47,6 +49,7 @@ public class SellerRatingDialog {
             if (lblAvgRating != null) {
                 lblAvgRating.setText("میانگین امتیاز: -");
             }
+            System.err.println("Error fetching average rating: " + e.getMessage());
         }
     }
 
@@ -66,9 +69,15 @@ public class SellerRatingDialog {
     private void updateStarUI() {
         for (int i = 0; i < stars.length; i++) {
             if (i < selectedRating) {
-                stars[i].setStyle("-fx-font-size: 24px; -fx-background-color: transparent; -fx-text-fill: #ffc107; -fx-cursor: hand;"); // طلایی
+                stars[i].getStyleClass().removeAll("star-button-inactive");
+                if (!stars[i].getStyleClass().contains("star-button-active")) {
+                    stars[i].getStyleClass().add("star-button-active");
+                }
             } else {
-                stars[i].setStyle("-fx-font-size: 24px; -fx-background-color: transparent; -fx-text-fill: #ccc; -fx-cursor: hand;"); // خاکستری
+                stars[i].getStyleClass().removeAll("star-button-active");
+                if (!stars[i].getStyleClass().contains("star-button-inactive")) {
+                    stars[i].getStyleClass().add("star-button-inactive");
+                }
             }
         }
     }
@@ -78,9 +87,7 @@ public class SellerRatingDialog {
         if (selectedRating > 0 && sellerId != null) {
             try {
                 btnSubmit.setDisable(true);
-
                 AppContext.getRatingService().submitRating(sellerId, selectedRating);
-
                 closeDialog();
             } catch (RuntimeException e) {
                 btnSubmit.setDisable(false);
@@ -92,7 +99,7 @@ public class SellerRatingDialog {
     private void showError(String message) {
         if (lblMessage != null) {
             lblMessage.setText(message);
-            lblMessage.setStyle("-fx-text-fill: #a62626; -fx-font-size: 12px;");
+            lblMessage.getStyleClass().add("rating-error-label");
             lblMessage.setVisible(true);
             lblMessage.setManaged(true);
         } else {
