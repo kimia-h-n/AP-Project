@@ -41,7 +41,7 @@ public class HomeController {
             City allCitiesPlaceholder = new City(null, "همه شهرها");
             cityFilterComboBox.getItems().add(allCitiesPlaceholder);
             cityFilterComboBox.getItems().addAll(serverCities);
-            cityFilterComboBox.setValue(allCitiesPlaceholder);
+            //cityFilterComboBox.setValue(allCitiesPlaceholder);
         } catch (Exception e) {
             System.err.println("Error loading cities in home: " + e.getMessage());
         }
@@ -63,6 +63,8 @@ public class HomeController {
 
     private void loadActiveAd() {
         try {
+            activeAds = AppContext.getAdvertisementService().getActiveAdvertisements();
+
             double width = adsGrid.getWidth();
             if (width > 0) {
                 showAds(width);
