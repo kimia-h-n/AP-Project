@@ -10,6 +10,7 @@ import com.example.sales.user.Role;
 import com.example.sales.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,6 +32,8 @@ public class AuthenticationService {
                     request.getUsername(),
                     request.getPassword()
             ));
+        } catch (DisabledException e) {
+            throw new BlockedUserLoginException();
         } catch (AuthenticationException e) {
             throw new InvalidUsernameOrPassword();
         }

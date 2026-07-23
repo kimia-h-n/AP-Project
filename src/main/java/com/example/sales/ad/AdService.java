@@ -1,6 +1,7 @@
 package com.example.sales.ad;
 
 
+import com.example.sales.ad.filter.AdSortChoice;
 import com.example.sales.ad.filter.AdSpecifications;
 import com.example.sales.ad.dto.*;
 import com.example.sales.ad.favorite.FavoriteRepository;
@@ -240,7 +241,7 @@ public class AdService {
         return contentChanged;
     }
 
-    public List<AdCardSummary> searchByTitle(String username, String title) {
+    public List<AdCardSummary> searchByTitle(String title) {
 //        List<AdResponse> matchedAds = adMapper.toResponseList(
 //                adRepository.findAll(AdSpecification.titleContains(title)));
 //        applyFavorite(username, matchedAds);
@@ -275,6 +276,19 @@ public class AdService {
 
         List<AdCardSummary> ads = adMapper.toCartSummeryList(adRepository.findAll(spec));
 //        addPrimaryImage(ads);
+        primaryImageEnricher.enrich(
+                ads,
+                AdCardSummary::getId,
+                AdCardSummary::setPrimaryImageId,
+                AdCardSummary::setPrimaryImageUrl
+        );
+        return ads;
+    }
+
+    public List<AdCardSummary> sortAdsBy(AdSortChoice adSortChoice) {
+        Specification<Ad> spec = Specification.where(AdSpecifications.hasStatus(AdStatus.APPROVED));
+        spec = spec.and(AdSpecifications.applySorting(adSortChoice));
+        List<AdCardSummary> ads = adMapper.toCartSummeryList(adRepository.findAll(spec));
         primaryImageEnricher.enrich(
                 ads,
                 AdCardSummary::getId,

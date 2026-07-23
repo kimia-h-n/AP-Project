@@ -41,6 +41,8 @@ public class SecurityConfiguration {
                         // ───────────────────── Public GET Endpoints ─────────────────
                         .requestMatchers(HttpMethod.GET, "/api/v1/ads/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/filter").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/ads/search").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/ads/sortBy").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/search").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/rating/avg/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/images/**").permitAll()
