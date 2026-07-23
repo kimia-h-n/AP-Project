@@ -49,7 +49,7 @@ public class ReportCard extends VBox {
             if (reasonLabel != null) {
                 ReportReason reasonEnum = ReportReason.fromString(report.getReason());
                 reasonLabel.setText("علت گزارش: " + reasonEnum.getLabel());
-                reasonLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #b71c1c; -fx-font-size: 11px;");
+                reasonLabel.getStyleClass().add("report-reason-label");
             }
 
             if (handleBtn != null) {
@@ -68,7 +68,6 @@ public class ReportCard extends VBox {
             Parent root = loader.load();
 
             Stage dialogStage = new Stage();
-
             dialogStage.initStyle(StageStyle.TRANSPARENT);
             dialogStage.initModality(Modality.APPLICATION_MODAL);
 
