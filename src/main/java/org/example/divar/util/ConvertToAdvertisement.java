@@ -46,6 +46,8 @@ public class ConvertToAdvertisement {
             ad.setSeller(seller);
         }
 
+        ad.setSellerRating(dto.getSellerRating());
+
         if (dto.getCreatedAt() != null) {
             ad.setCreatedAt(Instant.parse(dto.getCreatedAt()));
         }
