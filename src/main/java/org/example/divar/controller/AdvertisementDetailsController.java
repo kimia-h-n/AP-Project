@@ -15,6 +15,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.example.divar.SwitchStage;
+import org.example.divar.chat.model.Conversation;
 import org.example.divar.component.ImageGallery;
 import org.example.divar.component.SellerRatingDialog;
 import org.example.divar.model.*;
@@ -165,7 +166,8 @@ public class AdvertisementDetailsController {
                     return true;
                 }
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         return false;
     }
@@ -254,35 +256,6 @@ public class AdvertisementDetailsController {
         gallery.showPrevious();
     }
 
-    @FXML
-    private void chatWithSeller() {
-        if (messageLabel != null) {
-            messageLabel.setVisible(false);
-            messageLabel.setText("");
-        }
-
-        String myUsername = SessionManager.getCurrentUsername();
-        if (myUsername == null) {
-            showError("برای گفتگو ابتدا باید وارد حساب کاربری شوید.");
-            return;
-        }
-
-        if (currentAdvertisement == null || currentAdvertisement.getSeller() == null) {
-            return;
-        }
-
-        String sellerUsername = currentAdvertisement.getSeller().getUsername();
-
-        if (myUsername.equals(sellerUsername)) {
-            showError("شما نمی‌توانید برای آگهی خودتان گفت‌وگو شروع کنید.");
-            return;
-        }
-
-        Conversation conversation = AppContext.getConversationService()
-                .findOrCreateConversation(currentAdvertisement, myUsername, sellerUsername);
-
-        SwitchStage.switchToChat(conversation);
-    }
 
     @FXML
     private void manageFavoriteAdvertisement() {
@@ -427,11 +400,6 @@ public class AdvertisementDetailsController {
         }
     }
 
-    private void showError(String message) {
-        messageLabel.setText(message);
-        messageLabel.getStyleClass().setAll("error-message");
-        messageLabel.setVisible(true);
-    }
 
     private void showSuccess(String message) {
         messageLabel.setText(message);
@@ -439,16 +407,93 @@ public class AdvertisementDetailsController {
         messageLabel.setVisible(true);
     }
 
-    @FXML private void goToProfile() {
+    @FXML
+    private void goToProfile() {
         SwitchStage.switchToProfile();
     }
 
-    @FXML private void goBack() {
+    @FXML
+    private void goBack() {
         SwitchStage.goBack();
     }
 
-    @FXML private void goToChat() {
+    @FXML
+    private void goToChat() {
         SwitchStage.switchToChat();
+    }
+
+    @FXML
+    private void chatWithSeller() {
+        clearMessage();
+
+        String myUsername = SessionManager.getCurrentUsername();
+        if (myUsername == null || myUsername.isBlank()) {
+            showError("برای گفتگو ابتدا باید وارد حساب کاربری شوید.");
+            return;
+        }
+
+        if (currentAdvertisement == null) {
+            showError("اطلاعات آگهی در دسترس نیست.");
+            return;
+        }
+
+        if (currentAdvertisement.getSeller() == null || currentAdvertisement.getSeller().getUsername() == null) {
+            showError("اطلاعات فروشنده در دسترس نیست.");
+            return;
+        }
+
+        String sellerUsername = currentAdvertisement.getSeller().getUsername();
+
+        if (myUsername.equals(sellerUsername)) {
+            showError("شما نمی‌توانید برای آگهی خودتان گفت‌وگو شروع کنید.");
+            return;
+        }
+
+        chatBtn.setDisable(true);
+
+        try {
+            System.out.println("Inisde chat with seller" + myUsername + " " + sellerUsername);
+            Conversation conversation = AppContext.getConversationService()
+                    .findOrCreateConversation(currentAdvertisement, myUsername, sellerUsername);
+
+            if (conversation == null) {
+                throw new IllegalStateException("conversation is null");
+            }
+
+            if (conversation.getBuyerId() == null || conversation.getSellerId() == null) {
+                throw new IllegalStateException("شناسه‌های گفتگو معتبر نیستند.");
+            }
+
+            SwitchStage.switchToChat(conversation);
+        } catch (RuntimeException exception) {
+            showError(exception.getMessage() != null ? exception.getMessage() : "خطا در باز کردن گفتگو");
+        } finally {
+            chatBtn.setDisable(false);
+        }
+    }
+
+
+    private void disableActions() {
+        if (chatBtn != null) chatBtn.setDisable(true);
+        if (favoriteBtn != null) favoriteBtn.setDisable(true);
+        if (editBtn != null) editBtn.setDisable(true);
+        if (deleteBtn != null) deleteBtn.setDisable(true);
+        if (reportButton != null) reportButton.setDisable(true);
+        if (rateSellerBtn != null) rateSellerBtn.setDisable(true);
+    }
+
+    private void clearMessage() {
+        if (messageLabel != null) {
+            messageLabel.setVisible(false);
+            messageLabel.setText("");
+        }
+    }
+
+    private void showError(String message) {
+        if (messageLabel != null) {
+            messageLabel.setVisible(true);
+            messageLabel.setText(message);
+        }
     }
 }
 

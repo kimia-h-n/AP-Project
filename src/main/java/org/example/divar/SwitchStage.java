@@ -1,11 +1,13 @@
 package org.example.divar;
 
 import javafx.scene.Parent;
+import org.example.divar.chat.ChatController;
+import org.example.divar.chat.model.Conversation;
 import org.example.divar.controller.*;
 import org.example.divar.model.*;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import java.io.IOException;
+
 import java.util.Objects;
 import java.util.Stack;
 
@@ -102,29 +104,43 @@ public class SwitchStage {
     }
 
     public static void switchToChat() {
-        navigate(() -> {
-            try {
-                FXMLLoader fxmlLoader = new FXMLLoader(SwitchStage.class.getResource("/org/example/divar/fxml/chat.fxml"));
-                Scene scene = new Scene(fxmlLoader.load());
-                scene.getStylesheets().add(Objects.requireNonNull(SwitchStage.class.getResource("/org/example/divar/css/style.css")).toExternalForm());
-                stage.setScene(scene);
-                stage.centerOnScreen();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+        navigate(() -> loadScene("/org/example/divar/fxml/chat.fxml", true));
+    }
+
+    private static void loadScene(String fxmlPath, boolean resizable) {
+        try {
+            FXMLLoader loader = new FXMLLoader(SwitchStage.class.getResource(fxmlPath));
+            Scene scene = new Scene(loader.load());
+            scene.getStylesheets().add(requireCss());
+            stage.setScene(scene);
+            stage.setResizable(resizable);
+            stage.centerOnScreen();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void switchToChat(Conversation conversation) {
+        Objects.requireNonNull(conversation, "conversation cannot be null");
+
         navigate(() -> {
             try {
-                FXMLLoader fxmlLoader = new FXMLLoader(SwitchStage.class.getResource("/org/example/divar/fxml/chat.fxml"));
-                Scene scene = new Scene(fxmlLoader.load());
-                scene.getStylesheets().add(Objects.requireNonNull(SwitchStage.class.getResource("/org/example/divar/css/style.css")).toExternalForm());
-                ChatController controller = fxmlLoader.getController();
-                controller.openConversation(conversation);
+                FXMLLoader loader = new FXMLLoader(SwitchStage.class.getResource("/org/example/divar/fxml/chat.fxml"));
+                Parent root = loader.load();
+
+                ChatController controller = loader.getController();
+                if (controller == null) {
+                    throw new IllegalStateException("ChatController was not created by FXMLLoader");
+                }
+
+                Scene scene = new Scene(root);
+                scene.getStylesheets().add(requireCss());
+
                 stage.setScene(scene);
+                stage.setResizable(true);
                 stage.centerOnScreen();
+
+                controller.initializeChat(conversation);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -204,6 +220,12 @@ public class SwitchStage {
                 e.printStackTrace();
             }
         });
+    }
+
+    private static String requireCss() {
+        return Objects.requireNonNull(
+                SwitchStage.class.getResource("/org/example/divar/css/style.css")
+        ).toExternalForm();
     }
 }
 

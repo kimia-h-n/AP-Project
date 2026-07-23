@@ -39,7 +39,7 @@ public class UserServiceHttp implements UserService {
 
     @Override
     public String getNameByUsername(String username) {
-        JSONObject userJson = ApiClient.get("/api/v1/users/" + username);
+        JSONObject userJson = ApiClient.get("/api/v1/users/username/" + username);
 
         String firstName = userJson.optString("firstname", "");
         String lastName = userJson.optString("lastname", "");
@@ -49,7 +49,7 @@ public class UserServiceHttp implements UserService {
 
     @Override
     public User getUserProfile(String username) {
-        JSONObject userJson = ApiClient.get("/api/v1/users/" + username);
+        JSONObject userJson = ApiClient.get("/api/v1/users/username/" + username);
         return ConvertToUser.convertToUser(userJson);
     }
 }

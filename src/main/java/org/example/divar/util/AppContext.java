@@ -1,5 +1,10 @@
 package org.example.divar.util;
 
+import org.example.divar.chat.service.ChatService;
+import org.example.divar.chat.service.ConversationService;
+import org.example.divar.chat.service.ConversationServiceHttp;
+import org.example.divar.service.UserServiceHttp;
+import org.example.divar.chat.websocket.ChatServiceWebSocket;
 import org.example.divar.service.*;
 import org.example.divar.validation.UserValidation;
 import org.example.divar.validation.AdvertisementValidation;

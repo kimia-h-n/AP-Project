@@ -7,8 +7,6 @@
     <children>
         <Label fx:id="nameLabel" style="-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #333333;" />
 
-        <Label fx:id="lastMsgLabel" style="-fx-text-fill: #777777; -fx-font-size: 12px;" />
+        <Label fx:id="lastMessageLabel" style="-fx-text-fill: #777777; -fx-font-size: 12px;" />
     </children>
 </fx:root>
-
-
