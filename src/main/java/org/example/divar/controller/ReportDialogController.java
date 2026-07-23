@@ -4,6 +4,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
@@ -19,6 +20,8 @@ public class ReportDialogController {
 
     @FXML private RadioButton reasonFraud, reasonImmoral, reasonWrongCategory, reasonWrongPrice,
             reasonWrongInfo, reasonDuplicate, reasonUnavailable, reasonOthers;
+
+    @FXML private Label messageLabel;
 
     private Stage dialogStage;
     private long advertisementId;
@@ -39,6 +42,12 @@ public class ReportDialogController {
     @FXML
     private void sendReport() {
         ReportReason selectedReason = getSelectedReportReason();
+
+        if (messageLabel != null) {
+            messageLabel.setVisible(false);
+            messageLabel.setManaged(false);
+        }
+
         try {
             AppContext.getAdvertisementService().reportAdvertisement(advertisementId, selectedReason);
             closeReportWindow();
@@ -46,10 +55,16 @@ public class ReportDialogController {
         } catch (RuntimeException e) {
             String persianMessage = HandleErrors.getPersianMessage(e.getMessage(), e.getMessage(), 400);
 
-            closeReportWindow();
-
-            if (detailsController != null) {
-                detailsController.showError(persianMessage);
+            if (messageLabel != null) {
+                messageLabel.setText(persianMessage);
+                messageLabel.getStyleClass().setAll("error-message");
+                messageLabel.setVisible(true);
+                messageLabel.setManaged(true);
+            } else {
+                closeReportWindow();
+                if (detailsController != null) {
+                    detailsController.showError(persianMessage);
+                }
             }
         }
     }

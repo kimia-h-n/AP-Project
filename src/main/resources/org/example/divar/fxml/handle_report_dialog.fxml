@@ -17,6 +17,8 @@
         <Label text="رسیدگی به گزارش" styleClass="dialog-title"/>
         <Label text="لطفاً نوع اقدام مورد نظر را انتخاب کرده و علت آن را ثبت کنید." styleClass="dialog-subtitle" wrapText="true"/>
 
+        <Label fx:id="messageLabel" visible="false" managed="false" style="-fx-text-fill: #a62626; -fx-font-size: 13px; -fx-font-weight: bold;" wrapText="true"/>
+
         <VBox spacing="8.0" styleClass="radio-group-container">
             <children>
                 <RadioButton fx:id="deleteAdRadio" text="حذف آگهی" selected="true" styleClass="custom-radio"/>

@@ -14,6 +14,7 @@ public class HandleReportDialogController {
     @FXML private TextArea reasonTextArea;
     @FXML private Button submitBtn;
     @FXML private Button cancelBtn;
+    @FXML private Label messageLabel;
 
     private ToggleGroup actionGroup;
     private Stage stage;
@@ -35,9 +36,14 @@ public class HandleReportDialogController {
 
     @FXML
     private void handleSubmit() {
+        if (messageLabel != null) {
+            messageLabel.setVisible(false);
+            messageLabel.setManaged(false);
+        }
+
         String reason = reasonTextArea.getText().trim();
         if (reason.isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "توجه", "لطفاً علت اقدام را وارد کنید.");
+            showError("لطفاً علت اقدام را وارد کنید.");
         } else {
             ReportResolutionAction action;
             if (banUserRadio.isSelected()) {
@@ -58,7 +64,7 @@ public class HandleReportDialogController {
                 }
 
             } catch (Exception e) {
-                showAlert(Alert.AlertType.ERROR, "خطا", "خطا در ثبت اقدام: " + e.getMessage());
+                showError("خطا در ثبت اقدام: " + e.getMessage());
             }
         }
     }
@@ -70,21 +76,12 @@ public class HandleReportDialogController {
         }
     }
 
-    private void showAlert(Alert.AlertType alertType, String title, String message) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.initStyle(javafx.stage.StageStyle.UNDECORATED);
-
-        DialogPane dialogPane = alert.getDialogPane();
-        dialogPane.setNodeOrientation(javafx.geometry.NodeOrientation.RIGHT_TO_LEFT);
-
-        try {
-            dialogPane.getStylesheets().add(getClass().getResource("/org/example/divar/css/style.css").toExternalForm());
-        } catch (Exception ignored) {
+    private void showError(String message) {
+        if (messageLabel != null) {
+            messageLabel.setText(message);
+            messageLabel.getStyleClass().setAll("error-message");
+            messageLabel.setVisible(true);
+            messageLabel.setManaged(true);
         }
-
-        alert.showAndWait();
     }
 }
