@@ -850,3 +850,8 @@
     -fx-font-size: 16px;
     -fx-text-fill: #888;
 }
+
+.delete-image-btn {
+    -fx-text-fill: red;
+    -fx-font-size: 11px;
+}
