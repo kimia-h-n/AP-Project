@@ -5,6 +5,7 @@ import org.example.divar.model.City;
 import org.example.divar.util.SessionManager;
 import org.example.divar.util.AppContext;
 import org.example.divar.util.ImageLoader;
+import org.example.divar.util.CityFormatter; // <--- ایمپورت کلاس CityFormatter
 import org.example.divar.validation.AdvertisementValidation;
 import org.example.divar.SwitchStage;
 import javafx.fxml.FXML;
@@ -53,17 +54,17 @@ public class NewAdvertisementController {
         category.getItems().setAll(Category.values());
         condition.getItems().setAll(ProductCondition.values());
 
-        city.setConverter(new javafx.util.StringConverter<City>() {
-            @Override
-            public String toString(City cityObject) {
-                return cityObject == null ? "" : cityObject.getName();
-            }
+        try {
+            ArrayList<City> serverCities = AppContext.getAdvertisementService().getAllProvinces();
+            city.getItems().setAll(serverCities);
 
-            @Override
-            public City fromString(String string) {
-                return null;
+            if (!serverCities.isEmpty()) {
+                city.setValue(serverCities.get(0));
             }
-        });
+        } catch (Exception e) {
+            showError("امکان دریافت لیست شهرها از سرور وجود ندارد.");
+            System.err.println("Error loading cities: " + e.getMessage());
+        }
 
         try {
             ArrayList<City> serverCities = AppContext.getAdvertisementService().getAllProvinces();
@@ -157,7 +158,7 @@ public class NewAdvertisementController {
         thumb.setPreserveRatio(true);
 
         Button deleteBtn = new Button("حذف عکس");
-        deleteBtn.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
+        deleteBtn.getStyleClass().add("delete-image-btn");
 
         VBox imageRow = new VBox(5);
         imageRow.setAlignment(Pos.CENTER);
@@ -271,17 +272,12 @@ public class NewAdvertisementController {
     private void applyImageChanges() {
         var adService = AppContext.getAdvertisementService();
 
-        System.out.println("=== DEBUG IMAGE CHANGES ===");
-        System.out.println("imagesToDelete count: " + imagesToDelete.size());
-        System.out.println("newLocalFiles count: " + newLocalFiles.size());
-
         int localIndex = 0;
         int deleteIndex = 0;
 
         while (deleteIndex < imagesToDelete.size() && localIndex < newLocalFiles.size()) {
             String imageIdToReplace = imagesToDelete.get(deleteIndex);
             String newFilePath = newLocalFiles.get(localIndex);
-            System.out.println("Executing REPLACE (PUT) for imageId: " + imageIdToReplace);
             try {
                 adService.replaceAdvertisementImage(imageIdToReplace, newFilePath);
             } catch (RuntimeException e) {
@@ -304,14 +300,12 @@ public class NewAdvertisementController {
 
         if (localIndex < newLocalFiles.size()) {
             ArrayList<String> remainingFiles = new ArrayList<>(newLocalFiles.subList(localIndex, newLocalFiles.size()));
-            System.out.println("Executing POST /images for remaining new files count: " + remainingFiles.size());
             try {
                 adService.uploadAdvertisementImages(editingAdId, remainingFiles);
             } catch (RuntimeException e) {
                 System.err.println("Error POST Upload: " + e.getMessage());
             }
         }
-        System.out.println("==========================");
     }
 
     private void goBackAfterDelay() {
@@ -327,35 +321,33 @@ public class NewAdvertisementController {
         }).start();
     }
 
-    @FXML private void goBack() { SwitchStage.goBack(); }
-    @FXML private void goToProfile() { SwitchStage.switchToProfile(); }
-    @FXML private void goToChat() { SwitchStage.switchToChat(); }
-
     private void showError(String message) {
-        if (messageLabel != null) {
-            messageLabel.setText(message);
-            messageLabel.getStyleClass().remove("success-message");
-            if (!messageLabel.getStyleClass().contains("error-message")) {
-                messageLabel.getStyleClass().add("error-message");
-            }
-            messageLabel.setVisible(true);
-            messageLabel.setManaged(true);
-        } else {
-            System.err.println("Error: " + message);
-        }
+        messageLabel.setText(message);
+        messageLabel.getStyleClass().setAll("error-message");
+        messageLabel.setVisible(true);
+        messageLabel.setManaged(true);
     }
 
     private void showSuccess(String message) {
-        if (messageLabel != null) {
-            messageLabel.setText(message);
-            messageLabel.getStyleClass().remove("error-message");
-            if (!messageLabel.getStyleClass().contains("success-message")) {
-                messageLabel.getStyleClass().add("success-message");
-            }
-            messageLabel.setVisible(true);
-        } else {
-            System.out.println(message);
-        }
+        messageLabel.setText(message);
+        messageLabel.getStyleClass().setAll("success-message");
+        messageLabel.setVisible(true);
+        messageLabel.setManaged(true);
+    }
+
+    @FXML
+    private void goBack() {
+        SwitchStage.goBack();
+    }
+
+    @FXML
+    private void goToProfile() {
+        SwitchStage.switchToProfile();
+    }
+
+    @FXML
+    private void goToChat() {
+        SwitchStage.switchToChat();
     }
 }
 

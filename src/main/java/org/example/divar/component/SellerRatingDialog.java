@@ -66,9 +66,9 @@ public class SellerRatingDialog {
     private void updateStarUI() {
         for (int i = 0; i < stars.length; i++) {
             if (i < selectedRating) {
-                stars[i].setStyle("-fx-font-size: 24px; -fx-background-color: transparent; -fx-text-fill: #ffc107; -fx-cursor: hand;"); // طلایی
+                stars[i].setStyle("-fx-font-size: 24px; -fx-background-color: transparent; -fx-text-fill: #ffc107; -fx-cursor: hand;");
             } else {
-                stars[i].setStyle("-fx-font-size: 24px; -fx-background-color: transparent; -fx-text-fill: #ccc; -fx-cursor: hand;"); // خاکستری
+                stars[i].setStyle("-fx-font-size: 24px; -fx-background-color: transparent; -fx-text-fill: #ccc; -fx-cursor: hand;");
             }
         }
     }

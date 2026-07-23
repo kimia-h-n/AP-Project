@@ -18,21 +18,12 @@ public class AdSummaryCard extends VBox {
     @FXML private Label cardPrice;
     @FXML private Label cardLocation;
 
-
     public AdSummaryCard(Advertisement advertisement, boolean isAdminContext) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/divar/fxml/ad_summary_card.fxml"));
             loader.setRoot(this);
             loader.setController(this);
             loader.load();
-
-            System.out.println(
-                    "[SUMMARY] adId=" + advertisement.getId()
-                            + ", primaryImageUrl=" + advertisement.getPrimaryImageUrl()
-                            + ", imagePaths=" + advertisement.getImagePaths()
-                            + ", imageIds=" + advertisement.getImageIds()
-            );
-
 
             String rawUrl = advertisement.getPrimaryImageUrl();
             if (rawUrl != null && !rawUrl.isBlank()) {
@@ -47,7 +38,11 @@ public class AdSummaryCard extends VBox {
 
             cardTitle.setText(advertisement.getTitle());
             cardPrice.setText(String.format("%,d", advertisement.getPrice()) + " تومان");
-            String city = (advertisement.getCity() != null) ? advertisement.getCity().toString() : "نامشخص";
+
+            String city = "نامشخص";
+            if (advertisement.getCity() != null) {
+                city = advertisement.getCity().toString();
+            }
             cardLocation.setText(city);
 
             this.setOnMouseClicked(e -> {
@@ -64,5 +59,4 @@ public class AdSummaryCard extends VBox {
             e.printStackTrace();
         }
     }
-
 }

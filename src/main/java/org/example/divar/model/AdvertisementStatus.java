@@ -1,6 +1,7 @@
 package org.example.divar.model;
 
 public enum AdvertisementStatus {
+
     PENDING("در انتظار بررسی"),
     REJECTED("رد شده"),
     REMOVED("حذف شده"),
@@ -23,13 +24,16 @@ public enum AdvertisementStatus {
     }
 
     public static AdvertisementStatus fromString(String text) {
+
         for (AdvertisementStatus status : AdvertisementStatus.values()) {
             if (status.getLabel().equals(text)) {
                 return status;
             }
         }
+
         throw new RuntimeException("Advertisement status not found: " + text);
     }
+
 }
 
 

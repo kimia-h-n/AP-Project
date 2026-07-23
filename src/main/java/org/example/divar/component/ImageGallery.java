@@ -17,7 +17,6 @@ public class ImageGallery {
 
     public interface ImageActionListener {
         void onDeleteRequested(String imageId, int index);
-
         void onAddRequested();
     }
 
@@ -29,24 +28,16 @@ public class ImageGallery {
     private final List<String> imageIds = new ArrayList<>();
 
     private int currentIndex = 0;
-
     private boolean editable = false;
     private ImageActionListener listener;
 
-    public ImageGallery(
-            ImageView mainImage,
-            HBox thumbnailBox,
-            Label counterLabel
-    ) {
+    public ImageGallery(ImageView mainImage, HBox thumbnailBox, Label counterLabel) {
         this.mainImage = mainImage;
         this.thumbnailBox = thumbnailBox;
         this.counterLabel = counterLabel;
     }
 
-    public void setEditable(
-            boolean editable,
-            ImageActionListener listener
-    ) {
+    public void setEditable(boolean editable, ImageActionListener listener) {
         this.editable = editable;
         this.listener = listener;
         render();
@@ -56,10 +47,7 @@ public class ImageGallery {
         setImages(urls, null);
     }
 
-    public void setImages(
-            List<String> urls,
-            List<String> ids
-    ) {
+    public void setImages(List<String> urls, List<String> ids) {
         imageUrls.clear();
         imageIds.clear();
 
@@ -68,11 +56,12 @@ public class ImageGallery {
         }
 
         for (int i = 0; i < imageUrls.size(); i++) {
-            String id =
-                    ids != null && i < ids.size()
-                            ? ids.get(i)
-                            : null;
-
+            String id;
+            if (ids != null && i < ids.size()) {
+                id = ids.get(i);
+            } else {
+                id = null;
+            }
             imageIds.add(id);
         }
 
@@ -84,10 +73,7 @@ public class ImageGallery {
         if (imageUrls.isEmpty()) {
             return;
         }
-
-        currentIndex =
-                (currentIndex + 1) % imageUrls.size();
-
+        currentIndex = (currentIndex + 1) % imageUrls.size();
         render();
     }
 
@@ -95,11 +81,7 @@ public class ImageGallery {
         if (imageUrls.isEmpty()) {
             return;
         }
-
-        currentIndex =
-                (currentIndex - 1 + imageUrls.size())
-                        % imageUrls.size();
-
+        currentIndex = (currentIndex - 1 + imageUrls.size()) % imageUrls.size();
         render();
     }
 
@@ -129,13 +111,10 @@ public class ImageGallery {
         }
 
         String currentSource = imageUrls.get(currentIndex);
-
         mainImage.setImage(loadImage(currentSource));
 
         if (counterLabel != null) {
-            counterLabel.setText(
-                    (currentIndex + 1) + " / " + imageUrls.size()
-            );
+            counterLabel.setText((currentIndex + 1) + " / " + imageUrls.size());
         }
 
         for (int i = 0; i < imageUrls.size(); i++) {
@@ -149,7 +128,6 @@ public class ImageGallery {
 
     private StackPane createThumbnail(int index) {
         ImageView thumb = new ImageView();
-
         thumb.setFitWidth(60);
         thumb.setFitHeight(45);
         thumb.setPreserveRatio(true);
@@ -162,7 +140,6 @@ public class ImageGallery {
         }
 
         thumb.setStyle("-fx-cursor: hand;");
-
         thumb.setOnMouseClicked(event -> {
             currentIndex = index;
             render();
@@ -173,23 +150,12 @@ public class ImageGallery {
 
         if (editable) {
             Button deleteBtn = new Button("×");
-
-            deleteBtn.setStyle(
-                    "-fx-background-color: rgba(0,0,0,0.6);" +
-                            "-fx-text-fill: white;" +
-                            "-fx-font-size: 11px;" +
-                            "-fx-padding: 0 5 0 5;" +
-                            "-fx-cursor: hand;"
-            );
+            deleteBtn.getStyleClass().add("image-gallery-delete-btn");
 
             deleteBtn.setOnAction(event -> {
                 event.consume();
-
                 if (listener != null) {
-                    listener.onDeleteRequested(
-                            imageIds.get(index),
-                            index
-                    );
+                    listener.onDeleteRequested(imageIds.get(index), index);
                 }
             });
 
@@ -202,12 +168,8 @@ public class ImageGallery {
 
     private Button createAddButton() {
         Button addBtn = new Button("+");
-
         addBtn.setPrefSize(60, 45);
-        addBtn.setStyle(
-                "-fx-cursor: hand;" +
-                        "-fx-font-size: 16px;"
-        );
+        addBtn.getStyleClass().add("image-gallery-add-btn");
 
         addBtn.setOnAction(event -> {
             if (listener != null) {
@@ -218,10 +180,6 @@ public class ImageGallery {
         return addBtn;
     }
 
-    /**
-     * مسیر فایل محلی را با File loader و تصویر backend را
-     * با ApiClient احراز هویت‌شده بارگذاری می‌کند.
-     */
     private Image loadImage(String source) {
         if (source == null || source.isBlank()) {
             return ImageLoader.loadDefault();
@@ -231,29 +189,23 @@ public class ImageGallery {
             File localFile = new File(source);
 
             if (localFile.exists() && localFile.isFile()) {
-                Image localImage =
-                        ImageLoader.loadFromPath(source);
-
-                return localImage != null
-                        ? localImage
-                        : ImageLoader.loadDefault();
+                Image localImage = ImageLoader.loadFromPath(source);
+                if (localImage != null) {
+                    return localImage;
+                } else {
+                    return ImageLoader.loadDefault();
+                }
+            } else {
+                Image serverImage = ImageLoader.loadMainImageFromUrl(source);
+                if (serverImage != null) {
+                    return serverImage;
+                } else {
+                    return ImageLoader.loadDefault();
+                }
             }
 
-            Image serverImage =
-                    ImageLoader.loadMainImageFromUrl(source);
-
-            return serverImage != null
-                    ? serverImage
-                    : ImageLoader.loadDefault();
-
         } catch (Exception e) {
-            System.err.println(
-                    "خطا در بارگذاری تصویر " +
-                            source +
-                            ": " +
-                            e.getMessage()
-            );
-
+            System.err.println("Error loading image " + source + ": " + e.getMessage());
             return ImageLoader.loadDefault();
         }
     }

@@ -1,6 +1,7 @@
 package org.example.divar.model;
 
 public enum ReportReason {
+
     FRAUD("کلاهبرداری"),
     IMMORAL("غیرقانونی یا غیراخلاقی"),
     WRONG_CATEGORY("دسته‌بندی اشتباه"),
@@ -26,11 +27,13 @@ public enum ReportReason {
     }
 
     public static ReportReason fromString(String text) {
+
         for (ReportReason reason : ReportReason.values()) {
             if (reason.name().equalsIgnoreCase(text) || reason.getLabel().equals(text)) {
                 return reason;
             }
         }
+
         return OTHERS;
     }
 }

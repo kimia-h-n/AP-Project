@@ -103,11 +103,6 @@ public class AdminController {
     }
 
     @FXML
-    private void openChat() {
-        SwitchStage.switchToChat();
-    }
-
-    @FXML
     private void logout() {
         SessionManager.logout();
         SwitchStage.showLogin();

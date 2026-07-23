@@ -6,7 +6,7 @@
 
 <fx:root type="javafx.scene.layout.VBox" spacing="10.0" prefWidth="220.0"
          styleClass="admin-card" style="-fx-padding: 12px;"
-         nodeOrientation="RIGHT_TO_LEFT"
+         nodeOrientation="LEFT_TO_RIGHT"
          xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <StackPane style="-fx-background-color: #f2f2f2; -fx-background-radius: 6px;" prefHeight="140.0">
@@ -14,8 +14,23 @@
                 <ImageView fx:id="cardImage" fitWidth="196.0" fitHeight="140.0" preserveRatio="true"/>
             </children>
         </StackPane>
-        <Label fx:id="cardTitle" styleClass="admin-card-title" wrapText="true"/>
-        <Label fx:id="cardPrice" styleClass="admin-card-price"/>
-        <Label fx:id="cardLocation" styleClass="admin-card-location"/>
+        <Label fx:id="cardTitle"
+               styleClass="admin-card-title"
+               wrapText="true"
+               alignment="CENTER_RIGHT"
+               textAlignment="RIGHT"
+               maxWidth="Infinity"/>
+
+        <Label fx:id="cardPrice"
+               styleClass="admin-card-price"
+               alignment="CENTER_RIGHT"
+               textAlignment="RIGHT"
+               maxWidth="Infinity"/>
+
+        <Label fx:id="cardLocation"
+               styleClass="admin-card-location"
+               alignment="CENTER_RIGHT"
+               textAlignment="RIGHT"
+               maxWidth="Infinity"/>
     </children>
 </fx:root>

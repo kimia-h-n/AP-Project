@@ -3,65 +3,121 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="org.example.divar.controller.HomeController"
             prefWidth="1150.0" prefHeight="750.0" style="-fx-background-color: #ffffff;" nodeOrientation="RIGHT_TO_LEFT">
 
     <top>
-        <HBox spacing="15.0" alignment="CENTER_LEFT" style="-fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0; -fx-background-color: #ffffff;" prefHeight="65.0">
+        <HBox spacing="15.0" alignment="CENTER_RIGHT" style="-fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0; -fx-background-color: #ffffff;" prefHeight="65.0">
             <padding>
                 <Insets top="10.0" bottom="10.0" left="20.0" right="20.0"/>
             </padding>
             <children>
-                <Label text="دیوار" style="-fx-text-fill: #a62626; -fx-font-size: 24px; -fx-font-weight: bold;"/>
-
-                <TextField fx:id="searchField" promptText="جستجو در همه آگهی‌ها" prefWidth="400.0" onAction="#handleSearch"
-                           style="-fx-background-color: #f5f5f5; -fx-background-radius: 4px; -fx-padding: 8px;"/>
-
+                <HBox alignment="CENTER" spacing="8">
+                    <FontIcon iconLiteral="fas-home" iconSize="22" iconColor="#a62626"/>
+                    <Label text="دیوار" style="-fx-text-fill: #a62626; -fx-font-size: 24px; -fx-font-weight: bold;"/>
+                </HBox>
+                <HBox alignment="CENTER" spacing="8" style="-fx-background-color: #f5f5f5; -fx-background-radius: 4px; -fx-padding: 0 10 0 0;">
+                    <TextField fx:id="searchField" promptText="جستجو در همه آگهی‌ها" prefWidth="400.0" onAction="#handleSearch"
+                               style="-fx-background-color: transparent; -fx-padding: 8px; -fx-border-color: transparent;"/>
+                    <FontIcon iconLiteral="fas-search" iconSize="18" iconColor="#999"/>
+                </HBox>
                 <Region HBox.hgrow="ALWAYS" />
-
-                <Button text="پروفایل من" onAction="#goToProfile"
-                        style="-fx-background-color: transparent; -fx-text-fill: #666666; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 15 8 15; -fx-border-color: #cccccc; -fx-border-radius: 4px;"/>
-                <Button text="چت" onAction="#goToChat"
-                        style="-fx-background-color: transparent; -fx-text-fill: #666666; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 15 8 15; -fx-border-color: #cccccc; -fx-border-radius: 4px;"/>
-
+                <Button onAction="#goToProfile"
+                        style="-fx-background-color: transparent; -fx-text-fill: #666666; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 15 8 15; -fx-border-color: #cccccc; -fx-border-radius: 4px;">
+                    <graphic>
+                        <HBox alignment="CENTER" spacing="8">
+                            <FontIcon iconLiteral="fas-user" iconSize="16" iconColor="#666"/>
+                            <Label text="پروفایل من" style="-fx-text-fill: #666666; -fx-font-size: 14px; -fx-font-weight: bold;"/>
+                        </HBox>
+                    </graphic>
+                </Button>
+                <Button onAction="#goToChat"
+                        style="-fx-background-color: transparent; -fx-text-fill: #666666; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 15 8 15; -fx-border-color: #cccccc; -fx-border-radius: 4px;">
+                    <graphic>
+                        <HBox alignment="CENTER" spacing="8">
+                            <FontIcon iconLiteral="fas-comment-dots" iconSize="16" iconColor="#666"/>
+                            <Label text="چت" style="-fx-text-fill: #666666; -fx-font-size: 14px; -fx-font-weight: bold;"/>
+                        </HBox>
+                    </graphic>
+                </Button>
                 <Button text="ثبت آگهی" onAction="#goToNewAd" style="-fx-background-color: #a62626; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 8px 16px; -fx-background-radius: 4px; -fx-cursor: hand;"/>
             </children>
         </HBox>
     </top>
 
     <left>
-        <ScrollPane fitToWidth="true" style="-fx-background-color: #ffffff; -fx-border-color: 0 1 0 0; -fx-border-color: #e0e0e0;" prefWidth="250.0" nodeOrientation="LEFT_TO_RIGHT">
+        <ScrollPane fitToWidth="true" style="-fx-background-color: #ffffff; -fx-border-color: 0 1 0 0; -fx-border-color: #e0e0e0;" prefWidth="250.0" nodeOrientation="RIGHT_TO_LEFT">
             <content>
                 <VBox spacing="15.0" style="-fx-padding: 20; -fx-background-color: #ffffff;" nodeOrientation="RIGHT_TO_LEFT">
                     <children>
-                        <Label text="دسته بندی ‌ها" style="-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: #333333;"/>
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <FontIcon iconLiteral="fas-list" iconSize="16" iconColor="#333"/>
+                            <Label text="دسته‌ها" style="-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: #333333;"/>
+                        </HBox>
                         <VBox spacing="8.0" style="-fx-padding: 0 5 0 0;">
-                            <Hyperlink text="همه دسته‌بندی‌ها" onAction="#handleCategoryClick" style="-fx-text-fill: #a62626; -fx-font-size: 13px; -fx-font-weight: bold;"/>
-                            <Hyperlink text="املاک" onAction="#handleCategoryClick" style="-fx-text-fill: #555555; -fx-font-size: 13px;"/>
-                            <Hyperlink text="وسایل نقلیه" onAction="#handleCategoryClick" style="-fx-text-fill: #555555; -fx-font-size: 13px;"/>
-                            <Hyperlink text="کالای دیجیتال" onAction="#handleCategoryClick" style="-fx-text-fill: #555555; -fx-font-size: 13px;"/>
-                            <Hyperlink text="سرگرمی و فراغت" onAction="#handleCategoryClick" style="-fx-text-fill: #555555; -fx-font-size: 13px;"/>
-                            <Hyperlink text="استخدام و کاریابی" onAction="#handleCategoryClick" style="-fx-text-fill: #555555; -fx-font-size: 13px;"/>
-                            <Hyperlink text="خانه و آشپزخانه" onAction="#handleCategoryClick" style="-fx-text-fill: #555555; -fx-font-size: 13px;"/>
-                            <Hyperlink text="تجهیزات و صنعتی" onAction="#handleCategoryClick" style="-fx-text-fill: #555555; -fx-font-size: 13px;"/>
-                            <Hyperlink onAction="#handleCategoryClick" text="اجتماعی" style="-fx-text-fill: #555555; -fx-font-size: 13px;"/>
-                            <Hyperlink onAction="#handleCategoryClick" text="خدمات" style="-fx-text-fill: #555555; -fx-font-size: 13px;"/>
-                            <Hyperlink onAction="#handleCategoryClick" text="وسایل شخصی" style="-fx-text-fill: #555555; -fx-font-size: 13px;"/>
+                            <HBox alignment="CENTER_RIGHT" spacing="10" style="-fx-padding: 4 0 4 0;" nodeOrientation="LEFT_TO_RIGHT">
+                                <Hyperlink fx:id="allCategoriesLink" text="همه دسته‌بندی‌ها" onAction="#handleCategoryClick" styleClass="category-link-selected" alignment="CENTER_RIGHT" textAlignment="RIGHT" maxWidth="Infinity"/>
+                                <FontIcon iconLiteral="fas-th-list" iconSize="16" iconColor="#a62626"/>
+                            </HBox>
+                            <HBox alignment="CENTER_RIGHT" spacing="10" style="-fx-padding: 4 0 4 0;" nodeOrientation="LEFT_TO_RIGHT">
+                                <Hyperlink fx:id="realEstateLink" text="املاک" onAction="#handleCategoryClick" styleClass="category-link" alignment="CENTER_RIGHT" textAlignment="RIGHT" maxWidth="Infinity"/>
+                                <FontIcon iconLiteral="fas-home" iconSize="16" iconColor="#555"/>
+                            </HBox>
+                            <HBox alignment="CENTER_RIGHT" spacing="10" style="-fx-padding: 4 0 4 0;" nodeOrientation="LEFT_TO_RIGHT">
+                                <Hyperlink fx:id="vehiclesLink" text="وسایل نقلیه" onAction="#handleCategoryClick" styleClass="category-link" alignment="CENTER_RIGHT" textAlignment="RIGHT" maxWidth="Infinity"/>
+                                <FontIcon iconLiteral="fas-car" iconSize="16" iconColor="#555"/>
+                            </HBox>
+                            <HBox alignment="CENTER_RIGHT" spacing="10" style="-fx-padding: 4 0 4 0;" nodeOrientation="LEFT_TO_RIGHT">
+                                <Hyperlink fx:id="digitalLink" text="کالای دیجیتال" onAction="#handleCategoryClick" styleClass="category-link" alignment="CENTER_RIGHT" textAlignment="RIGHT" maxWidth="Infinity"/>
+                                <FontIcon iconLiteral="fas-mobile-alt" iconSize="16" iconColor="#555"/>
+                            </HBox>
+                            <HBox alignment="CENTER_RIGHT" spacing="10" style="-fx-padding: 4 0 4 0;" nodeOrientation="LEFT_TO_RIGHT">
+                                <Hyperlink fx:id="entertainmentLink" text="سرگرمی و فراغت" onAction="#handleCategoryClick" styleClass="category-link" alignment="CENTER_RIGHT" textAlignment="RIGHT" maxWidth="Infinity"/>
+                                <FontIcon iconLiteral="fas-gamepad" iconSize="16" iconColor="#555"/>
+                            </HBox>
+                            <HBox alignment="CENTER_RIGHT" spacing="10" style="-fx-padding: 4 0 4 0;" nodeOrientation="LEFT_TO_RIGHT">
+                                <Hyperlink fx:id="jobsLink" text="استخدام و کاریابی" onAction="#handleCategoryClick" styleClass="category-link" alignment="CENTER_RIGHT" textAlignment="RIGHT" maxWidth="Infinity"/>
+                                <FontIcon iconLiteral="fas-briefcase" iconSize="16" iconColor="#555"/>
+                            </HBox>
+                            <HBox alignment="CENTER_RIGHT" spacing="10" style="-fx-padding: 4 0 4 0;" nodeOrientation="LEFT_TO_RIGHT">
+                                <Hyperlink fx:id="homeKitchenLink" text="خانه و آشپزخانه" onAction="#handleCategoryClick" styleClass="category-link" alignment="CENTER_RIGHT" textAlignment="RIGHT" maxWidth="Infinity"/>
+                                <FontIcon iconLiteral="fas-utensils" iconSize="16" iconColor="#555"/>
+                            </HBox>
+                            <HBox alignment="CENTER_RIGHT" spacing="10" style="-fx-padding: 4 0 4 0;" nodeOrientation="LEFT_TO_RIGHT">
+                                <Hyperlink fx:id="industrialLink" text="تجهیزات و صنعتی" onAction="#handleCategoryClick" styleClass="category-link" alignment="CENTER_RIGHT" textAlignment="RIGHT" maxWidth="Infinity"/>
+                                <FontIcon iconLiteral="fas-tools" iconSize="16" iconColor="#555"/>
+                            </HBox>
+                            <HBox alignment="CENTER_RIGHT" spacing="10" style="-fx-padding: 4 0 4 0;" nodeOrientation="LEFT_TO_RIGHT">
+                                <Hyperlink fx:id="socialLink" text="اجتماعی" onAction="#handleCategoryClick" styleClass="category-link" alignment="CENTER_RIGHT" textAlignment="RIGHT" maxWidth="Infinity"/>
+                                <FontIcon iconLiteral="fas-users" iconSize="16" iconColor="#555"/>
+                            </HBox>
+                            <HBox alignment="CENTER_RIGHT" spacing="10" style="-fx-padding: 4 0 4 0;" nodeOrientation="LEFT_TO_RIGHT">
+                                <Hyperlink fx:id="servicesLink" text="خدمات" onAction="#handleCategoryClick" styleClass="category-link" alignment="CENTER_RIGHT" textAlignment="RIGHT" maxWidth="Infinity"/>
+                                <FontIcon iconLiteral="fas-wrench" iconSize="16" iconColor="#555"/>
+                            </HBox>
+                            <HBox alignment="CENTER_RIGHT" spacing="10" style="-fx-padding: 4 0 4 0;" nodeOrientation="LEFT_TO_RIGHT">
+                                <Hyperlink fx:id="personalGoodsLink" text="وسایل شخصی" onAction="#handleCategoryClick" styleClass="category-link" alignment="CENTER_RIGHT" textAlignment="RIGHT" maxWidth="Infinity"/>
+                                <FontIcon iconLiteral="fas-user-tie" iconSize="16" iconColor="#555"/>
+                            </HBox>
                         </VBox>
-
                         <Separator style="-fx-padding: 5 0 5 0;"/>
-
                         <VBox spacing="8.0">
-                            <Label text="شهر" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #333333;"/>
+                            <HBox alignment="CENTER_LEFT" spacing="8">
+                                <FontIcon iconLiteral="fas-map-marker-alt" iconSize="16" iconColor="#333"/>
+                                <Label text="شهر" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #333333;"/>
+                            </HBox>
                             <ComboBox fx:id="cityFilterComboBox" promptText="انتخاب شهر" prefWidth="200.0"
                                       style="-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-border-radius: 4px;"/>
                         </VBox>
-
                         <Separator style="-fx-padding: 5 0 5 0;"/>
                         <VBox spacing="8.0">
-                            <Label text="قیمت (تومان)" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #333333;"/>
+                            <HBox alignment="CENTER_LEFT" spacing="8">
+                                <FontIcon iconLiteral="fas-tag" iconSize="16" iconColor="#333"/>
+                                <Label text="قیمت (تومان)" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #333333;"/>
+                            </HBox>
                             <HBox spacing="5.0" alignment="CENTER">
                                 <children>
                                     <TextField fx:id="minPriceField" promptText="از (حداقل)" prefWidth="95.0" style="-fx-font-size: 11px;"/>
@@ -69,19 +125,22 @@
                                 </children>
                             </HBox>
                         </VBox>
-
                         <Separator style="-fx-padding: 5 0 5 0;"/>
-
                         <VBox spacing="8.0">
-                            <Label text="زمان انتشار آگهی" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #333333;"/>
+                            <HBox alignment="CENTER_LEFT" spacing="8">
+                                <FontIcon iconLiteral="fas-clock" iconSize="16" iconColor="#333"/>
+                                <Label text="زمان انتشار آگهی" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #333333;"/>
+                            </HBox>
                             <ComboBox fx:id="timeFilterComboBox" promptText="امروز، هفته گذشته و..." prefWidth="200.0"
                                       style="-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-border-radius: 4px;"/>
                         </VBox>
-
                         <Separator style="-fx-padding: 10 0 5 10;"/>
-
                         <Button text="اعمال فیلترها" onAction="#filterInputs" prefWidth="200.0"
-                                style="-fx-background-color: #a62626; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8; -fx-background-radius: 4px;"/>
+                                style="-fx-background-color: #a62626; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8; -fx-background-radius: 4px;">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-filter" iconSize="14" iconColor="white"/>
+                            </graphic>
+                        </Button>
                     </children>
                 </VBox>
             </content>
@@ -89,12 +148,11 @@
     </left>
 
     <center>
-        <ScrollPane fitToWidth="true" style="-fx-background-color: #ffffff; -fx-padding: 15px 15px 15px 15px;" nodeOrientation="LEFT_TO_RIGHT">
+        <ScrollPane fitToWidth="true" style="-fx-background-color: #ffffff; -fx-background: #ffffff; -fx-padding: 15px 15px 15px 15px;" nodeOrientation="LEFT_TO_RIGHT">
             <content>
                 <VBox spacing="15.0" style="-fx-padding: 25px 20px 0px 20px; -fx-background-color: #ffffff;" nodeOrientation="RIGHT_TO_LEFT">
                     <children>
-                        <GridPane fx:id="adsGrid" hgap="15.0" vgap="15.0">
-                        </GridPane>
+                        <GridPane fx:id="adsGrid" hgap="15.0" vgap="15.0"/>
                     </children>
                 </VBox>
             </content>

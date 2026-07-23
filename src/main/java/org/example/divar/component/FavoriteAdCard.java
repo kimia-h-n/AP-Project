@@ -46,14 +46,6 @@ public class FavoriteAdCard extends VBox {
                 cityLabel.setText("نامشخص");
             }
 
-            System.out.println(
-                    "[FAVORITE] adId=" + advertisement.getId()
-                            + ", primaryImageUrl=" + advertisement.getPrimaryImageUrl()
-                            + ", imagePaths=" + advertisement.getImagePaths()
-                            + ", imageIds=" + advertisement.getImageIds()
-            );
-
-
             String rawUrl = advertisement.getPrimaryImageUrl();
             if (rawUrl != null && !rawUrl.isBlank()) {
                 adImage.setImage(ImageLoader.loadMainImageFromUrl(rawUrl));

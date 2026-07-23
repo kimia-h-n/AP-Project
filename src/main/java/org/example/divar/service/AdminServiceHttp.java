@@ -1,16 +1,16 @@
 package org.example.divar.service;
 
+import org.example.divar.dto.admin.AdminReportResponseDTO;
 import org.example.divar.model.*;
 import org.example.divar.dto.ad.AdModerationRequestDTO;
 import org.example.divar.dto.ad.AdResponseDTO;
 import org.example.divar.util.ApiClient;
+import org.example.divar.util.ConvertToAdminReport;
 import org.example.divar.util.ConvertToAdvertisement;
 import org.example.divar.util.ConvertToUser;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.util.ArrayList;
-import java.util.List;
 
 public class AdminServiceHttp implements AdminService {
 
@@ -66,13 +66,6 @@ public class AdminServiceHttp implements AdminService {
     public void blockUser(String id, String reason) {
         String endpoint = "/api/v1/admin/users/block/" + id;
 
-        System.out.println("\n========== [REQUEST DEBUG] ==========");
-        System.out.println("Action: Block User");
-        System.out.println("Target ID in URL: " + id);
-        System.out.println("Full Endpoint: " + endpoint);
-        System.out.println("Reason: " + reason);
-        System.out.println("=====================================\n");
-
         JSONObject body = new JSONObject();
         if (reason != null && !reason.isBlank()) {
             body.put("reason", reason);
@@ -89,21 +82,12 @@ public class AdminServiceHttp implements AdminService {
         if (jsonArray != null) {
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject obj = jsonArray.getJSONObject(i);
+                AdminReportResponseDTO dto = AdminReportResponseDTO.fromJson(obj);
 
-                AdminReport report = new AdminReport();
-
-                report.setId(obj.optLong("adReportId", obj.optLong("id", 0)));
-                report.setAdId(obj.optLong("adId", 0));
-                report.setAdTitle(obj.optString("adTitle", ""));
-
-                String firstName = obj.optString("sellerFirstName", "");
-                String lastName = obj.optString("sellerLastName", "");
-                report.setSellerFullName((firstName + " " + lastName).trim());
-
-                report.setReason(obj.optString("reportReason", ""));
-                report.setImageUrl(obj.optString("primaryImageUrl", ""));
-
-                reports.add(report);
+                AdminReport report = ConvertToAdminReport.convertToAdminReport(dto);
+                if (report != null) {
+                    reports.add(report);
+                }
             }
         }
 
@@ -112,6 +96,35 @@ public class AdminServiceHttp implements AdminService {
 
     @Override
     public void resolveReport(long reportId, ReportResolutionAction action, String note) {
+        String endpoint = "/api/v1/admin/reported-ads/" + reportId + "/resolve";
+
+        JSONObject body = new JSONObject();
+        body.put("action", action.name());
+        if (note != null && !note.isBlank()) {
+            body.put("note", note);
+        }
+        ApiClient.post(endpoint, body);
+    }
+
+    @Override
+    public ArrayList<Advertisement> getUserAdvertisements(long userId) {
+        String endpoint = "/api/v1/admin/users/" + userId + "/ads";
+        JSONArray jsonArray = ApiClient.getList(endpoint);
+        ArrayList<Advertisement> result = new ArrayList<>();
+
+        if (jsonArray != null) {
+            for (int i = 0; i < jsonArray.length(); i++) {
+                try {
+                    JSONObject adJson = jsonArray.getJSONObject(i);
+                    AdResponseDTO dto = AdResponseDTO.fromJson(adJson);
+                    result.add(ConvertToAdvertisement.convertToAdvertisement(dto));
+                } catch (Exception ex) {
+                    System.err.println("Error creating advertisement card: " + ex.getMessage());
+                    ex.printStackTrace();
+                }
+            }
+        }
+        return result;
     }
 }
 

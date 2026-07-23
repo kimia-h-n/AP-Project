@@ -1,11 +1,6 @@
 @font-face {
     font-family: 'Vazirmatn';
-    src: url('../fonts/Vazirmatn-Regular.ttf');
-}
-
-@font-face {
-    font-family: 'Vazirmatn Bold';
-    src: url('../fonts/Vazirmatn-Bold.ttf');
+    src: url('../fonts/Vazirmatn-Medium.ttf');
 }
 
 .root, root {
@@ -96,6 +91,16 @@
     -fx-padding: 12px 10px;
     -fx-alignment: center-left;
     -fx-cursor: hand;
+}
+
+.menu-link-normal {
+    -fx-text-fill: #444444;
+    -fx-font-size: 14px;
+    -fx-underline: false;
+    -fx-padding: 5px 0;
+    -fx-font-weight: normal;
+    -fx-alignment: CENTER_RIGHT;
+    -fx-text-alignment: RIGHT;
 }
 
 .menu-btn-active {
@@ -619,8 +624,6 @@
     -fx-border-color: #cccccc;
 }
 
-
-/* وضعیت مسدود شده */
 .status-pill-blocked {
     -fx-background-color: #ffebee;
     -fx-text-fill: #c62828;
@@ -666,21 +669,18 @@
     -fx-text-fill: #888888;
 }
 
-/* استایل نام و نام خانوادگی */
 .user-row-name {
     -fx-font-weight: bold;
     -fx-font-size: 14px;
     -fx-text-fill: #212121;
 }
 
-/* استایل شماره تماس */
 .user-row-phone {
     -fx-font-weight: bold;
     -fx-font-size: 12px;
     -fx-text-fill: #616161;
 }
 
-/* --- Handle Report Dialog Styles --- */
 .dialog-container {
     -fx-background-color: #ffffff;
     -fx-background-radius: 8px;
@@ -738,4 +738,255 @@
 
 .btn-secondary:hover {
     -fx-background-color: #f5f5f5;
+}
+
+.empty-ad-label {
+    -fx-text-fill: #757575;
+    -fx-font-size: 14px;
+}
+
+.empty-user-label {
+    -fx-text-fill: #999999;
+    -fx-font-size: 14px;
+}
+
+.dialog-root {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1px;
+}
+
+.dialog-header {
+    -fx-padding: 15px 20px;
+    -fx-border-color: #f0f0f0;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.dialog-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333333;
+}
+
+.dialog-close-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #888888;
+    -fx-font-size: 16px;
+    -fx-cursor: hand;
+}
+
+.dialog-content {
+    -fx-padding: 10px 20px 20px 20px;
+}
+
+.dialog-radio {
+    -fx-font-size: 14px;
+    -fx-text-fill: #444444;
+    -fx-cursor: hand;
+}
+
+.dialog-footer {
+    -fx-padding: 15px 20px;
+    -fx-border-color: #f0f0f0;
+    -fx-border-width: 1px 0 0 0;
+    -fx-background-color: #fafafa;
+}
+
+.dialog-submit-btn {
+    -fx-background-color: #a62626;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-padding: 8px 22px;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+}
+
+.dialog-cancel-btn {
+    -fx-background-color: white;
+    -fx-text-fill: #555555;
+    -fx-border-color: #cccccc;
+    -fx-border-radius: 4px;
+    -fx-font-size: 14px;
+    -fx-padding: 8px 22px;
+    -fx-cursor: hand;
+}
+
+.success-dialog-root {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1px;
+    -fx-padding: 25px 40px;
+}
+
+.success-dialog-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333333;
+}
+
+.success-dialog-btn {
+    -fx-background-color: #a62626;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-padding: 6px 30px;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+}
+
+.category-link {
+    -fx-text-fill: #303030;
+    -fx-font-weight: normal;
+}
+
+.category-link-selected {
+    -fx-text-fill: #A62626;
+    -fx-font-weight: bold;
+}
+
+.empty-ads-label {
+    -fx-font-size: 16px;
+    -fx-text-fill: #888;
+}
+
+.delete-image-btn {
+    -fx-text-fill: red;
+    -fx-font-size: 11px;
+}
+
+.status-active {
+    -fx-background-color: #e8f5e9;
+    -fx-text-fill: #2e7d32;
+    -fx-padding: 4 8;
+    -fx-background-radius: 6;
+}
+
+.status-banned {
+    -fx-background-color: #ffebee;
+    -fx-text-fill: #c62828;
+    -fx-padding: 4 8;
+    -fx-background-radius: 6;
+}
+
+.image-gallery-delete-btn {
+    -fx-background-color: rgba(0, 0, 0, 0.6);
+    -fx-text-fill: white;
+    -fx-font-size: 11px;
+    -fx-padding: 0 5 0 5;
+    -fx-cursor: hand;
+}
+
+.image-gallery-add-btn {
+    -fx-cursor: hand;
+    -fx-font-size: 16px;
+}
+
+.report-reason-label {
+    -fx-font-weight: bold;
+    -fx-text-fill: #b71c1c;
+    -fx-font-size: 11px;
+}
+
+.star-button-active {
+    -fx-font-size: 24px;
+    -fx-background-color: transparent;
+    -fx-text-fill: #ffc107;
+    -fx-cursor: hand;
+}
+
+.star-button-inactive {
+    -fx-font-size: 24px;
+    -fx-background-color: transparent;
+    -fx-text-fill: #ccc;
+    -fx-cursor: hand;
+}
+
+.rating-error-label {
+    -fx-text-fill: #a62626;
+    -fx-font-size: 12px;
+}
+
+.category-link {
+    -fx-text-fill: #555555;
+    -fx-font-size: 13px;
+    -fx-font-weight: normal;
+    -fx-underline: false;
+}
+
+.category-link-selected {
+    -fx-text-fill: #a62626;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-underline: false;
+}
+
+/* ====== استایل‌های دیالوگ امتیاز ====== */
+
+.rating-avg-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333333;
+}
+
+.rating-title-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #666666;
+}
+
+.rating-message-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #a62626;
+}
+
+/* ====== دیالوگ امتیاز ====== */
+.star-active {
+    -fx-font-size: 26px;
+    -fx-background-color: transparent;
+    -fx-text-fill: #ffc107;
+    -fx-cursor: hand;
+}
+
+.star-inactive {
+    -fx-font-size: 26px;
+    -fx-background-color: transparent;
+    -fx-text-fill: #cccccc;
+    -fx-cursor: hand;
+}
+
+/* دکمه ثبت امتیاز */
+.rating-submit-btn {
+    -fx-background-color: #a62626;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+    -fx-background-radius: 4px;
+}
+
+.rating-submit-btn:hover {
+    -fx-background-color: #8c1e1e;
+}
+
+.rating-submit-btn:disabled {
+    -fx-opacity: 0.5;
+    -fx-cursor: default;
+}
+
+/* دکمه انصراف */
+.rating-cancel-btn {
+    -fx-background-color: #f0f0f0;
+    -fx-text-fill: #333333;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+    -fx-background-radius: 4px;
+}
+
+.rating-cancel-btn:hover {
+    -fx-background-color: #e0e0e0;
 }

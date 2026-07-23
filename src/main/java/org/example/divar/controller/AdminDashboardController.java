@@ -71,6 +71,7 @@ public class AdminDashboardController {
             }
             return new ReadOnlyObjectWrapper<>(ad.getTitle() + "\n" + category);
         });
+
         titleColumn.setCellFactory(col -> new TableCell<>() {
             { setAlignment(javafx.geometry.Pos.CENTER); }
             @Override
@@ -95,6 +96,7 @@ public class AdminDashboardController {
             }
             return new ReadOnlyObjectWrapper<>(seller);
         });
+
         sellerColumn.setCellFactory(col -> new TableCell<>() {
             { setAlignment(javafx.geometry.Pos.CENTER); }
             @Override
@@ -111,7 +113,6 @@ public class AdminDashboardController {
         cityColumn.setCellValueFactory(data -> {
             Advertisement ad = data.getValue();
             String city;
-            // اصلاح نحوه خواندن نام شهر متناسب با کلاس جدید City
             if (ad.getCity() != null && ad.getCity().getName() != null) {
                 city = ad.getCity().getName();
             } else {
@@ -119,6 +120,7 @@ public class AdminDashboardController {
             }
             return new ReadOnlyObjectWrapper<>(city);
         });
+
         cityColumn.setCellFactory(col -> new TableCell<>() {
             { setAlignment(javafx.geometry.Pos.CENTER); }
             @Override

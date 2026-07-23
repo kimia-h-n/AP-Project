@@ -7,7 +7,7 @@
 <VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.example.divar.controller.HandleReportDialogController"
       spacing="12.0" prefWidth="420.0" styleClass="dialog-container"
-      stylesheets="@../css/styles.css" nodeOrientation="RIGHT_TO_LEFT">
+      stylesheets="@../css/style.css" nodeOrientation="RIGHT_TO_LEFT">
 
     <padding>
         <Insets top="20.0" right="20.0" bottom="20.0" left="20.0"/>

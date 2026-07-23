@@ -1,6 +1,7 @@
 package org.example.divar.model;
 
 public class AdminReport {
+
     private long id;
     private long adId;
     private String adTitle;

@@ -22,23 +22,48 @@ public class UserDetailsDialogController {
 
                 javafx.application.Platform.runLater(() -> {
                     lblFullName.setText(user.getFirstname() + " " + user.getLastname());
-                    lblUsername.setText("@" + (user.getUsername() != null ? user.getUsername() : "پیدا نشد"));
-                    lblPhone.setText(user.getPhoneNumber() != null ? user.getPhoneNumber() : "-");
-                    lblEmail.setText(user.getEmail() != null ? user.getEmail() : "-");
+
+                    if (user.getUsername() != null) {
+                        lblUsername.setText("@" + user.getUsername());
+                    } else {
+                        lblUsername.setText("@پیدا نشد");
+                    }
+
+                    if (user.getPhoneNumber() != null) {
+                        lblPhone.setText(user.getPhoneNumber());
+                    } else {
+                        lblPhone.setText("-");
+                    }
+
+                    if (user.getEmail() != null) {
+                        lblEmail.setText(user.getEmail());
+                    } else {
+                        lblEmail.setText("-");
+                    }
 
                     double rating = user.getAverageRating();
-                    lblRating.setText(rating > 0 ? String.format("%.1f از ۵", rating) : "بدون امتیاز");
+                    if (rating > 0) {
+                        lblRating.setText(String.format("%.1f از ۵", rating));
+                    } else {
+                        lblRating.setText("بدون امتیاز");
+                    }
 
                     if (user.getStatus() != null && user.getStatus() != org.example.divar.model.UserStatus.BANNED) {
                         lblStatus.setText("فعال");
-                        lblStatus.setStyle("-fx-background-color: #e8f5e9; -fx-text-fill: #2e7d32; -fx-padding: 4 8; -fx-background-radius: 6;");
+                        lblStatus.getStyleClass().removeAll("status-banned");
+                        if (!lblStatus.getStyleClass().contains("status-active")) {
+                            lblStatus.getStyleClass().add("status-active");
+                        }
                     } else {
                         lblStatus.setText("مسدود شده");
-                        lblStatus.setStyle("-fx-background-color: #ffebee; -fx-text-fill: #c62828; -fx-padding: 4 8; -fx-background-radius: 6;");
+                        lblStatus.getStyleClass().removeAll("status-active");
+                        if (!lblStatus.getStyleClass().contains("status-banned")) {
+                            lblStatus.getStyleClass().add("status-banned");
+                        }
                     }
                 });
             } catch (Exception e) {
-                System.err.println("خطا در دریافت جزئیات کاربر: " + e.getMessage());
+                System.err.println("Error fetching user details: " + e.getMessage());
                 e.printStackTrace();
             }
         }).start();

@@ -24,6 +24,7 @@ public class Advertisement {
     private Instant updatedAt;
     private double sellerRating;
 
+
     public Advertisement() {
         this.imagePaths = new ArrayList<>();
         this.imageIds = new ArrayList<>();
@@ -172,6 +173,7 @@ public class Advertisement {
     public void setSellerRating(double sellerRating) {
         this.sellerRating = sellerRating;
     }
+
 }
 
 

@@ -4,6 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 <BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="org.example.divar.controller.NewAdvertisementController"
             prefWidth="1150.0" prefHeight="750.0" style="-fx-background-color: #f5f5f5;" nodeOrientation="RIGHT_TO_LEFT">
@@ -14,15 +15,32 @@
                 <Insets top="10.0" bottom="10.0" left="20.0" right="20.0"/>
             </padding>
             <children>
-                <Label text="دیوار" style="-fx-text-fill: #a62626; -fx-font-size: 24px; -fx-font-weight: bold; -fx-cursor: hand"/>
+                <HBox alignment="CENTER" spacing="8">
+                    <FontIcon iconLiteral="fas-home" iconSize="22" iconColor="#a62626"/>
+                    <Label text="دیوار" style="-fx-text-fill: #a62626; -fx-font-size: 24px; -fx-font-weight: bold; -fx-cursor: hand"/>
+                </HBox>
                 <Label fx:id="pageTitleLabel" text="ثبت آگهی جدید" style="-fx-font-size: 16px; -fx-text-fill: #666666; -fx-padding: 0 0 0 10;"/>
 
                 <Region HBox.hgrow="ALWAYS" />
 
-                <Button text="پروفایل من" onAction="#goToProfile"
-                        style="-fx-background-color: transparent; -fx-text-fill: #666666; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 15 8 15; -fx-border-color: #cccccc; -fx-border-radius: 4px;"/>
-                <Button text="چت" onAction="#goToChat"
-                        style="-fx-background-color: transparent; -fx-text-fill: #666666; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 15 8 15; -fx-border-color: #cccccc; -fx-border-radius: 4px;"/>
+                <Button onAction="#goToProfile"
+                        style="-fx-background-color: transparent; -fx-text-fill: #666666; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 15 8 15; -fx-border-color: #cccccc; -fx-border-radius: 4px;">
+                    <graphic>
+                        <HBox alignment="CENTER" spacing="8">
+                            <FontIcon iconLiteral="fas-user" iconSize="16" iconColor="#666"/>
+                            <Label text="پروفایل من" style="-fx-text-fill: #666666; -fx-font-size: 14px; -fx-font-weight: bold;"/>
+                        </HBox>
+                    </graphic>
+                </Button>
+                <Button onAction="#goToChat"
+                        style="-fx-background-color: transparent; -fx-text-fill: #666666; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 15 8 15; -fx-border-color: #cccccc; -fx-border-radius: 4px;">
+                    <graphic>
+                        <HBox alignment="CENTER" spacing="8">
+                            <FontIcon iconLiteral="fas-comment-dots" iconSize="16" iconColor="#666"/>
+                            <Label text="چت" style="-fx-text-fill: #666666; -fx-font-size: 14px; -fx-font-weight: bold;"/>
+                        </HBox>
+                    </graphic>
+                </Button>
             </children>
         </HBox>
     </top>
@@ -36,44 +54,40 @@
                         <Separator />
 
                         <VBox spacing="8.0">
-                            <Label text="عکس‌های آگهی" style="-fx-font-weight: bold; -fx-text-fill: #444444;"/>
                             <HBox spacing="15.0" alignment="CENTER_RIGHT">
                                 <children>
-                                    <Button text="انتخاب عکس‌ها..." onAction="#uploadImage" style="-fx-background-color: #ffffff; -fx-border-color: #a62626; -fx-text-fill: #a62626; -fx-border-radius: 4px; -fx-padding: 8 16; -fx-cursor: hand;"/>
+                                    <Button text="آپلود عکس" onAction="#uploadImage" style="-fx-background-color: #ffffff; -fx-border-color: #a62626; -fx-text-fill: #a62626; -fx-border-radius: 4px; -fx-padding: 8 16; -fx-cursor: hand;"/>
                                     <Label fx:id="imagePathLabel" text="هیچ عکسی انتخاب نشده است" style="-fx-text-fill: #888888; -fx-font-size: 13px;"/>
                                 </children>
                             </HBox>
-
                             <HBox fx:id="images" spacing="10.0" alignment="CENTER_RIGHT" prefHeight="90.0"/>
                         </VBox>
-
-
                         <HBox spacing="20.0">
                             <children>
                                 <VBox spacing="8.0" HBox.hgrow="ALWAYS">
                                     <Label text="* دسته آگهی" style="-fx-font-weight: bold; -fx-text-fill: #444444;"/>
-                                    <ComboBox fx:id="category" promptText="انتخاب دسته‌بندی" maxWidth="Infinity" prefHeight="38.0" style="-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-radius: 4px;"/>
+                                    <ComboBox fx:id="category" promptText="انتخاب دسته‌بندی" maxWidth="Infinity" prefHeight="38.0" style="-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-radius: 7px;"/>
                                 </VBox>
                                 <VBox spacing="8.0" HBox.hgrow="ALWAYS">
                                     <Label text="* وضعیت کالا" style="-fx-font-weight: bold; -fx-text-fill: #444444;"/>
-                                    <ComboBox fx:id="condition" promptText="انتخاب وضعیت" maxWidth="Infinity" prefHeight="38.0" style="-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-radius: 4px;"/>
+                                    <ComboBox fx:id="condition" promptText="انتخاب وضعیت" maxWidth="Infinity" prefHeight="38.0" style="-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-radius: 7px;"/>
                                 </VBox>
                             </children>
                         </HBox>
                         <VBox spacing="8.0">
                             <Label text="* شهر" style="-fx-font-weight: bold; -fx-text-fill: #444444;"/>
-                            <ComboBox fx:id="city" promptText="انتخاب شهر" maxWidth="Infinity" prefHeight="38.0" style="-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-radius: 4px;"/>
+                            <ComboBox fx:id="city" promptText="انتخاب شهر" maxWidth="Infinity" prefHeight="38.0" style="-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-radius: 7px;"/>
                         </VBox>
 
                         <VBox spacing="8.0">
                             <Label text="* عنوان آگهی" style="-fx-font-weight: bold; -fx-text-fill: #444444;"/>
                             <TextField fx:id="titleField" promptText="مثلاً: یخچال در حد نو" prefHeight="38.0"/>
-                            <Label text="در عنوان آگهی به موارد مهم مانند مدل، رنگ و ویژگی‌های اصلی اشاره کنید." style="-fx-text-fill: #888888; -fx-font-size: 11px;"/>
+                            <Label text="در عنوان آگهی به موارد مهم مانند مدل، رنگ و ویژگی‌های اصلی اشاره کنید." style="-fx-text-fill: #888888; -fx-font-size: 12px;"/>
                         </VBox>
 
                         <VBox spacing="8.0">
                             <Label text=" * قیمت (تومان)" style="-fx-font-weight: bold; -fx-text-fill: #444444;"/>
-                            <TextField fx:id="priceField" promptText="مبلغ را به تومان وارد کنید" prefHeight="38.0"/>
+                            <TextField fx:id="priceField" promptText="مبلغ را به تومان وارد کنید" prefHeight="45.0"/>
                         </VBox>
 
                         <VBox spacing="8.0">
@@ -83,7 +97,7 @@
 
                         <VBox spacing="8.0">
                             <Label text="توضیحات آگهی" style="-fx-font-weight: bold; -fx-text-fill: #444444;"/>
-                            <TextArea fx:id="descriptionArea" promptText="جزئیات و مشخصات کامل کالا یا خدمات خود را بنویسید..." prefHeight="120.0" wrapText="true" style="-fx-border-color: #cccccc; -fx-border-radius: 4px;"/>
+                            <TextArea fx:id="descriptionArea" promptText="جزئیات و مشخصات کامل کالا یا خدمات خود را بنویسید..." prefHeight="120.0" wrapText="true" style="-fx-border-color: #cccccc; -fx-border-radius: 7px;"/>
                         </VBox>
 
                         <Region prefHeight="10.0"/>
@@ -91,7 +105,7 @@
                         <HBox spacing="15.0" alignment="CENTER_LEFT">
                             <children>
                                 <Button fx:id="submitButton" text="ثبت و انتشار آگهی" onAction="#createAdvertisement" prefHeight="40.0" prefWidth="160.0" style="-fx-background-color: #a62626; -fx-text-fill: white; -fx-font-weight: bold;"/>
-                                <Button text="انصراف" onAction="#goBack" prefHeight="40.0" prefWidth="100.0" style="-fx-background-color: transparent; -fx-text-fill: #555555; -fx-border-color: #cccccc; -fx-border-radius: 4px;"/>
+                                <Button text="انصراف" onAction="#goBack" prefHeight="40.0" prefWidth="100.0" style="-fx-background-color: transparent; -fx-text-fill: #555555; -fx-border-color: #cccccc; -fx-border-radius: 7px;"/>
                                 <Label fx:id="messageLabel" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 13px; " visible="false"/>
                             </children>
                         </HBox>

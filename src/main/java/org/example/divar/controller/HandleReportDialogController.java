@@ -37,29 +37,54 @@ public class HandleReportDialogController {
     private void handleSubmit() {
         String reason = reasonTextArea.getText().trim();
         if (reason.isEmpty()) {
-            Alert alert = new Alert(Alert.AlertType.WARNING, "لطفاً علت اقدام را وارد کنید.");
-            alert.showAndWait();
-            return;
-        }
+            showAlert(Alert.AlertType.WARNING, "توجه", "لطفاً علت اقدام را وارد کنید.");
+        } else {
+            ReportResolutionAction action;
+            if (banUserRadio.isSelected()) {
+                action = ReportResolutionAction.BLOCK_USER;
+            } else {
+                action = ReportResolutionAction.DELETE_AD;
+            }
 
-        ReportResolutionAction action = banUserRadio.isSelected()
-                ? ReportResolutionAction.BLOCK_USER
-                : ReportResolutionAction.DELETE_AD;
+            try {
+                AppContext.getAdminService().resolveReport(report.getId(), action, reason);
 
-        try {
-            AppContext.getAdminService().resolveReport(report.getId(), action, reason);
+                if (stage != null) {
+                    stage.close();
+                }
 
-            if (stage != null) stage.close();
-            if (onSuccessCallback != null) onSuccessCallback.run();
+                if (onSuccessCallback != null) {
+                    onSuccessCallback.run();
+                }
 
-        } catch (Exception e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "خطا در ثبت اقدام: " + e.getMessage());
-            alert.showAndWait();
+            } catch (Exception e) {
+                showAlert(Alert.AlertType.ERROR, "خطا", "خطا در ثبت اقدام: " + e.getMessage());
+            }
         }
     }
 
     @FXML
     private void handleCancel() {
-        if (stage != null) stage.close();
+        if (stage != null) {
+            stage.close();
+        }
+    }
+
+    private void showAlert(Alert.AlertType alertType, String title, String message) {
+        Alert alert = new Alert(alertType);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.initStyle(javafx.stage.StageStyle.UNDECORATED);
+
+        DialogPane dialogPane = alert.getDialogPane();
+        dialogPane.setNodeOrientation(javafx.geometry.NodeOrientation.RIGHT_TO_LEFT);
+
+        try {
+            dialogPane.getStylesheets().add(getClass().getResource("/org/example/divar/css/style.css").toExternalForm());
+        } catch (Exception ignored) {
+        }
+
+        alert.showAndWait();
     }
 }
