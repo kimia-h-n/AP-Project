@@ -56,6 +56,7 @@ public class AdvertisementDetailsController {
     @FXML private Button deleteBtn;
     @FXML private Button reportButton;
     @FXML private Button rateSellerBtn;
+    @FXML private Label favoriteLabel;
 
     private Advertisement currentAdvertisement;
     private boolean isFavoriteAdvertisement = false;
@@ -305,8 +306,13 @@ public class AdvertisementDetailsController {
                 isFavoriteAdvertisement = true;
             }
             updateFavoriteButtonUI();
+            if (messageLabel != null) {
+                messageLabel.setVisible(false);
+            }
 
         } catch (RuntimeException e) {
+            isFavoriteAdvertisement = !isFavoriteAdvertisement;
+            updateFavoriteButtonUI();
             showError(e.getMessage());
         } finally {
             favoriteBtn.setDisable(false);
@@ -316,10 +322,10 @@ public class AdvertisementDetailsController {
     private void updateFavoriteButtonUI() {
         favoriteBtn.getStyleClass().remove("admin-topbar-btn-active");
         if (isFavoriteAdvertisement) {
-            favoriteBtn.setText("حذف از علاقه‌مندی");
+            if (favoriteLabel != null) favoriteLabel.setText("حذف از علاقه‌مندی");
             favoriteBtn.getStyleClass().add("admin-topbar-btn-active");
         } else {
-            favoriteBtn.setText("افزودن به علاقه‌مندی");
+            if (favoriteLabel != null) favoriteLabel.setText("افزودن به علاقه‌مندی");
         }
     }
 
