@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+//todo: add index
 public class SellerRating {
     @Id
     @GeneratedValue

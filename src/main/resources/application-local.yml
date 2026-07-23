@@ -21,6 +21,4 @@ application:
       expiration: 86400000
 logging:
   level:
-    org:
-      springframework:
-        security=TRACE:
+    org.springframework.security: TRACE

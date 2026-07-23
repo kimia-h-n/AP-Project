@@ -1,6 +1,7 @@
 package com.example.sales.ad;
 
 import com.example.sales.ad.dto.*;
+import com.example.sales.ad.filter.AdSortChoice;
 import com.example.sales.ad.filter.DateFilter;
 import com.example.sales.ad.model.*;
 import com.example.sales.ad.image.AdImageService;
@@ -71,13 +72,12 @@ public class AdController {
         return "anonymousUser".equals(username) ? null : username;
     }
 
-    @GetMapping("/search")
-    public List<AdCardSummary> searchByTitle(@RequestParam String title, Authentication authentication) {
-        String username = extractUsernameIfLoggedIn(authentication);
-        return adService.searchByTitle(username, title);
+    @GetMapping("/ads/search")
+    public List<AdCardSummary> searchByTitle(@RequestParam String title) {
+        return adService.searchByTitle(title);
     }
 
-    @GetMapping("/filter")
+    @GetMapping("/ads/filter")
     public List<AdCardSummary> searchAds(
             @RequestParam(required = false) Long minPrice,
             @RequestParam(required = false) Long maxPrice,
@@ -86,5 +86,10 @@ public class AdController {
             @RequestParam(required = false) Long cityId
     ) {
         return adService.filterAds(minPrice, maxPrice, category, dataFilter, cityId);
+    }
+
+    @GetMapping("/ads/sortBy")
+    public List<AdCardSummary> sortAds(@RequestParam AdSortChoice adSortChoice) {
+        return adService.sortAdsBy(adSortChoice);
     }
 }

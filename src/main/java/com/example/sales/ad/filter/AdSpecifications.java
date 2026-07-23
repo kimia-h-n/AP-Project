@@ -3,7 +3,9 @@ package com.example.sales.ad.filter;
 import com.example.sales.ad.Ad;
 import com.example.sales.ad.model.AdCategory;
 import com.example.sales.ad.model.AdStatus;
-import jakarta.persistence.criteria.Predicate;
+import com.example.sales.rating.SellerRating;
+import com.example.sales.user.User;
+import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.Instant;
@@ -80,4 +82,33 @@ public class AdSpecifications {
             return predicate;
         };
     }
+
+    public static Specification<Ad> applySorting(AdSortChoice sortOption) {
+        return (root, query, cb) -> {
+            if (sortOption == null || query.getResultType() == Long.class || query.getResultType() == long.class) {
+                return cb.conjunction();
+            }
+
+            switch (sortOption) {
+                case NEWEST -> query.orderBy(cb.desc(root.get("createdAt")));
+                case CHEAPEST -> query.orderBy(cb.asc(root.get("price")));
+                case MOST_EXPENSIVE -> query.orderBy(cb.desc(root.get("price")));
+
+                case SELLER_RATING -> {
+                    Subquery<Double> subquery = query.subquery(Double.class);
+                    Root<SellerRating> subRoot = subquery.from(SellerRating.class);
+
+                    subquery.select(cb.avg(subRoot.get("rating")))
+                            .where(cb.equal(subRoot.get("seller"), root.get("seller")));
+
+                    Expression<Double> avgRating = cb.coalesce(subquery, 0.0);
+
+                    query.orderBy(cb.desc(avgRating), cb.desc(root.get("createdAt")));
+                }
+            }
+            return cb.conjunction();
+        };
+    }
+
+
 }
