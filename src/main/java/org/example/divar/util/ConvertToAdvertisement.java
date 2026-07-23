@@ -14,12 +14,9 @@ public class ConvertToAdvertisement {
         ad.setDescription(dto.getDescription());
         ad.setAddress(dto.getAddress());
         ad.setPrice(dto.getPrice());
-
         ad.setImagePaths(dto.getImageUrls());
         ad.setImageIds(dto.getImageIds());
-
         ad.setPrimaryImageUrl(normalizeImageRef(dto.getPrimaryImageUrl()));
-
         ad.setFavorite(dto.isFavorite());
 
         if (dto.getCategory() != null) {
@@ -43,14 +40,9 @@ public class ConvertToAdvertisement {
             User seller = new User();
             seller.setUsername(dto.getSellerUsername());
             seller.setId(dto.getSellerId());
-
-            // دریافت نام و نام خانوادگی فروشنده از DTO
             seller.setFirstname(dto.getSellerFirstName());
             seller.setLastname(dto.getSellerLastName());
-
-            // ست کردن امتیاز فروشنده که مستقیم از DTO می‌آید
             seller.setAverageRating(dto.getSellerRating());
-
             ad.setSeller(seller);
         }
 
@@ -65,6 +57,9 @@ public class ConvertToAdvertisement {
         return ad;
     }
 
+    /**
+     * Normalizes the image reference path by ensuring it has the correct base URL or endpoint prefix.
+     */
     private static String normalizeImageRef(String value) {
         if (value == null || value.isBlank()) {
             return value;
