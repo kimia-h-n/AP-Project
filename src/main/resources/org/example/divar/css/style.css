@@ -869,3 +869,16 @@
     -fx-padding: 4 8;
     -fx-background-radius: 6;
 }
+
+.image-gallery-delete-btn {
+    -fx-background-color: rgba(0, 0, 0, 0.6);
+    -fx-text-fill: white;
+    -fx-font-size: 11px;
+    -fx-padding: 0 5 0 5;
+    -fx-cursor: hand;
+}
+
+.image-gallery-add-btn {
+    -fx-cursor: hand;
+    -fx-font-size: 16px;
+}
