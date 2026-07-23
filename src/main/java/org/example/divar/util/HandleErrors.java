@@ -45,6 +45,8 @@ public class HandleErrors {
                 case "ALREADY_VOTED":
                 case "USER_ALREADY_VOTED":
                     return "شما قبلاً به این فروشنده امتیاز داده‌اید.";
+                case "USER_IS_BLOCKRD_FROM_LOGIN":
+                    return "شما مسدود شده اید.";
             }
         }
 
