@@ -1,9 +1,6 @@
 package org.example.divar.service;
 
-import org.example.divar.model.Advertisement;
-import org.example.divar.model.AdminReport;
-import org.example.divar.model.ReportResolutionAction;
-import org.example.divar.model.User;
+import org.example.divar.model.*;
 
 import java.util.ArrayList;
 
@@ -28,5 +25,7 @@ public interface AdminService {
     void resolveReport(long reportId, ReportResolutionAction action, String note) throws RuntimeException;
 
     ArrayList<Advertisement> getUserAdvertisements(long userId) throws RuntimeException;
+
+    DashboardStatistics getDashboardStats() throws RuntimeException;
 }
 

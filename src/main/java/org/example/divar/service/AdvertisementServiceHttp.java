@@ -212,4 +212,20 @@ public class AdvertisementServiceHttp implements AdvertisementService {
             throw new RuntimeException("Error fetching provinces list from server: " + e.getMessage());
         }
     }
+
+    @Override
+    public ArrayList<Advertisement> getSortedAds(AdSortChoice sortChoice) {
+        String endpoint = "/api/v1/ads/sortBy?adSortChoice=" + sortChoice.name();
+        JSONArray responseArray = ApiClient.getList(endpoint);
+        ArrayList<Advertisement> result = new ArrayList<>();
+
+        if (responseArray != null) {
+            for (int i = 0; i < responseArray.length(); i++) {
+                JSONObject adJson = responseArray.getJSONObject(i);
+                AdResponseDTO dto = AdResponseDTO.fromJson(adJson);
+                result.add(ConvertToAdvertisement.convertToAdvertisement(dto));
+            }
+        }
+        return result;
+    }
 }

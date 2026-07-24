@@ -17,6 +17,7 @@ public class AdminController {
     @FXML private Button adsBtn;
     @FXML private Button reportsBtn;
     @FXML private Button usersBtn;
+    @FXML private Button statsDashboardBtn;
 
     private Button activeButton;
     private List<Button> menuButtons;
@@ -30,7 +31,7 @@ public class AdminController {
             return;
         }
 
-        menuButtons = List.of(dashboardBtn, adsBtn, reportsBtn, usersBtn);
+        menuButtons = List.of(dashboardBtn, adsBtn, reportsBtn, usersBtn, statsDashboardBtn);
 
         for (Button btn : menuButtons) {
             btn.getStyleClass().remove("button");
@@ -49,6 +50,8 @@ public class AdminController {
             showReports();
         } else if (tab.equals("users")) {
             showUsers();
+        } else if (tab.equals("stats")) {
+            showStatsDashboard();
         } else {
             showDashboard();
         }
@@ -76,6 +79,12 @@ public class AdminController {
     private void showUsers() {
         lastTab = "users";
         loadPage("/org/example/divar/fxml/admin_users.fxml", usersBtn);
+    }
+
+    @FXML
+    private void showStatsDashboard() {
+        lastTab = "stats";
+        loadPage("/org/example/divar/fxml/admin_stats_dashboard.fxml", statsDashboardBtn);
     }
 
     private void loadPage(String fxmlPath, Button clickedButton) {

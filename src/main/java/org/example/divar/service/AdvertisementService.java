@@ -45,6 +45,8 @@ public interface AdvertisementService {
     void reportAdvertisement(long adId, ReportReason reason) throws RuntimeException;
 
     ArrayList<City> getAllProvinces() throws RuntimeException;
+
+    ArrayList<Advertisement> getSortedAds(AdSortChoice sortChoice) throws RuntimeException;
 }
 
 

@@ -123,6 +123,12 @@ public class AdminServiceHttp implements AdminService {
         }
         return result;
     }
+
+    @Override
+    public DashboardStatistics getDashboardStats() {
+        JSONObject json = ApiClient.get("/api/v1/admin/dashboard/stats");
+        return ConvertToDashboardStatistics.convert(json);
+    }
 }
 
 

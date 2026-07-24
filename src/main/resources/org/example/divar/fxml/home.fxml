@@ -113,6 +113,34 @@
                                       style="-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-border-radius: 4px;"/>
                         </VBox>
                         <Separator style="-fx-padding: 5 0 5 0;"/>
+
+                        <!-- بخش مرتب‌سازی (مشابه دسته‌ها) -->
+                        <VBox spacing="8.0">
+                            <HBox alignment="CENTER_LEFT" spacing="8">
+                                <FontIcon iconLiteral="fas-sort" iconSize="16" iconColor="#333"/>
+                                <Label text="مرتب‌سازی" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #333333;"/>
+                            </HBox>
+                            <VBox spacing="8.0" style="-fx-padding: 0 5 0 0;">
+                                <HBox alignment="CENTER_RIGHT" spacing="10" style="-fx-padding: 4 0 4 0;" nodeOrientation="LEFT_TO_RIGHT">
+                                    <Hyperlink fx:id="sortNewestLink" text="جدیدترین" onAction="#handleSortClick" styleClass="category-link" alignment="CENTER_RIGHT" textAlignment="RIGHT" maxWidth="Infinity"/>
+                                    <FontIcon iconLiteral="fas-clock" iconSize="16" iconColor="#555"/>
+                                </HBox>
+                                <HBox alignment="CENTER_RIGHT" spacing="10" style="-fx-padding: 4 0 4 0;" nodeOrientation="LEFT_TO_RIGHT">
+                                    <Hyperlink fx:id="sortCheapestLink" text="ارزان‌ترین" onAction="#handleSortClick" styleClass="category-link" alignment="CENTER_RIGHT" textAlignment="RIGHT" maxWidth="Infinity"/>
+                                    <FontIcon iconLiteral="fas-arrow-down" iconSize="16" iconColor="#555"/>
+                                </HBox>
+                                <HBox alignment="CENTER_RIGHT" spacing="10" style="-fx-padding: 4 0 4 0;" nodeOrientation="LEFT_TO_RIGHT">
+                                    <Hyperlink fx:id="sortExpensiveLink" text="گران‌ترین" onAction="#handleSortClick" styleClass="category-link" alignment="CENTER_RIGHT" textAlignment="RIGHT" maxWidth="Infinity"/>
+                                    <FontIcon iconLiteral="fas-arrow-up" iconSize="16" iconColor="#555"/>
+                                </HBox>
+                                <HBox alignment="CENTER_RIGHT" spacing="10" style="-fx-padding: 4 0 4 0;" nodeOrientation="LEFT_TO_RIGHT">
+                                    <Hyperlink fx:id="sortRatingLink" text="امتیاز فروشنده" onAction="#handleSortClick" styleClass="category-link" alignment="CENTER_RIGHT" textAlignment="RIGHT" maxWidth="Infinity"/>
+                                    <FontIcon iconLiteral="fas-star" iconSize="16" iconColor="#555"/>
+                                </HBox>
+                            </VBox>
+                        </VBox>
+
+                        <Separator style="-fx-padding: 5 0 5 0;"/>
                         <VBox spacing="8.0">
                             <HBox alignment="CENTER_LEFT" spacing="8">
                                 <FontIcon iconLiteral="fas-tag" iconSize="16" iconColor="#333"/>

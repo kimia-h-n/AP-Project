@@ -2,10 +2,7 @@ package org.example.divar.controller;
 
 import org.example.divar.SwitchStage;
 import org.example.divar.component.AdSummaryCard;
-import org.example.divar.model.Advertisement;
-import org.example.divar.model.Category;
-import org.example.divar.model.City;
-import org.example.divar.model.DateFilter;
+import org.example.divar.model.*;
 import org.example.divar.util.AppContext;
 import org.example.divar.util.CityFormatter;
 import javafx.event.ActionEvent;
@@ -30,6 +27,10 @@ public class HomeController {
             entertainmentLink, jobsLink, homeKitchenLink, industrialLink,
             socialLink, servicesLink, personalGoodsLink;
 
+    @FXML private Hyperlink sortNewestLink, sortCheapestLink, sortExpensiveLink, sortRatingLink;
+
+    private AdSortChoice selectedSortChoice = null;
+    private Hyperlink lastClickedSortLink = null;
     private ArrayList<Advertisement> activeAds = new ArrayList<>();
     private Category selectedCategoryEnum = null;
     private Hyperlink lastClickedCategoryLink = null;
@@ -121,6 +122,36 @@ public class HomeController {
             showAds(widthToUse);
         } catch (Exception e) {
             System.err.println("Error filtering by category: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleSortClick(ActionEvent event) {
+        Hyperlink clickedLink = (Hyperlink) event.getSource();
+
+        if (lastClickedSortLink != null) {
+            lastClickedSortLink.getStyleClass().remove("category-link-selected");
+            if (!lastClickedSortLink.getStyleClass().contains("category-link")) {
+                lastClickedSortLink.getStyleClass().add("category-link");
+            }
+        }
+
+        clickedLink.getStyleClass().remove("category-link");
+        if (!clickedLink.getStyleClass().contains("category-link-selected")) {
+            clickedLink.getStyleClass().add("category-link-selected");
+        }
+
+        lastClickedSortLink = clickedLink;
+        String sortText = clickedLink.getText();
+
+        try {
+            selectedSortChoice = AdSortChoice.fromString(sortText);
+            activeAds = AppContext.getAdvertisementService().getSortedAds(selectedSortChoice);
+
+            double widthToUse = adsGrid.getWidth() > 0 ? adsGrid.getWidth() : 900;
+            showAds(widthToUse);
+        } catch (Exception e) {
+            System.err.println("Error sorting advertisements: " + e.getMessage());
         }
     }
 
