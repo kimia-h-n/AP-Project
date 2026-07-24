@@ -242,7 +242,7 @@ public class AdvertisementServiceHttp implements AdvertisementService {
 
             String encodedQuery = java.net.URLEncoder.encode(query.trim(), "UTF-8");
 
-            JSONArray responseArray = ApiClient.getList("/api/v1/search?title=" + encodedQuery);
+            JSONArray responseArray = ApiClient.getList("/api/v1/ads/search?title=" + encodedQuery);
 
             ArrayList<Advertisement> result = new ArrayList<>();
             if (responseArray != null) {
@@ -293,7 +293,7 @@ public class AdvertisementServiceHttp implements AdvertisementService {
      * @return list of filtered advertisements
      */
     public ArrayList<Advertisement> filterAdvertisements(Long minPrice, Long maxPrice, Category category, Long cityId, DateFilter dateFilter) {
-        StringBuilder query = new StringBuilder("/api/v1/filter?");
+        StringBuilder query = new StringBuilder("/api/v1/ads/filter?");
 
         if (minPrice != null) query.append("minPrice=").append(minPrice).append("&");
         if (maxPrice != null) query.append("maxPrice=").append(maxPrice).append("&");
