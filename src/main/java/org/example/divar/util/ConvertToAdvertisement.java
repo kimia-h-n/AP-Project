@@ -21,6 +21,7 @@ public class ConvertToAdvertisement {
         ad.setImageIds(dto.getImageIds());
         ad.setPrimaryImageUrl(normalizeImageRef(dto.getPrimaryImageUrl()));
         ad.setFavorite(dto.isFavorite());
+        ad.setSellerRating(dto.getSellerRating());
 
         if (dto.getCategory() != null) {
             ad.setCategory(Category.valueOf(dto.getCategory()));
