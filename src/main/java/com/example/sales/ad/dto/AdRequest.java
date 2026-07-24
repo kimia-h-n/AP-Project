@@ -12,6 +12,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 
+/**
+ * Request DTO used for creating or updating an advertisement.
+ * <p>
+ * This object contains the core user-provided fields required to register an ad.
+ * </p>
+ */
+
 public class AdRequest {
     private String title;
     private String description;

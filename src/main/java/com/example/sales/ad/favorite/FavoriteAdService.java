@@ -10,14 +10,17 @@ import com.example.sales.exception.AdNotFoundException;
 import com.example.sales.exception.AlreadyFavoriteAdException;
 import com.example.sales.exception.UserNotFoundException;
 import com.example.sales.picture.AdPrimaryImageEnricher;
-import com.example.sales.repository.UserRepository;
-import com.example.sales.user.User;
+import com.example.sales.user.UserRepository;
+import com.example.sales.user.model.User;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Service for managing user's favorite advertisements.
+ */
 @Service
 @AllArgsConstructor
 public class FavoriteAdService {

@@ -20,13 +20,27 @@ import org.springframework.stereotype.Component;
 import java.security.Principal;
 import java.util.Collections;
 
+/**
+ * Intercepts inbound STOMP messages and enforces JWT-based authentication.
+ * <p>
+ * The interceptor validates the Authorization header on CONNECT frames and ensures
+ * that SEND/SUBSCRIBE frames are only processed for authenticated users.
+ * </p>
+ */
 @Component
 @AllArgsConstructor
 public class AuthChannelInterceptor implements ChannelInterceptor {
     private JwtService jwtService;
     private static final Logger logger = LoggerFactory.getLogger(AuthChannelInterceptor.class);
 
-
+    /**
+     * Performs authentication and authorization checks before a STOMP message is sent.
+     *
+     * @param message the incoming STOMP message
+     * @param channel the target message channel
+     * @return the original message if validation succeeds
+     * @throws MessageDeliveryException if authentication fails
+     */
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
@@ -35,7 +49,7 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
             return message;
         }
 
-        StompCommand command = accessor.getCommand();
+        StompCommand command = accessor.getCommand(); // Connect, Send, Subscribe
         logger.info("Processing STOMP {} for session {}", command, accessor.getSessionId());
 
         if (command == null || StompCommand.CONNECTED.equals(command)) {

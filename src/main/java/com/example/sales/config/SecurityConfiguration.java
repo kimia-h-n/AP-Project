@@ -17,7 +17,13 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
-
+/**
+ * Main Spring Security configuration for the application.
+ * <p>
+ * Configures request authorization rules, session management, CORS,
+ * and the JWT authentication filter.
+ * </p>
+ */
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -26,9 +32,15 @@ public class SecurityConfiguration {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
 
+    /**
+     * Builds the HTTP security filter chain.
+     *
+     * @param http HTTP security builder
+     * @return configured security filter chain
+     * @throws Exception if the security configuration cannot be built
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
         return http
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
@@ -36,14 +48,12 @@ public class SecurityConfiguration {
                         // ───────────────────── Public Endpoints ─────────────────────
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/province").permitAll()
-                        .requestMatchers("/chat/**").permitAll()
 
                         // ───────────────────── Public GET Endpoints ─────────────────
                         .requestMatchers(HttpMethod.GET, "/api/v1/ads/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/filter").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/ads/search").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/ads/sortBy").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/search").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/rating/avg/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/images/**").permitAll()
 
@@ -54,17 +64,18 @@ public class SecurityConfiguration {
                         // ───────────────────── Authenticated Endpoints ──────────────
                         .requestMatchers("/api/v1/favorites/**").authenticated()
 
-                        // ───────────────────── Image Mutations (need token) ─────────
+                        // ───────────────────── Image Mutations ──────────────────────
                         .requestMatchers(HttpMethod.POST, "/api/v1/ads/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/images/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/images/**").authenticated()
 
                         // ───────────────────── Admin ───────────────────────────────
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/v1/admin/dashboard/stats").hasRole("ADMIN")
 
                         // ───────────────────── Chat ───────────────────────────────
                         .requestMatchers("/chat-native").permitAll()
+                        .requestMatchers("/chat/**").permitAll()
+
                         // ───────────────────── Everything else ─────────────────────
                         .anyRequest().authenticated()
                 )
@@ -76,6 +87,11 @@ public class SecurityConfiguration {
                 .build();
     }
 
+    /**
+     * Configures Cross-Origin Resource Sharing for the application.
+     *
+     * @return CORS configuration source
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();

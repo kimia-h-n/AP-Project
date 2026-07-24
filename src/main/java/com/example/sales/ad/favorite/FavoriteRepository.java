@@ -1,7 +1,7 @@
 package com.example.sales.ad.favorite;
 
 import com.example.sales.ad.Ad;
-import com.example.sales.user.User;
+import com.example.sales.user.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,6 +10,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Repository for favorite ad relations.
+ */
 @Repository
 public interface FavoriteRepository extends JpaRepository<FavoriteAd, Long> {
 

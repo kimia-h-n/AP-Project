@@ -3,6 +3,7 @@ package com.example.sales.exception;
 import org.springframework.http.HttpStatus;
 
 public enum ErrorCode {
+
     USER_NOT_FOUND("USER_NOT_FOUND", HttpStatus.NOT_FOUND),
     INVALID_PASSWORD_OR_USERNAME("INVALID_PASSWORD_OR_USERNAME", HttpStatus.UNAUTHORIZED),
     DUPLICATE_EMAIL("EMAIL_ALREADY_EXISTS", HttpStatus.CONFLICT),

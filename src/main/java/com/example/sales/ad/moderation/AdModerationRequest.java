@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Request payload used for moderation of an advertisement.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

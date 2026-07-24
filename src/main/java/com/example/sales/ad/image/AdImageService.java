@@ -8,8 +8,8 @@ import com.example.sales.picture.ImageData;
 import com.example.sales.picture.ImageDownload;
 import com.example.sales.picture.ImageUtils;
 import com.example.sales.picture.StorageRepository;
-import com.example.sales.repository.UserRepository;
-import com.example.sales.user.User;
+import com.example.sales.user.UserRepository;
+import com.example.sales.user.model.User;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +19,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
-
+/**
+ * Service for managing advertisement images.
+ */
 @Service
 @AllArgsConstructor
 public class AdImageService {

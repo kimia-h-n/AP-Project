@@ -1,10 +1,13 @@
 package com.example.sales.ad.reported.model;
 
 import com.example.sales.ad.Ad;
-import com.example.sales.user.User;
+import com.example.sales.user.model.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+/**
+ * JPA entity representing a report submitted for an advertisement.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

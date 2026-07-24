@@ -10,21 +10,22 @@ import com.example.sales.ad.mapper.AdMapper;
 import com.example.sales.ad.model.*;
 import com.example.sales.exception.*;
 import com.example.sales.picture.AdPrimaryImageEnricher;
-import com.example.sales.picture.ImageMetaView;
 import com.example.sales.picture.StorageRepository;
 import com.example.sales.province.ProvinceRepository;
 import com.example.sales.rating.SellerRatingService;
-import com.example.sales.repository.UserRepository;
-import com.example.sales.user.Role;
-import com.example.sales.user.User;
+import com.example.sales.user.UserRepository;
+import com.example.sales.user.model.Role;
+import com.example.sales.user.model.User;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
+/**
+ * Service containing advertisement business logic.
+ */
 @Service
 @AllArgsConstructor
 public class AdService {
@@ -37,6 +38,9 @@ public class AdService {
     private final AdPrimaryImageEnricher primaryImageEnricher;
     private final SellerRatingService sellerRatingService;
 
+    /**
+     * Creates a new advertisement for the given user.
+     */
     public AdInsertResponse addAd(AdRequest request, String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(UserNotFoundException::new);
@@ -48,13 +52,12 @@ public class AdService {
         return new AdInsertResponse(savedAd.getId());
     }
 
-
+    /**
+     * Returns all approved advertisements.
+     */
     public List<AdCardSummary> getAllActiveAds(String username) {
-//        applyFavorite(username, activeAds);
-//        return adMapper.toCartSummeryList(adRepository.findAllByStatus(AdStatus.APPROVED));
         List<AdCardSummary> ads = adMapper.toCartSummeryList
                 (adRepository.findAllByStatus(AdStatus.APPROVED));
-//        addPrimaryImage(ads);
         primaryImageEnricher.enrich(
                 ads,
                 AdCardSummary::getId,
@@ -64,47 +67,13 @@ public class AdService {
         return ads;
     }
 
-    public void addPrimaryImage(List<AdCardSummary> ads) {
-        List<Long> adIds = ads.stream()
-                .map(AdCardSummary::getId)
-                .toList();
-
-        Map<Long, UUID> primaryByAdId = storageRepository
-                .findPrimaryMetaByAdIdIn(adIds)
-                .stream()
-                .collect(Collectors.toMap(
-                        ImageMetaView::getAdId,
-                        ImageMetaView::getId,
-                        (existing, ignored) -> existing
-                ));
-        for (AdCardSummary ad : ads) {
-            UUID primaryImageId = primaryByAdId.get(ad.getId());
-            ad.setPrimaryImageId(primaryImageId);
-            ad.setPrimaryImageUrl(primaryImageId != null ? "/api/v1/images/" + primaryImageId : null);
-
-        }
-    }
-
-    private void applyFavorite(String username, List<AdResponse> responseList) {
-        if (isNotLoggedIn(username)) {
-            for (AdResponse response : responseList) {
-                response.setFavorite(false);
-                response.setMine(false);
-            }
-            return;
-        }
-        User user = userRepository.findByUsername(username).orElseThrow(UserNotFoundException::new);
-        Set<Long> favAdIds = favoriteRepository.findFavoriteAdIdsByUser(user);
-        responseList.forEach(ad -> {
-            ad.setFavorite(favAdIds.contains(ad.getId()));
-            ad.setMine(ad.getSellerUsername().equals(username));
-        });
-    }
-
     private static boolean isNotLoggedIn(String username) {
         return username == null;
     }
 
+    /**
+     * Returns the full ad details together with images and seller data.
+     */
     public AdResponse getAd(Long id, String username) {
         Ad ad = adRepository.findById(id).orElseThrow(AdNotFoundException::new);
         AdResponse adResponse = adMapper.toResponse(ad);
@@ -113,11 +82,6 @@ public class AdService {
         adResponse.setSellerRatingAvg(averageRating);
         if (isNotLoggedIn(username))
             return adResponse;
-
-        //todo: if in future, viewing rejected ads is desired, change here
-        //todo: is it neccessary to check this here?
-//        if (ad.getStatus() != AdStatus.APPROVED)
-//            throw new AdViewNotAllowedException();
 
         User user = userRepository.findByUsername(username).orElseThrow(UserNotFoundException::new);
 
@@ -147,6 +111,9 @@ public class AdService {
                 .getRole() == Role.ADMIN;
     }
 
+    /**
+     * Removes an advertisement if the current user is allowed to do so.
+     */
     @Transactional
     public void removeAd(Long id, String username) {
         Ad ad = adRepository.findById(id).orElseThrow(AdNotFoundException::new);
@@ -165,7 +132,9 @@ public class AdService {
         return ad.getSeller().getUsername().equals(username);
     }
 
-
+    /**
+     * Returns all approved ads created by the current user.
+     */
     public List<AdCardSummary> getAllMyAds(String username) {
 
         List<Ad> myAdsList = adRepository.findAllBySellerAndStatus(
@@ -178,14 +147,12 @@ public class AdService {
                 AdCardSummary::setPrimaryImageId,
                 AdCardSummary::setPrimaryImageUrl
         );
-//        List<AdResponse> ads = adMapper.toResponseList(myAds);
-//        for (int i = 0; i < ads.size(); i++) {
-//            ads.get(i).setMine(true);
-//            ads.get(i).setImages(buildImageResponses(myAds.get(i).getId()));
-//        }
         return ads;
     }
 
+    /**
+     * Updates an advertisement if the current user owns it.
+     */
     public void updateAd(Long id, String username, AdUpdateRequest request) {
         Ad ad = adRepository.findById(id).orElseThrow(AdNotFoundException::new);
         if (!isAdOwner(username, ad))
@@ -241,12 +208,10 @@ public class AdService {
         return contentChanged;
     }
 
+    /**
+     * Searches approved ads by title.
+     */
     public List<AdCardSummary> searchByTitle(String title) {
-//        List<AdResponse> matchedAds = adMapper.toResponseList(
-//                adRepository.findAll(AdSpecification.titleContains(title)));
-//        applyFavorite(username, matchedAds);
-        //todo: for later search improvements such as matching with description
-//         return adMapper.toCartSummeryList(adRepository.findAll(AdSpecification.titleContains(title)));
         List<AdCardSummary> ads = adMapper.toCartSummeryList(adRepository.findByTitleContainingIgnoreCaseAndStatus(title, AdStatus.APPROVED));
         primaryImageEnricher.enrich(
                 ads,
@@ -257,6 +222,9 @@ public class AdService {
         return ads;
     }
 
+    /**
+     * Filters approved ads using the provided criteria.
+     */
     public List<AdCardSummary> filterAds(Long minPrice, Long maxPrice, AdCategory category,
                                          DateFilter dateFilter, Long cityId) {
         Specification<Ad> spec = Specification.where(AdSpecifications.hasStatus(AdStatus.APPROVED));
@@ -275,7 +243,6 @@ public class AdService {
         }
 
         List<AdCardSummary> ads = adMapper.toCartSummeryList(adRepository.findAll(spec));
-//        addPrimaryImage(ads);
         primaryImageEnricher.enrich(
                 ads,
                 AdCardSummary::getId,
@@ -284,7 +251,9 @@ public class AdService {
         );
         return ads;
     }
-
+    /**
+     * Sorts approved ads using the given sort option.
+     */
     public List<AdCardSummary> sortAdsBy(AdSortChoice adSortChoice) {
         Specification<Ad> spec = Specification.where(AdSpecifications.hasStatus(AdStatus.APPROVED));
         spec = spec.and(AdSpecifications.applySorting(adSortChoice));

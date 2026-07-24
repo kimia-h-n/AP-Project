@@ -16,6 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * REST controller for ad image upload, download, replacement, and deletion.
+ */
 @Slf4j
 @RestController
 @RequiredArgsConstructor

@@ -8,7 +8,13 @@ import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 import java.util.UUID;
-
+/**
+ * DTO used to represent a compact summary card for an advertisement.
+ * <p>
+ * This class is typically used in listing pages, search results, or any UI section
+ * where only the most important ad information is needed.
+ * </p>
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

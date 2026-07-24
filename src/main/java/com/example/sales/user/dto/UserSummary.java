@@ -1,19 +1,22 @@
-package com.example.sales.user;
+package com.example.sales.user.dto;
+
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Lightweight DTO representing a user summary.
+ */
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserInfoResponse {
+public class UserSummary {
     private Long id;
-    private String username;
     private String firstname;
     private String lastname;
-    private String email;
     private String phoneNumber;
-    private Double avgRating;
     private boolean enabled;
 }
