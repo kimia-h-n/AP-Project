@@ -5,7 +5,7 @@ import com.example.sales.ad.model.AdStatus;
 import com.example.sales.ad.model.ProductCondition;
 import com.example.sales.picture.ImageData;
 import com.example.sales.province.City;
-import com.example.sales.user.User;
+import com.example.sales.user.model.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,7 +17,9 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * JPA entity representing an advertisement in the system.
+ */
 @Data
 @Builder
 @NoArgsConstructor
@@ -67,10 +69,18 @@ public class Ad {
     private Instant updatedAt;
 
 
+    /**
+     * Checks whether this ad is allowed to be reported as spam.
+     *
+     * @return true if the ad is not already marked as spam
+     */
     public boolean isAdSpammable() {
         return status != AdStatus.SPAM_REPORT;
     }
 
+    /**
+     * Marks the advertisement as spam-reported.
+     */
     public void spam() {
         status = AdStatus.SPAM_REPORT;
     }

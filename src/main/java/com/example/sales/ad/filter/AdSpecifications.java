@@ -4,7 +4,6 @@ import com.example.sales.ad.Ad;
 import com.example.sales.ad.model.AdCategory;
 import com.example.sales.ad.model.AdStatus;
 import com.example.sales.rating.SellerRating;
-import com.example.sales.user.User;
 import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -12,7 +11,13 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 
+/**
+ * Specification helpers for building advertisement queries.
+ */
 public class AdSpecifications {
+    /**
+     * Filters ads by status.
+     */
     public static Specification<Ad> hasStatus(AdStatus status) {
         return (root, query, cb) ->
                 status == null ? cb.conjunction() : cb.equal(root.get("status"), status);
@@ -20,6 +25,9 @@ public class AdSpecifications {
 
     private static final ZoneId APP_ZONE = ZoneId.of("Asia/Tehran");
 
+    /**
+     * Filters ads by creation date relative to the current day.
+     */
     public static Specification<Ad> hasDateFilter(DateFilter dateFilter) {
         return (root, query, cb) -> {
             if (dateFilter == null) {
@@ -48,26 +56,25 @@ public class AdSpecifications {
         };
     }
 
+    /**
+     * Filters ads by category.
+     */
     public static Specification<Ad> hasCategory(AdCategory category) {
         return (root, query, cb) ->
                 category == null ? cb.conjunction() : cb.equal(root.get("category"), category);
     }
 
+    /**
+     * Filters ads by city id.
+     */
     public static Specification<Ad> hasCityId(Long cityId) {
         return (root, query, cb) ->
                 cityId == null ? cb.conjunction() : cb.equal(root.get("city").get("id"), cityId);
     }
 
-    public static Specification<Ad> priceGte(Long minPrice) {
-        return (root, query, cb) ->
-                minPrice == null ? cb.conjunction() : cb.greaterThanOrEqualTo(root.get("price"), minPrice);
-    }
-
-    public static Specification<Ad> priceLte(Long maxPrice) {
-        return (root, query, cb) ->
-                maxPrice == null ? cb.conjunction() : cb.lessThanOrEqualTo(root.get("price"), maxPrice);
-    }
-
+    /**
+     * Filters ads by a price range.
+     */
     public static Specification<Ad> priceBetween(Long minPrice, Long maxPrice) {
         return (root, query, cb) -> {
             Predicate predicate = cb.conjunction();
@@ -83,6 +90,9 @@ public class AdSpecifications {
         };
     }
 
+    /**
+     * Applies dynamic ordering based on the selected sort option.
+     */
     public static Specification<Ad> applySorting(AdSortChoice sortOption) {
         return (root, query, cb) -> {
             if (sortOption == null || query.getResultType() == Long.class || query.getResultType() == long.class) {

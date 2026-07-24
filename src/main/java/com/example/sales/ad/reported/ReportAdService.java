@@ -7,13 +7,16 @@ import com.example.sales.ad.reported.model.ReportReason;
 import com.example.sales.exception.AdNotFoundException;
 import com.example.sales.exception.SpamNotAllowedException;
 import com.example.sales.exception.UserNotFoundException;
-import com.example.sales.repository.UserRepository;
-import com.example.sales.user.User;
+import com.example.sales.user.UserRepository;
+import com.example.sales.user.model.User;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service that stores and processes ad reports.
+ */
 @Slf4j
 @Service
 @AllArgsConstructor

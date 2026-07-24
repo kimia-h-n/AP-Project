@@ -9,7 +9,13 @@ import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 import java.util.List;
-
+/**
+ * Detailed response DTO representing a full advertisement view.
+ * <p>
+ * This object is typically used in ad detail pages where both ad information
+ * and seller-related metadata are required.
+ * </p>
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

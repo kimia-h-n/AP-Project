@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
+/**
+ * Response DTO for ad report records.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

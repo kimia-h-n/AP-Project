@@ -6,6 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Request payload used for creating a new user account.
+ */
 @Data
 @Builder
 @NoArgsConstructor

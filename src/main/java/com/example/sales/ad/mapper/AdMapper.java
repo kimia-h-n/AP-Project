@@ -13,6 +13,9 @@ import org.mapstruct.Mapping;
 
 import java.util.List;
 
+/**
+ * MapStruct mapper for converting between ad entities and DTOs.
+ */
 @Mapper(componentModel = "spring")
 public interface AdMapper {
 

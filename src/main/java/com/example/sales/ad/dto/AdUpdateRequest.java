@@ -11,7 +11,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-
+/**
+ * Request DTO used for updating an existing advertisement.
+ * <p>
+ * This object contains the fields that can be modified during an ad update.
+ * </p>
+ */
 public class AdUpdateRequest {
     private Long id;
     private String title;

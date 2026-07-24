@@ -6,6 +6,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+
+/**
+ * Response DTO representing a chat message.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

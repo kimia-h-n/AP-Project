@@ -9,11 +9,20 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * Repository for chat message persistence and query operations.
+ */
 @Repository
-
-
 public interface ChatRepository extends JpaRepository<ChatMessage, Long> {
 
+    /**
+     * Finds all chat messages between two users for a specific ad.
+     *
+     * @param user1Id first user id
+     * @param user2Id second user id
+     * @param adId    ad id
+     * @return ordered list of chat messages
+     */
     @Query("""
             SELECT m
             FROM ChatMessage m
@@ -28,6 +37,12 @@ public interface ChatRepository extends JpaRepository<ChatMessage, Long> {
             @Param("adId") Long adId
     );
 
+    /**
+     * Finds the latest message for each active conversation of a user.
+     *
+     * @param userId user id
+     * @return list of latest messages grouped by conversation
+     */
     @Query("""
             SELECT m FROM ChatMessage m
             WHERE m.id IN (
@@ -44,5 +59,13 @@ public interface ChatRepository extends JpaRepository<ChatMessage, Long> {
             """)
     List<ChatMessage> findActiveConversationsForUser(@Param("userId") Long userId);
 
+    /**
+     * Finds messages with the specified sender, receiver, and status.
+     *
+     * @param senderId   sender id
+     * @param receiverId receiver id
+     * @param status     message status
+     * @return matching chat messages
+     */
     List<ChatMessage> findBySenderIdAndReceiverIdAndStatus(Long senderId, Long receiverId, MessageStatus status);
 }

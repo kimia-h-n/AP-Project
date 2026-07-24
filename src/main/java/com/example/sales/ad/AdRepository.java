@@ -1,7 +1,7 @@
 package com.example.sales.ad;
 
 import com.example.sales.ad.model.AdStatus;
-import com.example.sales.user.User;
+import com.example.sales.user.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;

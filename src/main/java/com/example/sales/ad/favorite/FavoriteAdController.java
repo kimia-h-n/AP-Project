@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST controller for favorite advertisement operations.
+ */
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/favorites")

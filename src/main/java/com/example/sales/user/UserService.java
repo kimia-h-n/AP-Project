@@ -2,7 +2,7 @@ package com.example.sales.user;
 
 
 import com.example.sales.exception.UserNotFoundException;
-import com.example.sales.repository.UserRepository;
+import com.example.sales.user.dto.UserInfoResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 

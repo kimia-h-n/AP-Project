@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Request DTO used when reporting an advertisement.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
