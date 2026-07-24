@@ -22,8 +22,6 @@ public interface AdminService {
 
     ArrayList<AdminReport> getReports() throws RuntimeException;
 
-    void resolveReport(long reportId, ReportResolutionAction action, String note) throws RuntimeException;
-
     ArrayList<Advertisement> getUserAdvertisements(long userId) throws RuntimeException;
 
     DashboardStatistics getDashboardStats() throws RuntimeException;

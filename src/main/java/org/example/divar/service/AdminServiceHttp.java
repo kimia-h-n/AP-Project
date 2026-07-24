@@ -92,18 +92,6 @@ public class AdminServiceHttp implements AdminService {
     }
 
     @Override
-    public void resolveReport(long reportId, ReportResolutionAction action, String note) {
-        String endpoint = "/api/v1/admin/reported-ads/" + reportId + "/resolve";
-
-        JSONObject body = new JSONObject();
-        body.put("action", action.name());
-        if (note != null && !note.isBlank()) {
-            body.put("note", note);
-        }
-        ApiClient.post(endpoint, body);
-    }
-
-    @Override
     public ArrayList<Advertisement> getUserAdvertisements(long userId) {
         String endpoint = "/api/v1/admin/users/" + userId + "/ads";
         JSONArray jsonArray = ApiClient.getList(endpoint);

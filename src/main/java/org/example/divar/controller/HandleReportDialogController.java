@@ -35,31 +35,40 @@ public class HandleReportDialogController {
 
     @FXML
     private void handleSubmit() {
-        String reason = reasonTextArea.getText().trim();
-        if (reason.isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "توجه", "لطفاً علت اقدام را وارد کنید.");
-        } else {
-            ReportResolutionAction action;
-            if (banUserRadio.isSelected()) {
-                action = ReportResolutionAction.BLOCK_USER;
-            } else {
-                action = ReportResolutionAction.DELETE_AD;
+        String reason = reasonTextArea != null && reasonTextArea.getText() != null ? reasonTextArea.getText().trim() : "";
+
+        try {
+            if (banUserRadio != null && banUserRadio.isSelected()) {
+                var ad = AppContext.getAdvertisementService().getAdvertisementById(report.getAdId());
+
+                if (ad != null) {
+                    if (ad.getSeller() != null) {
+                        String sellerId = String.valueOf(ad.getSeller().getId());
+                        AppContext.getAdminService().blockUser(sellerId, reason);
+                    } else {
+                        showAlert(Alert.AlertType.ERROR, "خطا", "اطلاعات فروشنده برای این آگهی یافت نشد.");
+                        return;
+                    }
+                } else {
+                    showAlert(Alert.AlertType.ERROR, "خطا", "آگهی مورد نظر یافت نشد.");
+                    return;
+                }
             }
 
-            try {
-                AppContext.getAdminService().resolveReport(report.getId(), action, reason);
-
-                if (stage != null) {
-                    stage.close();
-                }
-
-                if (onSuccessCallback != null) {
-                    onSuccessCallback.run();
-                }
-
-            } catch (Exception e) {
-                showAlert(Alert.AlertType.ERROR, "خطا", "خطا در ثبت اقدام: " + e.getMessage());
+            if (deleteAdRadio != null && deleteAdRadio.isSelected()) {
+                AppContext.getAdvertisementService().deleteAdvertisement(report.getAdId());
             }
+
+            if (stage != null) {
+                stage.close();
+            }
+
+            if (onSuccessCallback != null) {
+                onSuccessCallback.run();
+            }
+
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "خطا", "خطا در انجام عملیات: " + e.getMessage());
         }
     }
 
