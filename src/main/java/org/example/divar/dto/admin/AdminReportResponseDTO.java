@@ -2,6 +2,9 @@ package org.example.divar.dto.admin;
 
 import org.json.JSONObject;
 
+/**
+ * Data Transfer Object (DTO) for parsing admin report response data from the server.
+ */
 public class AdminReportResponseDTO {
 
     private final long id;

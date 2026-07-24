@@ -5,7 +5,7 @@ import org.example.divar.model.City;
 import org.example.divar.util.SessionManager;
 import org.example.divar.util.AppContext;
 import org.example.divar.util.ImageLoader;
-import org.example.divar.util.CityFormatter; // <--- ایمپورت کلاس CityFormatter
+import org.example.divar.util.CityFormatter;
 import org.example.divar.validation.AdvertisementValidation;
 import org.example.divar.SwitchStage;
 import javafx.fxml.FXML;
@@ -19,6 +19,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Controller class for managing the creation and editing of advertisements.
+ */
 public class NewAdvertisementController {
 
     @FXML private Label pageTitleLabel;
@@ -65,16 +68,13 @@ public class NewAdvertisementController {
             showError("امکان دریافت لیست شهرها از سرور وجود ندارد.");
             System.err.println("Error loading cities: " + e.getMessage());
         }
-
-        try {
-            ArrayList<City> serverCities = AppContext.getAdvertisementService().getAllProvinces();
-            city.getItems().setAll(serverCities);
-        } catch (Exception e) {
-            showError("امکان دریافت لیست شهرها از سرور وجود ندارد.");
-            System.err.println("Error loading cities: " + e.getMessage());
-        }
     }
 
+    /**
+     * Initializes the view and populates fields with existing advertisement data for editing mode.
+     *
+     * @param advertisement the advertisement to be edited
+     */
     public void initializeForEdit(Advertisement advertisement) {
         this.editingAdId = advertisement.getId();
 
@@ -182,6 +182,9 @@ public class NewAdvertisementController {
         }
     }
 
+    /**
+     * Validates input fields and handles either creating a new advertisement or submitting edits.
+     */
     @FXML
     private void createAdvertisement() {
         String title = titleField.getText();
@@ -289,7 +292,6 @@ public class NewAdvertisementController {
 
         while (deleteIndex < imagesToDelete.size()) {
             String imageIdToDelete = imagesToDelete.get(deleteIndex);
-            System.out.println("Executing DELETE for imageId: " + imageIdToDelete);
             try {
                 adService.deleteAdvertisementImage(imageIdToDelete);
             } catch (RuntimeException e) {

@@ -7,6 +7,9 @@ import javafx.animation.PauseTransition;
 import javafx.util.Duration;
 import javafx.scene.control.*;
 
+/**
+ * Controller class for managing user registration view and account creation.
+ */
 public class RegisterController {
 
     @FXML private TextField firstnameField;
@@ -17,6 +20,10 @@ public class RegisterController {
     @FXML private TextField emailField;
     @FXML private Label messageLabel;
 
+    /**
+     * Validates registration inputs, registers the new user via service,
+     * displays a success message, and redirects to the login page after a delay.
+     */
     @FXML
     private void register() {
         String firstname = firstnameField.getText().trim();
@@ -53,12 +60,22 @@ public class RegisterController {
         SwitchStage.showLogin();
     }
 
+    /**
+     * Displays error messages on the UI when registration validation or server request fails.
+     *
+     * @param message the error message to display
+     */
     private void showError(String message) {
         messageLabel.setText(message);
         messageLabel.getStyleClass().setAll("error-message");
         messageLabel.setVisible(true);
     }
 
+    /**
+     * Displays success messages on the UI upon successful account creation.
+     *
+     * @param message the success message to display
+     */
     private void showSuccess(String message) {
         messageLabel.setText(message);
         messageLabel.getStyleClass().setAll("success-message");

@@ -4,6 +4,9 @@ import org.example.divar.model.*;
 
 import java.util.ArrayList;
 
+/**
+ * Service interface defining administrative operations for managing users, advertisements, reports, and system statistics.
+ */
 public interface AdminService {
 
     ArrayList<Advertisement> getPendingAdvertisements() throws RuntimeException;

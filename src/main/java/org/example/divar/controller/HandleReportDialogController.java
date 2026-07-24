@@ -7,6 +7,9 @@ import org.example.divar.model.AdminReport;
 import org.example.divar.model.ReportResolutionAction;
 import org.example.divar.util.AppContext;
 
+/**
+ * Controller class for managing the admin report resolution dialog, allowing admins to ban users or delete reported ads.
+ */
 public class HandleReportDialogController {
 
     @FXML private RadioButton deleteAdRadio;
@@ -33,6 +36,9 @@ public class HandleReportDialogController {
         this.onSuccessCallback = onSuccessCallback;
     }
 
+    /**
+     * Handles the submission of the resolution action, either banning the seller or deleting the reported advertisement.
+     */
     @FXML
     private void handleSubmit() {
         String reason = reasonTextArea != null && reasonTextArea.getText() != null ? reasonTextArea.getText().trim() : "";

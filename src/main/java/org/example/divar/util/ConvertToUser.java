@@ -4,6 +4,9 @@ import org.example.divar.model.User;
 import org.example.divar.model.UserStatus;
 import org.json.JSONObject;
 
+/**
+ * Utility class to map raw JSON objects into User application model instances.
+ */
 public class ConvertToUser {
 
     public static User convertToUser(JSONObject json) {

@@ -29,6 +29,9 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
+/**
+ * Controller class for managing advertisement details view, image gallery, favoriting, and buyer/seller interactions.
+ */
 public class AdvertisementDetailsController {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER =
@@ -67,6 +70,11 @@ public class AdvertisementDetailsController {
         gallery = new ImageGallery(mainImage, thumbnailBox, counterLabel);
     }
 
+    /**
+     * Loads and displays the details of the specified advertisement, fetching fresh data from the server.
+     *
+     * @param advertisement the advertisement to display
+     */
     public void showAdvertisement(Advertisement advertisement) {
         Advertisement freshAd;
         try {
@@ -422,6 +430,9 @@ public class AdvertisementDetailsController {
         SwitchStage.switchToChat();
     }
 
+    /**
+     * Initializes or opens a chat conversation with the seller of the current advertisement.
+     */
     @FXML
     private void chatWithSeller() {
         clearMessage();

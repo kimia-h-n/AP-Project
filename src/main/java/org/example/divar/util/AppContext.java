@@ -9,6 +9,9 @@ import org.example.divar.service.*;
 import org.example.divar.validation.UserValidation;
 import org.example.divar.validation.AdvertisementValidation;
 
+/**
+ * Context manager providing global access points to application services and validators.
+ */
 public class AppContext {
 
     private static final UserValidation USER_VALIDATION = new UserValidation();

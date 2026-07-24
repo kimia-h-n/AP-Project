@@ -3,6 +3,9 @@ package org.example.divar.util;
 import org.example.divar.model.DashboardStatistics;
 import org.json.JSONObject;
 
+/**
+ * Utility class to map raw JSON response objects into DashboardStatistics domain model instances.
+ */
 public class ConvertToDashboardStatistics {
 
     public static DashboardStatistics convert(JSONObject json) {

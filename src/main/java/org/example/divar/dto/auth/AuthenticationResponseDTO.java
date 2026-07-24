@@ -3,6 +3,9 @@ package org.example.divar.dto.auth;
 import org.example.divar.model.UserRole;
 import org.json.JSONObject;
 
+/**
+ * Data Transfer Object (DTO) for parsing authentication responses from the server.
+ */
 public class AuthenticationResponseDTO {
 
     private final String token;

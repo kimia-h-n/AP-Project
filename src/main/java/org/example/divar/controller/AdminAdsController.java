@@ -9,6 +9,9 @@ import org.example.divar.util.AppContext;
 
 import java.util.ArrayList;
 
+/**
+ * Controller class for managing and displaying active advertisements in the admin panel.
+ */
 public class AdminAdsController {
 
     @FXML private FlowPane adsFlowPane;
@@ -19,6 +22,9 @@ public class AdminAdsController {
         loadAds();
     }
 
+    /**
+     * Fetches active advertisements from the server and populates the flow pane container with summary cards.
+     */
     private void loadAds() {
         try {
             ArrayList<Advertisement> ads = AppContext.getAdvertisementService().getActiveAdvertisements();

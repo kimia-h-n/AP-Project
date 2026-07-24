@@ -22,6 +22,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Main chat controller responsible for managing the conversation list,
+ * handling real-time WebSocket communication, and updating the chat UI[cite: 1].
+ */
 public class ChatController {
 
     @FXML
@@ -102,6 +106,9 @@ public class ChatController {
         });
     }
 
+    /**
+     * Configures the cell factory for the conversations list using the ChatList component[cite: 1].
+     */
     private void configureChatsList() {
 
         chatsList.setCellFactory(list -> new ListCell<>() {
@@ -119,6 +126,9 @@ public class ChatController {
         });
     }
 
+    /**
+     * Configures the selection listener for the conversations list to load the selected chat[cite: 1].
+     */
     private void configureConversationSelection() {
         if (chatsList == null) {
             System.err.println("WARNING: chatsList was not injected from FXML.");
@@ -261,6 +271,12 @@ public class ChatController {
                 });
     }
 
+    /**
+     * Selects a conversation in the chat list.
+     * If the conversation is not found in the list, it loads it directly.
+     *
+     * @param conversation the conversation to select
+     */
     private void selectConversation(Conversation conversation) {
         if (conversation == null) {
             return;
@@ -278,7 +294,6 @@ public class ChatController {
                 .orElse(conversation);
 
         chatsList.getSelectionModel().select(existingConversation);
-
 
         if (!Objects.equals(
                 chatsList.getSelectionModel().getSelectedItem(),
@@ -302,6 +317,10 @@ public class ChatController {
         }
     }
 
+    /**
+     * Loads and displays the messages for the selected conversation in the UI,
+     * updating the header and scrolling to the bottom[cite: 1].
+     */
     private void loadSelectedConversation(Conversation conversation) {
         if (conversation == null || disposed) {
             return;
@@ -427,6 +446,11 @@ public class ChatController {
         return null;
     }
 
+    /**
+     * Synchronously establishes a WebSocket connection to the chat service for the current user,
+     * guarding against duplicate connection attempts and handling connection lifecycle events
+     * such as incoming live messages, successful connection establishment, and connection errors[cite: 1].
+     */
     private synchronized void connectToChatService() {
         System.out.println(
                 "connectToChatService called: disposed=" + disposed
@@ -562,6 +586,12 @@ public class ChatController {
         }
     }
 
+    /**
+     * Handles incoming live messages.
+     * Updates the conversation list and UI if the message belongs to the current chat.
+     *
+     * @param receivedMessage the message received from the server
+     */
     private void onLiveMessageReceived(Message receivedMessage) {
         if (disposed
                 || receivedMessage == null

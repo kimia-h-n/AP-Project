@@ -8,12 +8,19 @@ import org.example.divar.SwitchStage;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
+/**
+ * Controller class for managing user login and authentication view.
+ */
 public class LoginController {
 
     @FXML private TextField usernameField;
     @FXML private PasswordField passwordField;
     @FXML private Label messageLabel;
 
+    /**
+     * Handles user login by validating inputs, authenticating via service,
+     * determining user role, and navigating to the appropriate panel.
+     */
     @FXML
     private void login() {
         String username = usernameField.getText().trim();
@@ -52,6 +59,11 @@ public class LoginController {
         SwitchStage.switchToRegister();
     }
 
+    /**
+     * Displays error messages on the UI when login validation or authentication fails.
+     *
+     * @param message the error message to display
+     */
     private void showError(String message) {
         messageLabel.setText(message);
         messageLabel.getStyleClass().setAll("error-message");

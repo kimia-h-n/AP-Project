@@ -3,6 +3,9 @@ package org.example.divar.util;
 import org.example.divar.dto.admin.AdminReportResponseDTO;
 import org.example.divar.model.AdminReport;
 
+/**
+ * Utility class to map admin report DTO responses to application model objects.
+ */
 public class ConvertToAdminReport {
 
     public static AdminReport convertToAdminReport(AdminReportResponseDTO dto) {

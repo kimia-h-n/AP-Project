@@ -18,6 +18,9 @@ import org.example.divar.component.FavoriteAdCard;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Controller class for managing user profile view, favorite advertisements, and user's own ads.
+ */
 public class ProfileController {
 
     @FXML private VBox menu;
@@ -66,6 +69,9 @@ public class ProfileController {
         }
     }
 
+    /**
+     * Loads and displays the user's favorite advertisements in the grid.
+     */
     @FXML
     private void showFavorites() {
         lastProfileTab = "favorites";
@@ -89,6 +95,9 @@ public class ProfileController {
         return AppContext.getAdvertisementService().getMyAdvertisements();
     }
 
+    /**
+     * Loads and displays advertisements posted by the current user.
+     */
     @FXML
     private void showMyAdvertisements() {
         lastProfileTab = "myAdvertisements";
@@ -108,6 +117,11 @@ public class ProfileController {
         renderGrid(targetWidth);
     }
 
+    /**
+     * Dynamically renders the advertisement cards in a responsive grid layout based on container width.
+     *
+     * @param width the current width of the menu container
+     */
     private void renderGrid(double width) {
         adsGrid.getChildren().clear();
 

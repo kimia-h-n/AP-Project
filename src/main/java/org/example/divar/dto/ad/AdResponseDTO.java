@@ -4,6 +4,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import java.util.ArrayList;
 
+/**
+ * Data Transfer Object (DTO) for parsing and mapping advertisement response data from the server.
+ */
 public class AdResponseDTO {
 
     private final long id;

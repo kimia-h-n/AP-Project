@@ -16,6 +16,9 @@ import org.example.divar.model.AdminReport;
 import org.example.divar.model.ReportReason;
 import org.example.divar.util.ImageLoader;
 
+/**
+ * Custom UI component representing an advertisement report card in the admin panel with handling actions.
+ */
 public class ReportCard extends VBox {
 
     @FXML private ImageView cardImage;
@@ -24,6 +27,12 @@ public class ReportCard extends VBox {
     @FXML private Label reasonLabel;
     @FXML private Button handleBtn;
 
+    /**
+     * Initializes and populates the report card component with report details and action handlers.
+     *
+     * @param report     the administrative report data to display
+     * @param onResolved callback runnable executed when the report is successfully handled and resolved
+     */
     public ReportCard(AdminReport report, Runnable onResolved) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/divar/fxml/report_card.fxml"));

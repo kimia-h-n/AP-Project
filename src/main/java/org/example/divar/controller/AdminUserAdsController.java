@@ -14,6 +14,9 @@ import org.example.divar.service.AdminService;
 import org.example.divar.service.AdminServiceHttp;
 import java.util.ArrayList;
 
+/**
+ * Controller class for managing and displaying a specific user's advertisements in the admin panel.
+ */
 public class AdminUserAdsController {
 
     @FXML private FlowPane adsContainer;
@@ -21,6 +24,11 @@ public class AdminUserAdsController {
     private User targetUser;
     private final AdminService adminService = new AdminServiceHttp();
 
+    /**
+     * Sets the target user and triggers loading of their advertisements.
+     *
+     * @param user the user whose advertisements are to be displayed
+     */
     public void setUserData(User user) {
         this.targetUser = user;
         loadUserAds();

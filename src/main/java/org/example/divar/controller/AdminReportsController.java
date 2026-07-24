@@ -10,6 +10,9 @@ import org.example.divar.util.AppContext;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Controller class for managing and displaying advertisement reports in the admin panel.
+ */
 public class AdminReportsController {
 
     @FXML private FlowPane reportsFlowPane;
@@ -21,6 +24,9 @@ public class AdminReportsController {
         loadReports();
     }
 
+    /**
+     * Fetches all pending admin reports from the server and renders them in the flow pane container.
+     */
     public void loadReports() {
         clearMessage();
 
@@ -61,3 +67,4 @@ public class AdminReportsController {
         messageLabel.setManaged(false);
     }
 }
+

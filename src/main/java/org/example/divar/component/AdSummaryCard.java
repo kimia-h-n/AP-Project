@@ -11,6 +11,9 @@ import org.example.divar.model.Advertisement;
 import org.example.divar.util.AppContext;
 import org.example.divar.util.ImageLoader;
 
+/**
+ * Custom UI component representing an advertisement summary card in grid or list views.
+ */
 public class AdSummaryCard extends VBox {
 
     @FXML private ImageView cardImage;
@@ -18,6 +21,12 @@ public class AdSummaryCard extends VBox {
     @FXML private Label cardPrice;
     @FXML private Label cardLocation;
 
+    /**
+     * Initializes and populates the advertisement summary card component with advertisement data and click handlers.
+     *
+     * @param advertisement the advertisement to display in the card
+     * @param isAdminContext flag indicating whether the card is being viewed in an administrative context
+     */
     public AdSummaryCard(Advertisement advertisement, boolean isAdminContext) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/divar/fxml/ad_summary_card.fxml"));

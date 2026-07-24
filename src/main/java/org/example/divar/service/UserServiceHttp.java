@@ -9,6 +9,9 @@ import org.example.divar.util.ConvertToUser;
 import org.example.divar.util.SessionManager;
 import org.json.JSONObject;
 
+/**
+ * HTTP implementation of the UserService interface for user authentication and profile management.
+ */
 public class UserServiceHttp implements UserService {
 
     @Override

@@ -6,6 +6,9 @@ import javafx.scene.control.Label;
 import org.example.divar.model.DashboardStatistics;
 import org.example.divar.util.AppContext;
 
+/**
+ * Controller class for managing the admin main dashboard statistics view.
+ */
 public class AdminMainDashboardController {
 
     @FXML private Label lblActiveUsers;
@@ -19,6 +22,9 @@ public class AdminMainDashboardController {
         loadStats();
     }
 
+    /**
+     * Fetches dashboard statistics asynchronously from the server and updates the UI labels.
+     */
     private void loadStats() {
         new Thread(() -> {
             try {

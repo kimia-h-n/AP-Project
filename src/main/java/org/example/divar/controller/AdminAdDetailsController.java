@@ -15,6 +15,9 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
+/**
+ * Controller class for managing the admin view of advertisement details, image gallery, and administrative actions.
+ */
 public class AdminAdDetailsController {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER =
@@ -44,6 +47,11 @@ public class AdminAdDetailsController {
         gallery = new ImageGallery(mainImage, thumbnailBox, counterLabel);
     }
 
+    /**
+     * Loads and populates the view components with the given advertisement details.
+     *
+     * @param advertisement the advertisement to display in the admin details view
+     */
     public void showAdvertisement(Advertisement advertisement) {
         this.advertisement = advertisement;
 
@@ -148,7 +156,6 @@ public class AdminAdDetailsController {
         messageLabel.setManaged(true);
     }
 }
-
 
 
 

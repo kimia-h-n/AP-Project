@@ -14,6 +14,11 @@ import java.util.concurrent.CompletionStage;
 
 import javafx.application.Platform;
 
+/**
+ * This class handles the WebSocket and STOMP protocol connection for real-time chat.
+ * It connects to the server, authenticates using the JWT token, handles incoming frames (like CONNECTED, MESSAGE, ERROR),
+ * subscribes to the user's specific message queue, and allows sending live chat messages.
+ */
 public class ChatSocketService implements WebSocket.Listener {
 
     private final Long myUserId;
@@ -23,11 +28,20 @@ public class ChatSocketService implements WebSocket.Listener {
     private volatile boolean stompConnected = false;
     private final StringBuilder incomingBuffer = new StringBuilder();
 
+    /**
+     * Constructor that takes the current user ID and a message listener for callbacks.
+     *
+     * @param myUserId the ID of the logged-in user
+     * @param listener the listener interface to handle connection events and incoming messages
+     */
     public ChatSocketService(Long myUserId, ChatService.MessageListener listener) {
         this.myUserId = myUserId;
         this.listener = listener;
     }
 
+    /**
+     * Starts the asynchronous WebSocket connection to the chat server endpoint.
+     */
     public void connect() {
         String wsUrl = ApiConfig.BASE_URL.replaceFirst("^http", "ws") + "/chat-native";
 
@@ -43,6 +57,10 @@ public class ChatSocketService implements WebSocket.Listener {
                 });
     }
 
+    /**
+     * Called when the WebSocket connection is successfully opened.
+     * Checks for a valid JWT token and sends the STOMP CONNECT frame to the server.
+     */
     @Override
     public void onOpen(WebSocket webSocket) {
         this.webSocket = webSocket;
@@ -64,6 +82,9 @@ public class ChatSocketService implements WebSocket.Listener {
         WebSocket.Listener.super.onOpen(webSocket);
     }
 
+    /**
+     * Handles incoming text data chunks from the WebSocket, buffering them until the last chunk arrives.
+     */
     @Override
     public CompletionStage<?> onText(WebSocket webSocket, CharSequence data, boolean last) {
         incomingBuffer.append(data);
@@ -75,6 +96,9 @@ public class ChatSocketService implements WebSocket.Listener {
         return WebSocket.Listener.super.onText(webSocket, data, last);
     }
 
+    /**
+     * Handles incoming binary data chunks from the WebSocket, converting them to text and buffering until complete.
+     */
     @Override
     public CompletionStage<?> onBinary(WebSocket webSocket, ByteBuffer data, boolean last) {
         byte[] bytes = new byte[data.remaining()];
@@ -88,6 +112,9 @@ public class ChatSocketService implements WebSocket.Listener {
         return WebSocket.Listener.super.onBinary(webSocket, data, last);
     }
 
+    /**
+     * Parses and processes incoming STOMP frames (CONNECTED, MESSAGE, ERROR).
+     */
     private void handleFrame(String frame) {
         if (frame == null || frame.isBlank()) return;
 
@@ -142,6 +169,9 @@ public class ChatSocketService implements WebSocket.Listener {
         }
     }
 
+    /**
+     * Extracts the body content from a STOMP frame by finding the double newline separator.
+     */
     private String extractBody(String frame) {
         int idx = frame.indexOf("\n\n");
         if (idx < 0) return null;
@@ -149,6 +179,11 @@ public class ChatSocketService implements WebSocket.Listener {
         return body.replace("\0", "").trim();
     }
 
+    /**
+     * Sends a live chat message over the WebSocket connection using a STOMP SEND frame.
+     *
+     * @param msg the message object to send
+     */
     public void sendLiveMessage(Message msg) {
         if (!stompConnected) {
             throw new IllegalStateException("STOMP is not connected yet");
@@ -170,6 +205,9 @@ public class ChatSocketService implements WebSocket.Listener {
         );
     }
 
+    /**
+     * Helper method to send raw text frames over the WebSocket.
+     */
     private void sendRaw(String frame) {
         if (webSocket == null) {
             throw new IllegalStateException("WebSocket is not connected");
@@ -177,6 +215,9 @@ public class ChatSocketService implements WebSocket.Listener {
         webSocket.sendText(frame, true);
     }
 
+    /**
+     * Closes the WebSocket connection and resets connection flags.
+     */
     public void close() {
         try {
             if (webSocket != null) {

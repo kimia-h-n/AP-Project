@@ -5,6 +5,9 @@ import org.example.divar.dto.ad.AdResponseDTO;
 
 import java.time.Instant;
 
+/**
+ * Utility class to map AdResponseDTO objects to Advertisement domain model instances.
+ */
 public class ConvertToAdvertisement {
 
     public static Advertisement convertToAdvertisement(AdResponseDTO dto) {

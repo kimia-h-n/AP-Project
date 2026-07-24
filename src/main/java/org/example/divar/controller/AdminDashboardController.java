@@ -18,6 +18,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Locale;
 
+/**
+ * Controller class for managing the admin dashboard view, table of pending advertisements, approvals, and rejections.
+ */
 public class AdminDashboardController {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER =
@@ -190,6 +193,9 @@ public class AdminDashboardController {
         });
     }
 
+    /**
+     * Fetches pending advertisements from the server and populates the table items.
+     */
     private void loadPendingAds() {
         clearMessage();
         try {

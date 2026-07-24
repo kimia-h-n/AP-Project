@@ -2,6 +2,14 @@ package org.example.divar.util;
 
 public class HandleErrors {
 
+    /**
+     * Returns a Persian error message based on error code, message, or HTTP status.
+     *
+     * @param error   error code (e.g., "USER_NOT_FOUND")
+     * @param message error message
+     * @param status  HTTP status code
+     * @return Persian translated error message
+     */
     public static String getPersianMessage(String error, String message, int status) {
 
         if (error != null) {

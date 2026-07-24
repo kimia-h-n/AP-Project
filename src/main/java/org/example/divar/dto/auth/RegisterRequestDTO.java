@@ -2,6 +2,9 @@ package org.example.divar.dto.auth;
 
 import org.json.JSONObject;
 
+/**
+ * Data Transfer Object (DTO) holding user registration details for signup requests.
+ */
 public class RegisterRequestDTO {
 
     private final String username;

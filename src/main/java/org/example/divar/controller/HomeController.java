@@ -15,6 +15,9 @@ import javafx.scene.layout.GridPane;
 
 import java.util.ArrayList;
 
+/**
+ * Controller class for the main Home view, managing advertisement display, filtering, sorting, and navigation.
+ */
 public class HomeController {
 
     @FXML private GridPane adsGrid;
@@ -83,6 +86,11 @@ public class HomeController {
         }
     }
 
+    /**
+     * Handles category selection clicks to filter advertisements by category and update UI styles.
+     *
+     * @param event the ActionEvent triggered by clicking a category hyperlink
+     */
     @FXML
     private void handleCategoryClick(ActionEvent event) {
         Hyperlink clickedLink = (Hyperlink) event.getSource();
@@ -125,6 +133,9 @@ public class HomeController {
         }
     }
 
+    /**
+     * Handles sorting option clicks to reorder displayed advertisements.
+     */
     @FXML
     private void handleSortClick(ActionEvent event) {
         Hyperlink clickedLink = (Hyperlink) event.getSource();
@@ -155,6 +166,9 @@ public class HomeController {
         }
     }
 
+    /**
+     * Applies filters such as price range, city, and date to the advertisement list.
+     */
     @FXML
     private void filterInputs() {
         City selectedCity = cityFilterComboBox.getValue();
@@ -187,6 +201,9 @@ public class HomeController {
         }
     }
 
+    /**
+     * Searches advertisements based on the keyword entered in the search field.
+     */
     @FXML
     private void handleSearch() {
         String keyword;
@@ -236,6 +253,12 @@ public class HomeController {
         }
     }
 
+    /**
+     * Dynamically renders advertisement summary cards in a responsive grid layout
+     * based on the current width of the container.
+     *
+     * @param width the current width of the advertisements grid
+     */
     private void showAds(double width) {
         adsGrid.getChildren().clear();
 

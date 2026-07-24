@@ -8,6 +8,11 @@ import org.example.divar.chat.model.Conversation;
 import org.example.divar.util.AppContext;
 import org.example.divar.util.SessionManager;
 
+/**
+ * Custom UI component representing a conversation list item within the chat panel.
+ * This component resolves the correct participant's display name relative to the current session,
+ * formats it alongside the associated advertisement title, and displays the latest message snippet.
+ */
 public class ChatList extends VBox {
 
     @FXML
@@ -15,6 +20,13 @@ public class ChatList extends VBox {
     @FXML
     private Label lastMessageLabel;
 
+    /**
+     * Initializes and populates the chat list component by loading its FXML layout,
+     * determining the opposing party's username based on the active session,
+     * fetching their full display name via service calls, and binding conversation metadata to the view labels.
+     *
+     * @param conversation the {@link Conversation} data object containing chat participants, ad title, and recent messages
+     */
     public ChatList(Conversation conversation) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/divar/fxml/chat_list.fxml"));

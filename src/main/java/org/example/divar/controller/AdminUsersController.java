@@ -18,6 +18,9 @@ import org.example.divar.util.AppContext;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Controller class for managing user administration, including viewing user lists, blocking, and unblocking users.
+ */
 public class AdminUsersController {
 
     @FXML private FlowPane cardsContainer;

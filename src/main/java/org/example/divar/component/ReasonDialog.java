@@ -15,6 +15,9 @@ import javafx.stage.StageStyle;
 import java.io.IOException;
 import java.util.Objects;
 
+/**
+ * Custom controller and dialog utility component for prompting users or admins to input reasons for actions like rejection, blocking, or deletion.
+ */
 public class ReasonDialog {
 
     @FXML private Label dialogTitle;
@@ -37,6 +40,15 @@ public class ReasonDialog {
         });
     }
 
+    /**
+     * Displays a modal reason input dialog with customized title, subtitle, and text area visibility.
+     *
+     * @param fxmlPath     the resource path to the dialog FXML file
+     * @param title        the title text for the dialog header
+     * @param subtitle     the descriptive subtitle or instruction text
+     * @param showTextArea flag indicating whether the text area should be visible
+     * @return the entered reason string, or null if cancelled
+     */
     public static String show(String fxmlPath, String title, String subtitle, boolean showTextArea) {
         try {
             FXMLLoader loader = new FXMLLoader(ReasonDialog.class.getResource(fxmlPath));

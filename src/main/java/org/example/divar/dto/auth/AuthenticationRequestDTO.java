@@ -2,6 +2,9 @@ package org.example.divar.dto.auth;
 
 import org.json.JSONObject;
 
+/**
+ * Data Transfer Object (DTO) holding user credentials for authentication requests.
+ */
 public class AuthenticationRequestDTO {
 
     private final String username;

@@ -15,8 +15,23 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Utility class for managing all HTTP communications between the frontend client and the backend server.
+ * Provides methods for GET, POST, PATCH, and DELETE requests, multipart file uploads,
+ * and robust error/response handling.
+ *
+ * @author Fatemeh Salehi Mobin
+ * @version 1.0
+ */
 public class ApiClient {
 
+    /**
+     * Creates a base HTTP request builder and automatically attaches the Authorization
+     * Bearer token from the SessionManager if available.
+     *
+     * @param path the relative endpoint path on the server
+     * @return the configured HttpRequest.Builder
+     */
     private static final HttpClient client = HttpClient.newHttpClient();
 
     private static HttpRequest.Builder createBuilder(String path) {
@@ -30,6 +45,13 @@ public class ApiClient {
         return builder;
     }
 
+    /**
+     * Sends a POST request to the server with a JSON body.
+     *
+     * @param path the endpoint path
+     * @param body the request body as a JSONObject
+     * @return the server's response as a JSONObject
+     */
     public static JSONObject post(String path, JSONObject body) {
         HttpRequest.Builder builder = createBuilder(path)
                 .header("Content-Type", "application/json")
@@ -37,16 +59,35 @@ public class ApiClient {
         return (JSONObject) sendRequest(builder, false);
     }
 
+    /**
+     * Sends a GET request to the server to retrieve a single JSON object.
+     *
+     * @param path the endpoint path
+     * @return the retrieved data as a JSONObject
+     */
     public static JSONObject get(String path) {
         HttpRequest.Builder builder = createBuilder(path).GET();
         return (JSONObject) sendRequest(builder, false);
     }
 
+    /**
+     * Sends a GET request to the server to retrieve a list of data.
+     *
+     * @param path the endpoint path
+     * @return the retrieved array as a JSONArray
+     */
     public static JSONArray getList(String path) {
         HttpRequest.Builder builder = createBuilder(path).GET();
         return (JSONArray) sendRequest(builder, true);
     }
 
+    /**
+     * Sends a PATCH request to the server for partial updates.
+     *
+     * @param path the endpoint path
+     * @param body the update fields as a JSONObject
+     * @return the server's response as a JSONObject
+     */
     public static JSONObject patch(String path, JSONObject body) {
         HttpRequest.Builder builder = createBuilder(path)
                 .header("Content-Type", "application/json")
@@ -54,11 +95,25 @@ public class ApiClient {
         return (JSONObject) sendRequest(builder, false);
     }
 
+    /**
+     * Sends a DELETE request to the server to remove a resource.
+     *
+     * @param path the endpoint path
+     * @return the server's response as a JSONObject
+     */
     public static JSONObject delete(String path) {
         HttpRequest.Builder builder = createBuilder(path).DELETE();
         return (JSONObject) sendRequest(builder, false);
     }
 
+    /**
+     * Central method for executing HTTP requests, printing debug info to the console,
+     * and catching network errors.
+     *
+     * @param builder the configured HTTP request builder
+     * @param isList  determines whether the expected return type is a JSONArray
+     * @return the processed response object (JSONObject or JSONArray)
+     */
     private static Object sendRequest(HttpRequest.Builder builder, boolean isList) {
         try {
             HttpRequest request = builder.build();
@@ -79,6 +134,14 @@ public class ApiClient {
         }
     }
 
+    /**
+     * Processes and validates the HTTP response based on status codes.
+     *
+     * @code status Codes 200-299 indicate success; otherwise, errors are mapped via HandleErrors.
+     * @param response the raw server response
+     * @param isList   specifies if the output should be handled as a list
+     * @return parsed JSON structure
+     */
     private static Object handleResponse(HttpResponse<String> response, boolean isList) {
         int status = response.statusCode();
         String body = response.body();
@@ -116,6 +179,12 @@ public class ApiClient {
         throw new RuntimeException(HandleErrors.getPersianMessage(errorCode, message, status));
     }
 
+    /**
+     * Sends a POST request with a raw JSON string body.
+     *
+     * @param path         the endpoint path
+     * @param rawJsonBody  the raw JSON string
+     */
     public static void postRaw(String path, String rawJsonBody) {
         HttpRequest.Builder builder = createBuilder(path)
                 .header("Content-Type", "application/json")
@@ -123,6 +192,12 @@ public class ApiClient {
         sendRequest(builder, false);
     }
 
+    /**
+     * Uploads multiple images using multipart/form-data (used for advertisements).
+     *
+     * @param path            the endpoint path
+     * @param localImagePaths list of local file paths for the images
+     */
     public static void postMultipartImages(String path, ArrayList<String> localImagePaths) {
         String boundary = generateBoundary();
         List<byte[]> byteArrays = new ArrayList<>();
@@ -148,6 +223,12 @@ public class ApiClient {
         sendRequest(builder, false);
     }
 
+    /**
+     * Uploads or updates a single image via multipart/form-data.
+     *
+     * @param path          the endpoint path
+     * @param localFilePath the local file path of the image
+     */
     public static void putMultipartImage(String path, String localFilePath) {
         File file = new File(localFilePath);
         if (!file.exists()) {
@@ -172,10 +253,18 @@ public class ApiClient {
         sendRequest(builder, false);
     }
 
+    /**
+     * Generates a unique boundary string for multipart requests.
+     *
+     * @return unique boundary string
+     */
     private static String generateBoundary() {
         return "JavaBoundary" + System.currentTimeMillis();
     }
 
+    /**
+     * Appends a file part to the multipart body byte array list.
+     */
     private static void addFilePart(List<byte[]> byteArrays, String boundary, String fieldName, File file) throws IOException {
         String header = "--" + boundary + "\r\n" +
                 "Content-Disposition: form-data; name=\"" + fieldName + "\"; filename=\"" + file.getName() + "\"\r\n" +
@@ -186,10 +275,16 @@ public class ApiClient {
         byteArrays.add("\r\n".getBytes(StandardCharsets.UTF_8));
     }
 
+    /**
+     * Appends the closing boundary to the multipart body.
+     */
     private static void addBoundaryEnd(List<byte[]> byteArrays, String boundary) {
         byteArrays.add(("--" + boundary + "--\r\n").getBytes(StandardCharsets.UTF_8));
     }
 
+    /**
+     * Combines multiple byte arrays into a single contiguous byte array for the request body.
+     */
     private static byte[] combineByteArrays(List<byte[]> byteArrays) {
         long totalLength = byteArrays.stream().mapToInt(a -> a.length).sum();
         byte[] totalBody = new byte[(int) totalLength];
@@ -201,6 +296,12 @@ public class ApiClient {
         return totalBody;
     }
 
+    /**
+     * Fetches raw image bytes from the server to display in JavaFX ImageViews.
+     *
+     * @param path the image path or URL
+     * @return byte array of the image, or null if an error occurs
+     */
     public static byte[] getImageBytes(String path) {
         if (path == null || path.isBlank()) {
             return null;
@@ -233,6 +334,12 @@ public class ApiClient {
         }
     }
 
+    /**
+     * Fetches a raw string response from the server.
+     *
+     * @param path the endpoint path
+     * @return response string, or null if failed
+     */
     public static String getString(String path) {
         HttpRequest.Builder builder = createBuilder(path).GET();
         try {

@@ -3,6 +3,9 @@ package org.example.divar.util;
 import javafx.util.StringConverter;
 import org.example.divar.model.City;
 
+/**
+ * Utility class providing a JavaFX StringConverter for City objects to display their names in UI controls.
+ */
 public class CityFormatter {
 
     public static StringConverter<City> createStringConverter() {

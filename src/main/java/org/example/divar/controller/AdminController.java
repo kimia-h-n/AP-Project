@@ -9,6 +9,9 @@ import org.example.divar.SwitchStage;
 import org.example.divar.util.SessionManager;
 import java.util.List;
 
+/**
+ * Controller class for managing the main administrative panel navigation, tab switching, and authentication checks.
+ */
 public class AdminController {
 
     @FXML private StackPane contentArea;
@@ -57,30 +60,45 @@ public class AdminController {
         }
     }
 
+    /**
+     * Loads and displays the main admin dashboard view.
+     */
     @FXML
     private void showDashboard() {
         lastTab = "dashboard";
         loadPage("/org/example/divar/fxml/admin_dashboard.fxml", dashboardBtn);
     }
 
+    /**
+     * Loads and displays the advertisements management view in the admin panel.
+     */
     @FXML
     private void showAds() {
         lastTab = "ads";
         loadPage("/org/example/divar/fxml/admin_ads.fxml", adsBtn);
     }
 
+    /**
+     * Loads and displays the reports management view in the admin panel.
+     */
     @FXML
     private void showReports() {
         lastTab = "reports";
         loadPage("/org/example/divar/fxml/admin_reports.fxml", reportsBtn);
     }
 
+    /**
+     * Loads and displays the users management view in the admin panel.
+     */
     @FXML
     private void showUsers() {
         lastTab = "users";
         loadPage("/org/example/divar/fxml/admin_users.fxml", usersBtn);
     }
 
+    /**
+     * Loads and displays the statistics dashboard view in the admin panel.
+     */
     @FXML
     private void showStatsDashboard() {
         lastTab = "stats";

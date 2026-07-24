@@ -5,6 +5,10 @@ import org.example.divar.model.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Service interface defining core operations for advertisements, including creation,
+ * modification, image handling, favorites, searching, filtering, and categorization.
+ */
 public interface AdvertisementService {
 
     long createAdvertisement(String title, String description, String address,

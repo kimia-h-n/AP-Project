@@ -13,10 +13,25 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Objects;
 
+/**
+ * HTTP implementation of the {@link ConversationService} interface responsible for managing chat conversations,
+ * synchronizing chat threads from the server, loading message histories, resolving user identifiers,
+ * and handling conversation state between buyers and sellers.
+ */
 public class ConversationServiceHttp implements ConversationService {
 
     private final ArrayList<Conversation> conversations = new ArrayList<>();
 
+    /**
+     * Finds an existing local conversation matching the advertisement and participants,
+     * or creates a new conversation, loads user IDs, fetches message history from the server,
+     * and adds it to the active list.
+     *
+     * @param advertisement the advertisement associated with the chat
+     * @param buyerUsername the username of the buyer
+     * @param sellerUsername the username of the seller
+     * @return the existing or newly created {@link Conversation} object
+     */
     @Override
     public Conversation findOrCreateConversation(
             Advertisement advertisement,
@@ -39,6 +54,12 @@ public class ConversationServiceHttp implements ConversationService {
         return conversation;
     }
 
+    /**
+     * Retrieves all conversations for the current user, attempting to synchronize
+     * the latest summaries and messages from the server first.
+     *
+     * @return an {@link ArrayList} of active {@link Conversation} items
+     */
     @Override
     public ArrayList<Conversation> getConversations() {
         try {
@@ -49,6 +70,10 @@ public class ConversationServiceHttp implements ConversationService {
         return conversations;
     }
 
+    /**
+     * Synchronizes conversations from the server using the current session username
+     * and user ID, fetching summary lists and merging new threads.
+     */
     private void syncFromServer() {
         String myUsername = SessionManager.getCurrentUsername();
         if (myUsername == null || myUsername.isBlank()) {
@@ -64,6 +89,10 @@ public class ConversationServiceHttp implements ConversationService {
         }
     }
 
+    /**
+     * Merges a conversation summary received from the server into the local cache,
+     * checking for duplicates and loading its full message history.
+     */
     private void mergeSummary(long myUserId, String myUsername, JSONObject summaryJson) {
         long contactId = summaryJson.getLong("contactId");
 
@@ -100,6 +129,9 @@ public class ConversationServiceHttp implements ConversationService {
         conversations.add(conversation);
     }
 
+    /**
+     * Checks if two conversation threads refer to the same participants and advertisement.
+     */
     private boolean isSameThread(Conversation conversation, long userId, long otherId, Long adId) {
         boolean direct = Objects.equals(conversation.getBuyerId(), userId)
                 && Objects.equals(conversation.getSellerId(), otherId);
@@ -113,6 +145,9 @@ public class ConversationServiceHttp implements ConversationService {
         return sameParticipants && sameAd;
     }
 
+    /**
+     * Searches the local list for an existing conversation matching the ad and participants.
+     */
     private Conversation findExistingConversation(
             Advertisement advertisement,
             String buyerUsername,
@@ -142,6 +177,9 @@ public class ConversationServiceHttp implements ConversationService {
         return null;
     }
 
+    /**
+     * Resolves and populates buyer and seller user IDs, then loads their message history.
+     */
     private void loadIdsAndHistory(Conversation conversation) {
         try {
             long buyerId = loadUserId(conversation.getBuyerUsername());
@@ -158,6 +196,10 @@ public class ConversationServiceHttp implements ConversationService {
         }
     }
 
+    /**
+     * Fetches the message history between two users for a specific ad from the server
+     * and parses each message into the conversation object.
+     */
     private void loadHistoryInto(Conversation conversation, long user1Id, long user2Id) {
         StringBuilder path = new StringBuilder("/api/v1/conversations")
                 .append("?senderId=").append(user1Id)
@@ -175,6 +217,9 @@ public class ConversationServiceHttp implements ConversationService {
         }
     }
 
+    /**
+     * Fetches the numeric user ID corresponding to a given username via the user service.
+     */
     private long loadUserId(String username) {
         String userId = AppContext.getUserService().getUserProfile(username).getId();
         if (userId == null || userId.isBlank()) {
@@ -187,6 +232,9 @@ public class ConversationServiceHttp implements ConversationService {
         }
     }
 
+    /**
+     * Parses raw JSON message data into a domain {@link Message} object.
+     */
     private Message parseMessage(JSONObject messageJson, Conversation conversation) {
         Long messageId = messageJson.has("id") && !messageJson.isNull("id")
                 ? messageJson.getLong("id")
@@ -201,6 +249,9 @@ public class ConversationServiceHttp implements ConversationService {
         return new Message(messageId, senderId, receiverId, text, sentAt, conversation.getAdId());
     }
 
+    /**
+     * Resolves the receiver ID for a message, falling back to participant logic if missing in JSON.
+     */
     private long resolveReceiverId(JSONObject messageJson, long senderId, Conversation conversation) {
         if (messageJson.has("receiverId") && !messageJson.isNull("receiverId")) {
             return messageJson.getLong("receiverId");

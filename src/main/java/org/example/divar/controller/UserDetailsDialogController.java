@@ -6,6 +6,9 @@ import javafx.stage.Stage;
 import org.example.divar.model.User;
 import org.example.divar.util.AppContext;
 
+/**
+ * Controller class for managing the user details dialog in the admin panel.
+ */
 public class UserDetailsDialogController {
 
     @FXML private Label lblFullName;
@@ -15,6 +18,11 @@ public class UserDetailsDialogController {
     @FXML private Label lblEmail;
     @FXML private Label lblRating;
 
+    /**
+     * Fetches user details from the server asynchronously by user ID and populates the UI labels.
+     *
+     * @param userId the ID of the user whose details are to be loaded
+     */
     public void loadUserData(long userId) {
         new Thread(() -> {
             try {

@@ -13,6 +13,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Custom UI component representing an image gallery with thumbnail navigation and editing capabilities.
+ */
 public class ImageGallery {
 
     public interface ImageActionListener {
@@ -47,6 +50,12 @@ public class ImageGallery {
         setImages(urls, null);
     }
 
+    /**
+     * Sets the list of image URLs and IDs to be displayed in the gallery.
+     *
+     * @param urls list of image source paths or URLs
+     * @param ids  list of corresponding image identifiers
+     */
     public void setImages(List<String> urls, List<String> ids) {
         imageUrls.clear();
         imageIds.clear();

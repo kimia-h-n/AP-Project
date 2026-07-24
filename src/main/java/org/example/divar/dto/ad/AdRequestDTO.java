@@ -8,6 +8,9 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+/**
+ * Data Transfer Object (DTO) holding advertisement details for creation and submission requests.
+ */
 public class AdRequestDTO {
 
     private final String title;

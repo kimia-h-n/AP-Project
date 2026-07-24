@@ -3,6 +3,9 @@ package org.example.divar.dto.ad;
 import org.example.divar.model.AdModerationChoice;
 import org.json.JSONObject;
 
+/**
+ * Data Transfer Object (DTO) holding admin moderation choice and rejection reason for an advertisement.
+ */
 public class AdModerationRequestDTO {
 
     private final AdModerationChoice choice;

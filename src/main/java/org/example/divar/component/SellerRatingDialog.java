@@ -7,6 +7,10 @@ import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import org.example.divar.util.AppContext;
 
+/**
+ * Custom UI component and controller class for managing the seller rating dialog,
+ * allowing users to view average ratings, select star ratings interactively, and submit feedback.
+ */
 public class SellerRatingDialog {
 
     @FXML private Label lblAvgRating;
@@ -24,6 +28,11 @@ public class SellerRatingDialog {
         btnSubmit.setDisable(true);
     }
 
+    /**
+     * Sets the seller ID and triggers loading of their average rating from the server.
+     *
+     * @param sellerId the unique identifier of the seller being rated
+     */
     public void setSellerData(Long sellerId) {
         this.sellerId = sellerId;
         loadAverageRating();

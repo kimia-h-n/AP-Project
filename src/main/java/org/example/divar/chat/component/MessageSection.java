@@ -13,6 +13,11 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
+/**
+ * This class is created to display each message in the chat view.
+ * First it checks methods and variables to make sure they are not null, then loads the FXML file
+ * and sets the message bubble style and color based on whether the message belongs to the current user or the other person.
+ */
 public class MessageSection extends HBox {
 
     @FXML
@@ -27,6 +32,13 @@ public class MessageSection extends HBox {
     private final Message message;
     private final Long currentUserId;
 
+    /**
+     * Constructor that takes the message object and the user ID.
+     * Throws an exception if inputs are null, otherwise loads the layout.
+     *
+     * @param message the message object containing text and sender info
+     * @param currentUserId the ID of the user who is currently logged in
+     */
     public MessageSection(Message message, Long currentUserId) {
         this.message = Objects.requireNonNull(
                 message,
@@ -42,6 +54,9 @@ public class MessageSection extends HBox {
         initializeMessage();
     }
 
+    /**
+     * Loads the FXML file for the message bubble and sets this class as the controller.
+     */
     private void loadFXML() {
         FXMLLoader loader = new FXMLLoader(
                 getClass().getResource("/org/example/divar/fxml/message.fxml")
@@ -60,6 +75,10 @@ public class MessageSection extends HBox {
         }
     }
 
+    /**
+     * Sets the text and time of the message.
+     * Here it checks if the message sender is the current user or not to apply right-aligned or left-aligned styles.
+     */
     private void initializeMessage() {
         textLabel.setText(message.getText());
         timeLabel.setText(message.getSentAt().atZone(ZoneId.systemDefault())
@@ -75,7 +94,9 @@ public class MessageSection extends HBox {
         }
     }
 
-
+    /**
+     * Sets the style for messages sent by the current user (right side with red/Divar color).
+     */
     private void applySentMessageStyle() {
         setAlignment(Pos.CENTER_RIGHT);
         messageBox.setAlignment(Pos.BOTTOM_LEFT);
@@ -90,6 +111,9 @@ public class MessageSection extends HBox {
         );
     }
 
+    /**
+     * Sets the style for messages received from the other person (left side with light gray color).
+     */
     private void applyReceivedMessageStyle() {
         setAlignment(Pos.CENTER_LEFT);
         messageBox.setAlignment(Pos.BOTTOM_RIGHT);

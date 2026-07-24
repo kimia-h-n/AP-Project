@@ -7,17 +7,21 @@ import org.example.divar.controller.*;
 import org.example.divar.model.*;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.stage.Stage;
 
 import java.util.Objects;
 import java.util.Stack;
 
+/**
+ * Utility class for managing navigation, stage switching, and screen history in the JavaFX application.
+ */
 public class SwitchStage {
 
-    private static javafx.stage.Stage stage;
+    private static Stage stage;
     private static final Stack<Runnable> history = new Stack<>();
     private static Runnable currentScreen = null;
 
-    public static void setStage(javafx.stage.Stage stage) {
+    public static void setStage(Stage stage) {
         SwitchStage.stage = stage;
     }
 

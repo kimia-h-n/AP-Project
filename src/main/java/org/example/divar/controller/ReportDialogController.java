@@ -14,6 +14,9 @@ import org.example.divar.util.AppContext;
 
 import java.io.IOException;
 
+/**
+ * Controller class for managing the advertisement report dialog and feedback popups.
+ */
 public class ReportDialogController {
 
     @FXML private RadioButton reasonFraud, reasonImmoral, reasonWrongCategory, reasonWrongPrice,
@@ -30,6 +33,10 @@ public class ReportDialogController {
         this.advertisementId = advertisementId;
     }
 
+    /**
+     * Submits the selected report reason for the advertisement via the service
+     * and displays a success confirmation popup.
+     */
     @FXML
     private void sendReport() {
         ReportReason selectedReason = getSelectedReportReason();

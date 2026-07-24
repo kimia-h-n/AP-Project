@@ -13,6 +13,9 @@ import org.example.divar.model.Advertisement;
 import org.example.divar.util.AppContext;
 import org.example.divar.util.ImageLoader;
 
+/**
+ * Custom UI component representing a favorite advertisement card with removal functionality.
+ */
 public class FavoriteAdCard extends VBox {
 
     @FXML private ImageView adImage;
@@ -22,6 +25,12 @@ public class FavoriteAdCard extends VBox {
     @FXML private Label errorLabel;
     @FXML private Button removeBtn;
 
+    /**
+     * Initializes and populates the favorite advertisement card component with advertisement data and action handlers.
+     *
+     * @param advertisement the advertisement to display in the card
+     * @param onRemoved     callback runnable executed when the ad is successfully removed from favorites
+     */
     public FavoriteAdCard(Advertisement advertisement, Runnable onRemoved) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/divar/fxml/favorite_ad_card.fxml"));

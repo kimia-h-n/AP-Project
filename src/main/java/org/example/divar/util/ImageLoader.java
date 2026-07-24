@@ -6,12 +6,18 @@ import java.io.File;
 import java.util.Objects;
 
 /**
- * ImageLoader utility class for loading images from URLs or local file paths.
+ * Utility class for loading images from URLs or local file paths.
  */
 public class ImageLoader {
 
     private static final String DEFAULT_IMAGE_PATH = "/org/example/divar/images/current.jpg";
 
+    /**
+     * Loads an image from the given URL.
+     *
+     * @param imageUrl URL of the image
+     * @return Image object, or default image if loading fails
+     */
     public static Image loadMainImageFromUrl(String imageUrl) {
         if (imageUrl != null && !imageUrl.isBlank()) {
             try {
@@ -27,6 +33,11 @@ public class ImageLoader {
         return loadDefault();
     }
 
+    /**
+     * Loads the default fallback image.
+     *
+     * @return default Image object, or null if not found
+     */
     public static Image loadDefault() {
         try {
             return new Image(Objects.requireNonNull(
@@ -37,6 +48,12 @@ public class ImageLoader {
         }
     }
 
+    /**
+     * Loads an image from a local file path.
+     *
+     * @param path local file path
+     * @return Image object, or null if file doesn't exist or can't be loaded
+     */
     public static Image loadFromPath(String path) {
         try {
             if (path != null) {
